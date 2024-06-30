@@ -1,0 +1,100 @@
+package adapters
+
+import (
+	"fmt"
+
+	"ecommerce/internal/clients/shopify"
+	"ecommerce/internal/configs"
+	"ecommerce/internal/constants"
+
+	"golang.org/x/oauth2"
+)
+
+const (
+	ShopifyBaseURL         = "https://%s.myshopify.com"
+	ShopifyTokenKey        = "X-Shopify-Access-Token"
+	ShopifyAuthorizePath   = "/admin/oauth/authorize"
+	ShopifyRedirectPath    = "/api/shopify/redirect"
+	ShopifyAccessTokenPath = "/admin/oauth/access_token"
+)
+
+type IShopifyAdapter interface {
+	createOauth2Config() *oauth2.Config
+	getShopifyClient(param *shopify.ShopifyClientParam) shopify.IShopifyClient
+
+	GetAuthorizePath(param *shopify.ShopifyClientParam) string
+	GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error)
+	GetProducts(param *shopify.ShopifyClientParam) (interface{}, error)
+	//GetShopifyAuthConfig() *oauth2.Config
+}
+
+type ShopifyAdapterConfig struct {
+	ClientID     string
+	ClientSecret string
+	HostBaseUrl  string
+}
+
+type ShopifyAdapter struct {
+	Config *ShopifyAdapterConfig
+}
+
+func NewShopifyAdapter(config *configs.Config) IShopifyAdapter {
+	return &ShopifyAdapter{
+		Config: &ShopifyAdapterConfig{
+			ClientID:     config.ShopifyApp.ClientID,
+			ClientSecret: config.ShopifyApp.ClientSecret,
+			HostBaseUrl:  fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port),
+		},
+	}
+}
+
+func (a *ShopifyAdapter) getShopifyClient(param *shopify.ShopifyClientParam) shopify.IShopifyClient {
+	return shopify.NewShopifyClient(param)
+}
+
+func (a *ShopifyAdapter) createOauth2Config() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     a.Config.ClientID,
+		ClientSecret: a.Config.ClientSecret,
+		RedirectURL:  fmt.Sprintf("%s%s", a.Config.HostBaseUrl, constants.ShopifyRedirectPath),
+		Scopes:       []string{"read_products", "read_orders", "write_orders"},
+	}
+}
+
+func (a *ShopifyAdapter) GetAuthorizePath(param *shopify.ShopifyClientParam) string {
+	oauth2Config := a.createOauth2Config()
+	return a.getShopifyClient(param).GetAuthorizePath(oauth2Config)
+}
+
+func (a *ShopifyAdapter) GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error) {
+	oauth2Config := a.createOauth2Config()
+	token, err := a.getShopifyClient(param).GetAccessToken(oauth2Config, code)
+	if err != nil {
+		return "", err
+	}
+
+	return token.AccessToken, nil
+}
+
+func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) (interface{}, error) {
+	return a.getShopifyClient(param).GetProducts()
+	/*externalShopAuth, err := a.ExternalShopAuthService.GetShopifyAuthByExternalShopId(externalShopId)
+	if err != nil {
+		return nil, err
+	}
+
+	a.getShopifyClient(&shopify.ShopifyClientParam{
+		ShopName: externalShopAuth.ExternalShop.Name,
+		AccessToken: externalShopAuth.AccessToken,
+		)
+	/*shopifyAuth,
+
+		products, err := a.getShopifyClient(param).GetProducts()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("%v", products)
+	return products, nil*/
+	return nil, nil
+}
