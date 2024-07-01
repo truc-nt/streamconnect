@@ -13,7 +13,7 @@ const formatViews = (views: number) => {
 };
 
 const NavigationBoard: React.FC = () => {
-  const [activeButton, setActiveButton] = useState<string | null>(null);
+  const [activeButton, setActiveButton] = useState<string | null>('explore');
 
   const handleButtonClick = (buttonName: string) => {
     setActiveButton(buttonName);

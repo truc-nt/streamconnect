@@ -60,7 +60,6 @@ const mockLivestreams: Livestream[] = [
 const SuggestLivestreams: React.FC = () => {
   const handleLivestreamClick = (livestream: Livestream) => {
     console.log(`Clicked on ${livestream.livestreamName}`);
-    // Bạn có thể thêm hành động khác tại đây
   };
 
   return (
@@ -77,7 +76,7 @@ const SuggestLivestreams: React.FC = () => {
               sx={{ padding: 0, textTransform: 'none', cursor: 'pointer' }}
               fullWidth
             >
-              <Box sx={{ position: 'relative', width: '100%', cursor: 'pointer' }}>
+              <Box sx={{ position: 'relative', width: '100%', cursor: 'pointer', mb: 2 }}>
                 {/* Livestream Thumbnail */}
                 <img
                   src={livestream.imageUrl}
@@ -100,7 +99,7 @@ const SuggestLivestreams: React.FC = () => {
                 </Box>
 
                 {/* Avatar and Livestream Info */}
-                <Box sx={{ mt: 2, left: 0, width: '100%', textAlign: 'left', paddingLeft: '8px', paddingRight: '8px' }}>
+                <Box sx={{ mt: 1, left: 0, width: '100%', textAlign: 'left', paddingLeft: '8px', paddingRight: '8px' }}>
                   <Avatar alt={livestream.username} src={livestream.avatarUrl} sx={{ width: 36, height: 36, marginRight: 1, display: 'inline-block' }} />
                   <Box style={{ display: 'inline-block', verticalAlign: 'top' }}>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'white', display: 'block' }}>

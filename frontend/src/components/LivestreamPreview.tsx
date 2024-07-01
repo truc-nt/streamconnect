@@ -23,7 +23,7 @@ const LivestreamPreview: React.FC = () => {
   return (
     <Box
       sx={{
-        mt: 2,
+        mt: 3,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -60,7 +60,7 @@ const LivestreamPreview: React.FC = () => {
             bottom: 0,
             zIndex: 1,
             borderRadius: '8px',
-            padding: '8px', // Thicker border
+            padding: '8px', 
             boxSizing: 'border-box',
             background: 'inherit',
             backgroundClip: 'padding-box',
