@@ -5,6 +5,19 @@ import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ReactPlayer from 'react-player';
 import { Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
+import { keyframes } from '@emotion/react';
+
+const gradientAnimation = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+`;
 
 const LivestreamPreview: React.FC = () => {
   return (
@@ -17,17 +30,64 @@ const LivestreamPreview: React.FC = () => {
         width: '100%',
       }}
     >
-      <Box sx={{ position: 'relative', width: '100%', height: '540px' }}>
-        <ReactPlayer
-          url="https://www.youtube.com/watch?v=VBKNoLcj8jA"
-          width="100%"
-          height="100%"
-          controls
-          playing
-          muted
-        />
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          height: '538px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '-8px',
+            left: '-8px',
+            right: '-8px',
+            bottom: '-8px',
+            zIndex: 1,
+            borderRadius: '8px',
+            background: 'linear-gradient(45deg, red, orange, yellow, green, indigo, violet)',
+            backgroundSize: '400% 400%',
+            animation: `${gradientAnimation} 15s ease infinite`,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1,
+            borderRadius: '8px',
+            padding: '8px', // Thicker border
+            boxSizing: 'border-box',
+            background: 'inherit',
+            backgroundClip: 'padding-box',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            zIndex: 2,
+          }}
+        >
+          <ReactPlayer
+            url="https://www.youtube.com/watch?v=VBKNoLcj8jA"
+            width="100%"
+            height="100%"
+            controls
+            playing
+            muted
+          />
+        </Box>
 
-        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', zIndex: 3 }}>
           <Avatar alt="Username" src="/assets/your-avatar-image.jpg" />
           <Box sx={{ ml: 2 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'white' }}>
@@ -48,12 +108,12 @@ const LivestreamPreview: React.FC = () => {
         <Badge
           badgeContent="Live"
           color="error"
-          sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1, marginRight: 2, marginTop: 2 }}
+          sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3, marginRight: 2, marginTop: 2 }}
         >
           <Box />
         </Badge>
 
-        <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 1 }}>
+        <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 1, zIndex: 3 }}>
           <IconButton sx={{ color: 'white' }}>
             <FavoriteIcon />
           </IconButton>
