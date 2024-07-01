@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react';
-import { Box, Grid, Avatar, Typography, Badge, Tooltip, Button } from '@mui/material';
+import { Box, Grid, Avatar, Typography, Badge, Button } from '@mui/material';
+import { Visibility } from '@mui/icons-material';
 
 interface Livestream {
   imageUrl: string;
@@ -57,6 +58,10 @@ const mockLivestreams: Livestream[] = [
   },
 ];
 
+const formatViews = (views: number) => {
+  return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 const SuggestLivestreams: React.FC = () => {
   const handleLivestreamClick = (livestream: Livestream) => {
     console.log(`Clicked on ${livestream.livestreamName}`);
@@ -70,7 +75,7 @@ const SuggestLivestreams: React.FC = () => {
 
       <Grid container spacing={2}>
         {mockLivestreams.map((livestream, index) => (
-          <Grid key={index} item xs={12} sm={6} md={4} >
+          <Grid key={index} item xs={12} sm={6} md={4}>
             <Button
               onClick={() => handleLivestreamClick(livestream)}
               sx={{ padding: 0, textTransform: 'none', cursor: 'pointer' }}
@@ -85,9 +90,22 @@ const SuggestLivestreams: React.FC = () => {
                 />
 
                 {/* Viewer Count */}
-                <Box sx={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '4px 8px', borderRadius: '4px' }}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    left: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                  }}
+                >
+                  <Visibility sx={{ fontSize: '16px', color: 'white' }} />
                   <Typography variant="caption" sx={{ color: 'white' }}>
-                    {livestream.views} views
+                    {formatViews(livestream.views)}
                   </Typography>
                 </Box>
 
