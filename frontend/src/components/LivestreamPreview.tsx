@@ -3,9 +3,8 @@
 import React from 'react';
 import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReactPlayer from 'react-player';
+import { Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
 
 const LivestreamPreview: React.FC = () => {
   return (
@@ -14,13 +13,13 @@ const LivestreamPreview: React.FC = () => {
         mt: 2,
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center', 
-        width: '100%'   
+        alignItems: 'center',
+        width: '100%',
       }}
     >
       <Box sx={{ position: 'relative', width: '100%', height: '540px' }}>
         <ReactPlayer
-          url="https://www.youtube.com/watch?v=VBKNoLcj8jA" 
+          url="https://www.youtube.com/watch?v=VBKNoLcj8jA"
           width="100%"
           height="100%"
           controls
@@ -34,12 +33,15 @@ const LivestreamPreview: React.FC = () => {
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'white' }}>
               Username
             </Typography>
-            <Typography variant="body2" sx={{ color: 'white' }}>
-              Livestream Name
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'white' }}>
-              1234 views
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: '#D8D8D8' }}>
+                Livestream Name
+              </Typography>
+              <Visibility sx={{ fontSize: '16px', color: '#D8D8D8' }} />
+              <Typography variant="body2" sx={{ color: '#D8D8D8' }}>
+                1234
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
@@ -56,10 +58,10 @@ const LivestreamPreview: React.FC = () => {
             <FavoriteIcon />
           </IconButton>
           <IconButton sx={{ color: 'white' }}>
-            <ShareIcon />
+            <Fullscreen />
           </IconButton>
           <IconButton sx={{ color: 'white' }}>
-            <MoreVertIcon />
+            <VolumeOff />
           </IconButton>
         </Box>
       </Box>

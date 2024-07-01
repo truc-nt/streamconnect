@@ -1,25 +1,37 @@
-import React from 'react';
+'use client'
+
+import React, { useState } from 'react';
 import { Box, Button, Divider, Typography, Avatar } from '@mui/material';
+import { Circle } from '@mui/icons-material';
+
+const formatViews = (views: number) => {
+  return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
 const NavigationBoard: React.FC = () => {
-  // Mock data for the most viewed items
+  const [activeButton, setActiveButton] = useState<string | null>(null);
+
+  const handleButtonClick = (buttonName: string) => {
+    setActiveButton(buttonName);
+  };
+
   const mostViewedItems = [
     {
       username: 'User1',
       livestreamName: 'Livestream 1',
-      views: 1000,
+      views: 10000,
       avatarSrc: '/assets/avatar1.jpg',
     },
     {
       username: 'User2',
       livestreamName: 'Livestream 2',
-      views: 800,
+      views: 8000,
       avatarSrc: '/assets/avatar2.jpg',
     },
     {
       username: 'User3',
       livestreamName: 'Livestream 3',
-      views: 600,
+      views: 6000,
       avatarSrc: '/assets/avatar3.jpg',
     },
   ];
@@ -50,12 +62,15 @@ const NavigationBoard: React.FC = () => {
 
       <Button
         fullWidth
+        onClick={() => handleButtonClick('explore')}
         sx={{
           color: 'white',
           textTransform: 'none',
           marginBottom: 2,
           justifyContent: 'flex-start',
           textAlign: 'left',
+          backgroundColor: activeButton === 'explore' ? '#535561' : 'inherit',
+          fontWeight: activeButton === 'explore' ? 'bold' : 'normal',
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
@@ -66,12 +81,15 @@ const NavigationBoard: React.FC = () => {
 
       <Button
         fullWidth
+        onClick={() => handleButtonClick('trending')}
         sx={{
           color: 'white',
           marginBottom: 2,
           textTransform: 'none',
           justifyContent: 'flex-start',
           textAlign: 'left',
+          backgroundColor: activeButton === 'trending' ? '#535561' : 'inherit',
+          fontWeight: activeButton === 'trending' ? 'bold' : 'normal',
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
@@ -82,12 +100,15 @@ const NavigationBoard: React.FC = () => {
 
       <Button
         fullWidth
+        onClick={() => handleButtonClick('following')}
         sx={{
           color: 'white',
           marginBottom: 2,
           textTransform: 'none',
           justifyContent: 'flex-start',
           textAlign: 'left',
+          backgroundColor: activeButton === 'following' ? '#535561' : 'inherit',
+          fontWeight: activeButton === 'following' ? 'bold' : 'normal',
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
@@ -102,7 +123,6 @@ const NavigationBoard: React.FC = () => {
         Xem nhiều nhất
       </Typography>
 
-      {/* Render most viewed items */}
       {mostViewedItems.map((item, index) => (
         <Button
           key={index}
@@ -127,7 +147,12 @@ const NavigationBoard: React.FC = () => {
               {item.livestreamName}
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: '14px', fontWeight: '100', lineHeight: '20px' }}>{item.views} views</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography sx={{ fontSize: '14px', fontWeight: '100', lineHeight: '20px' }}>
+              {formatViews(item.views)}
+            </Typography>
+            <Circle sx={{ color: '#EF233C', fontSize: 'small' }} />
+          </Box>
         </Button>
       ))}
     </Box>
