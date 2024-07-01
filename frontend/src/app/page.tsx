@@ -12,9 +12,11 @@ export default function Home() {
         <NavigationBoard />
       </Box>
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Header />
+        <Box sx={{ position: 'relative', width: '100%' }}>
+          <Header />
+        </Box>
         <Box sx={{ flexGrow: 1, padding: 2, backgroundColor: '#1c1c1c', overflowY: 'auto' }}>
-          <Box sx={{marginX: 1.5}}>
+          <Box sx={{ marginX: 1.5 }}>
             <CategorySlider />
             <LivestreamPreview />
             <SuggestLivestreams />

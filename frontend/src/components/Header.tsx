@@ -1,10 +1,10 @@
 import React from 'react';
-import { AppBar, Box, Button, IconButton, InputBase, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, IconButton, InputBase, Toolbar } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 const Header: React.FC = () => {
   return (
-    <AppBar position="static" sx={{ backgroundColor: 'black', height: '70px' }}>
+    <AppBar sx={{ backgroundColor: 'black', height: '70px', width: 'calc(100% - 272px)', ml: '272px' }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '70%', justifyContent: 'flex-end' }}>
           <Box
@@ -15,7 +15,7 @@ const Header: React.FC = () => {
               borderRadius: 1,
               width: '100%',
               padding: '0 10px',
-              height: 40
+              height: 40,
             }}
           >
             <IconButton sx={{ padding: 0, color: 'white' }}>
@@ -36,7 +36,7 @@ const Header: React.FC = () => {
             '&:hover': {
               backgroundColor: '#06b1cc',
             },
-            px:2
+            px: 2,
           }}
         >
           Đăng nhập
