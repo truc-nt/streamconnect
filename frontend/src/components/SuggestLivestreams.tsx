@@ -1,5 +1,7 @@
+'use client'
+
 import React from 'react';
-import { Box, Grid, Avatar, Typography, Badge } from '@mui/material';
+import { Box, Grid, Avatar, Typography, Badge, Tooltip, Button } from '@mui/material';
 
 interface Livestream {
   imageUrl: string;
@@ -56,6 +58,11 @@ const mockLivestreams: Livestream[] = [
 ];
 
 const SuggestLivestreams: React.FC = () => {
+  const handleLivestreamClick = (livestream: Livestream) => {
+    console.log(`Clicked on ${livestream.livestreamName}`);
+    // Bạn có thể thêm hành động khác tại đây
+  };
+
   return (
     <Box>
       <Typography variant="h6" sx={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginY: 3 }}>
@@ -64,42 +71,48 @@ const SuggestLivestreams: React.FC = () => {
 
       <Grid container spacing={2}>
         {mockLivestreams.map((livestream, index) => (
-          <Grid key={index} item xs={12} sm={6} md={4}>
-            <Box sx={{ position: 'relative' }}>
-              {/* Livestream Thumbnail */}
-              <img
-                src={livestream.imageUrl}
-                alt="Livestream Thumbnail"
-                style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-              />
+          <Grid key={index} item xs={12} sm={6} md={4} >
+            <Button
+              onClick={() => handleLivestreamClick(livestream)}
+              sx={{ padding: 0, textTransform: 'none', cursor: 'pointer' }}
+              fullWidth
+            >
+              <Box sx={{ position: 'relative', width: '100%', cursor: 'pointer' }}>
+                {/* Livestream Thumbnail */}
+                <img
+                  src={livestream.imageUrl}
+                  alt="Livestream Thumbnail"
+                  style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                />
 
-              {/* Viewer Count */}
-              <Box sx={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '4px 8px', borderRadius: '4px' }}>
-                <Typography variant="caption" sx={{ color: 'white' }}>
-                  {livestream.views} views
-                </Typography>
-              </Box>
-
-              {/* Badge Live */}
-              <Box sx={{ position: 'absolute', top: 8, right: 24 }}>
-                <Badge badgeContent="Live" color="error">
-                  <Box />
-                </Badge>
-              </Box>
-
-              {/* Avatar and Livestream Info */}
-              <Box sx={{ mt: 2, left: 0, width: '100%', textAlign: 'left', paddingLeft: '8px', paddingRight: '8px' }}>
-                <Avatar alt={livestream.username} src={livestream.avatarUrl} sx={{ width: 36, height: 36, marginRight: 1, display: 'inline-block' }} />
-                <Box style={{ display: 'inline-block', verticalAlign: 'top' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'white', display: 'block' }}>
-                    {livestream.username}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'white', display: 'block' }}>
-                    {livestream.livestreamName}
+                {/* Viewer Count */}
+                <Box sx={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(0, 0, 0, 0.5)', padding: '4px 8px', borderRadius: '4px' }}>
+                  <Typography variant="caption" sx={{ color: 'white' }}>
+                    {livestream.views} views
                   </Typography>
                 </Box>
+
+                {/* Badge Live */}
+                <Box sx={{ position: 'absolute', top: 8, right: 24 }}>
+                  <Badge badgeContent="Live" color="error">
+                    <Box />
+                  </Badge>
+                </Box>
+
+                {/* Avatar and Livestream Info */}
+                <Box sx={{ mt: 2, left: 0, width: '100%', textAlign: 'left', paddingLeft: '8px', paddingRight: '8px' }}>
+                  <Avatar alt={livestream.username} src={livestream.avatarUrl} sx={{ width: 36, height: 36, marginRight: 1, display: 'inline-block' }} />
+                  <Box style={{ display: 'inline-block', verticalAlign: 'top' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'white', display: 'block' }}>
+                      {livestream.username}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'white', display: 'block' }}>
+                      {livestream.livestreamName}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
-            </Box>
+            </Button>
           </Grid>
         ))}
       </Grid>

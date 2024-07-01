@@ -3,6 +3,10 @@
 import React, { useState } from 'react';
 import { Box, Button, Divider, Typography, Avatar } from '@mui/material';
 import { Circle } from '@mui/icons-material';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import ExploreIcon from '@mui/icons-material/Explore';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+
 
 const formatViews = (views: number) => {
   return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -74,9 +78,10 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
+          gap: 2
         }}
       >
-        Khám phá
+        <ExploreIcon sx={{fontSize: '18px'}}/>Khám phá
       </Button>
 
       <Button
@@ -93,8 +98,10 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
+          gap: 2
         }}
       >
+        <WhatshotIcon sx={{fontSize: '15px', borderRadius: 50, backgroundColor:'white', color: 'black'}}/>
         Xu hướng
       </Button>
 
@@ -112,9 +119,10 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
+          gap: 2
         }}
       >
-        Đang follow
+        <PeopleAltIcon sx={{fontSize: '15px', borderRadius: 50, backgroundColor:'white', color: 'black'}}/> Đang follow
       </Button>
 
       <Divider sx={{ width: '100%', marginY: 2, borderColor: '#4a4a4a' }} />

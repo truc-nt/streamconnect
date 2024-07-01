@@ -23,7 +23,7 @@ const Header: React.FC = () => {
             </IconButton>
             <InputBase
               placeholder="Search for something..."
-              sx={{ ml: 1, flex: 1, color: 'white', fontWeight: '200' }}
+              sx={{ ml: 1, flex: 1, color: 'white', fontWeight: '200', fontSize: '14px' }}
               inputProps={{ 'aria-label': 'search' }}
             />
           </Box>
