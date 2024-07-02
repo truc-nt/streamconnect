@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
 import ReactPlayer from 'react-player';
-import { Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
+import { FeaturedVideo, Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
 import { keyframes } from '@emotion/react';
 
 const gradientAnimation = keyframes`
@@ -118,7 +117,7 @@ const LivestreamPreview: React.FC = () => {
 
         <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 1, zIndex: 3 }}>
           <IconButton sx={{ color: 'white' }}>
-            <FavoriteIcon />
+            <FeaturedVideo />
           </IconButton>
           <IconButton sx={{ color: 'white' }}>
             <Fullscreen />

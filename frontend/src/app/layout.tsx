@@ -33,8 +33,8 @@ export default function RootLayout({
                 backgroundColor: '#1c1c1c',
                 overflowY: 'auto',
                 '::-webkit-scrollbar': { display: 'none' },
-                '-ms-overflow-style': 'none',
-                'scrollbar-width': 'none',
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none',
               }}
             >
               <Box sx={{ marginX: 1.5 }}>
