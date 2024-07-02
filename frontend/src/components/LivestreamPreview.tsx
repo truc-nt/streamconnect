@@ -24,6 +24,7 @@ const LivestreamPreview: React.FC = () => {
     <Box
       sx={{
         mt: 3,
+        mb: 4,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -34,7 +35,7 @@ const LivestreamPreview: React.FC = () => {
         sx={{
           position: 'relative',
           width: '100%',
-          height: '538px',
+          height: '400px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -48,7 +49,8 @@ const LivestreamPreview: React.FC = () => {
             zIndex: 1,
             borderRadius: '8px',
             // background: 'linear-gradient(45deg, red, orange, yellow, green, indigo, violet)',
-            background: 'linear-gradient(45deg, #8b0000, black)',
+            background: 'linear-gradient(45deg, #08d2ed, #282a39)',
+            // background: 'linear-gradient(45deg, #8b0000, black)',
             backgroundSize: '400% 400%',
             animation: `${gradientAnimation} 15s ease infinite`,
           },

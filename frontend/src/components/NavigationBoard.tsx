@@ -1,22 +1,34 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Box, Button, Divider, Typography, Avatar } from '@mui/material';
 import { Circle } from '@mui/icons-material';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import ExploreIcon from '@mui/icons-material/Explore';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
-
 const formatViews = (views: number) => {
   return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
 const NavigationBoard: React.FC = () => {
-  const [activeButton, setActiveButton] = useState<string | null>('explore');
+  const router = useRouter();
+  const [activeButton, setActiveButton] = useState<string | null>(null);
 
-  const handleButtonClick = (buttonName: string) => {
+  useEffect(() => {
+    const savedActiveButton = localStorage.getItem('activeButton');
+    if (savedActiveButton) {
+      setActiveButton(savedActiveButton);
+    } else {
+      setActiveButton('explore');
+    }
+  }, []);
+
+  const handleButtonClick = (buttonName: string, path: string) => {
     setActiveButton(buttonName);
+    localStorage.setItem('activeButton', buttonName);
+    router.push(path);
   };
 
   const mostViewedItems = [
@@ -66,7 +78,10 @@ const NavigationBoard: React.FC = () => {
 
       <Button
         fullWidth
-        onClick={() => handleButtonClick('explore')}
+        onClick={(e) => {
+          e.preventDefault();
+          handleButtonClick('explore', '/');
+        }}
         sx={{
           color: 'white',
           textTransform: 'none',
@@ -78,15 +93,19 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
-          gap: 2
+          gap: 2,
         }}
       >
-        <ExploreIcon sx={{fontSize: '18px'}}/>Khám phá
+        <ExploreIcon sx={{ fontSize: '18px' }} />
+        Khám phá
       </Button>
 
       <Button
         fullWidth
-        onClick={() => handleButtonClick('trending')}
+        onClick={(e) => {
+          e.preventDefault();
+          handleButtonClick('trending', '/trending');
+        }}
         sx={{
           color: 'white',
           marginBottom: 2,
@@ -98,16 +117,26 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
-          gap: 2
+          gap: 2,
         }}
       >
-        <WhatshotIcon sx={{fontSize: '15px', borderRadius: 50, backgroundColor:'white', color: 'black'}}/>
+        <WhatshotIcon
+          sx={{
+            fontSize: '15px',
+            borderRadius: 50,
+            backgroundColor: 'white',
+            color: 'black',
+          }}
+        />
         Xu hướng
       </Button>
 
       <Button
         fullWidth
-        onClick={() => handleButtonClick('following')}
+        onClick={(e) => {
+          e.preventDefault();
+          handleButtonClick('following', '/following');
+        }}
         sx={{
           color: 'white',
           marginBottom: 2,
@@ -119,10 +148,18 @@ const NavigationBoard: React.FC = () => {
           '&:hover': {
             backgroundColor: '#4a4a4a',
           },
-          gap: 2
+          gap: 2,
         }}
       >
-        <PeopleAltIcon sx={{fontSize: '15px', borderRadius: 50, backgroundColor:'white', color: 'black'}}/> Đang follow
+        <PeopleAltIcon
+          sx={{
+            fontSize: '15px',
+            borderRadius: 50,
+            backgroundColor: 'white',
+            color: 'black',
+          }}
+        />
+        Đang follow
       </Button>
 
       <Divider sx={{ width: '100%', marginY: 2, borderColor: '#4a4a4a' }} />
@@ -147,11 +184,34 @@ const NavigationBoard: React.FC = () => {
           }}
         >
           <Avatar src={item.avatarSrc} sx={{ width: 36, height: 36, marginRight: 1 }} />
-          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flexGrow: 1, marginRight: 1 }}>
-            <Typography sx={{ fontWeight: '400', fontSize: '14px', lineHeight: '20px', textAlign: 'left' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              flexGrow: 1,
+              marginRight: 1,
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: '400',
+                fontSize: '14px',
+                lineHeight: '20px',
+                textAlign: 'left',
+              }}
+            >
               {item.username}
             </Typography>
-            <Typography sx={{ fontWeight: '100', fontSize: '14px', color: '#9A9A9A', lineHeight: '20px', textAlign: 'left' }}>
+            <Typography
+              sx={{
+                fontWeight: '100',
+                fontSize: '14px',
+                color: '#9A9A9A',
+                lineHeight: '20px',
+                textAlign: 'left',
+              }}
+            >
               {item.livestreamName}
             </Typography>
           </Box>

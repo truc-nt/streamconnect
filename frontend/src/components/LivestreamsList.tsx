@@ -62,17 +62,13 @@ const formatViews = (views: number) => {
   return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-const SuggestLivestreams: React.FC = () => {
+const LivestreamsList: React.FC = () => {
   const handleLivestreamClick = (livestream: Livestream) => {
     console.log(`Clicked on ${livestream.livestreamName}`);
   };
 
   return (
-    <Box>
-      <Typography variant="h6" sx={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginY: 3 }}>
-        Livestreams Được Đề Xuất
-      </Typography>
-
+    <Box sx={{mt: 3}}>
       <Grid container spacing={2}>
         {mockLivestreams.map((livestream, index) => (
           <Grid key={index} item xs={12} sm={6} md={4}>
@@ -137,4 +133,4 @@ const SuggestLivestreams: React.FC = () => {
   );
 };
 
-export default SuggestLivestreams;
+export default LivestreamsList;

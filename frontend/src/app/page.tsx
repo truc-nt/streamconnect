@@ -1,13 +1,18 @@
 import CategorySlider from '@/components/CategorySlider';
 import LivestreamPreview from '@/components/LivestreamPreview';
-import SuggestLivestreams from '@/components/SuggestLivestreams';
+import LivestreamsList from '@/components/LivestreamsList';
+import { Typography } from '@mui/material';
+
 
 export default function Home() {
   return (
     <>
       <CategorySlider />
       <LivestreamPreview />
-      <SuggestLivestreams />
+      <Typography variant="h6" sx={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>
+        Livestreams Được Đề Xuất
+      </Typography>
+      <LivestreamsList />
     </>
   );
 }
