@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material';
 import ReactPlayer from 'react-player';
 import { FeaturedVideo, Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
@@ -19,6 +20,16 @@ const gradientAnimation = keyframes`
 `;
 
 const LivestreamPreview: React.FC = () => {
+  const router = useRouter();
+
+  const handleVideoClick = () => {
+    router.push('/livestream');
+  };
+
+  const handleButtonClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
   return (
     <Box
       sx={{
@@ -29,6 +40,7 @@ const LivestreamPreview: React.FC = () => {
         alignItems: 'center',
         width: '100%',
       }}
+      onClick={handleVideoClick}
     >
       <Box
         sx={{
@@ -38,6 +50,7 @@ const LivestreamPreview: React.FC = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          cursor: 'pointer',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -47,9 +60,7 @@ const LivestreamPreview: React.FC = () => {
             bottom: '-8px',
             zIndex: 1,
             borderRadius: '8px',
-            // background: 'linear-gradient(45deg, red, orange, yellow, green, indigo, violet)',
             background: 'linear-gradient(45deg, #08d2ed, #282a39)',
-            // background: 'linear-gradient(45deg, #8b0000, black)',
             backgroundSize: '400% 400%',
             animation: `${gradientAnimation} 15s ease infinite`,
           },
@@ -62,7 +73,7 @@ const LivestreamPreview: React.FC = () => {
             bottom: 0,
             zIndex: 1,
             borderRadius: '8px',
-            padding: '8px', 
+            padding: '8px',
             boxSizing: 'border-box',
             background: 'inherit',
             backgroundClip: 'padding-box',
@@ -86,6 +97,7 @@ const LivestreamPreview: React.FC = () => {
             controls
             playing
             muted
+            style={{ pointerEvents: 'none' }}
           />
         </Box>
 
@@ -116,13 +128,13 @@ const LivestreamPreview: React.FC = () => {
         </Badge>
 
         <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 1, zIndex: 3 }}>
-          <IconButton sx={{ color: 'white' }}>
+          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
             <FeaturedVideo />
           </IconButton>
-          <IconButton sx={{ color: 'white' }}>
+          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
             <Fullscreen />
           </IconButton>
-          <IconButton sx={{ color: 'white' }}>
+          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
             <VolumeOff />
           </IconButton>
         </Box>
