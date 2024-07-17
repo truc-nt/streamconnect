@@ -1,11 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
-import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material';
-import ReactPlayer from 'react-player';
-import { FeaturedVideo, Fullscreen, Visibility, VolumeOff } from '@mui/icons-material';
-import { keyframes } from '@emotion/react';
+import React from "react";
+import { Box, Avatar, Typography, Badge, IconButton } from "@mui/material";
+import dynamic from "next/dynamic";
+import {
+  FeaturedVideo,
+  Fullscreen,
+  Visibility,
+  VolumeOff,
+} from "@mui/icons-material";
+import { keyframes } from "@emotion/react";
+import { useRouter } from "next/navigation";
 
 const gradientAnimation = keyframes`
   0% {
@@ -18,6 +23,8 @@ const gradientAnimation = keyframes`
     background-position: 0% 50%;
   }
 `;
+
+const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
 
 const LivestreamPreview: React.FC = () => {
   const router = useRouter();
@@ -35,10 +42,10 @@ const LivestreamPreview: React.FC = () => {
       sx={{
         mt: 3,
         mb: 4,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
       }}
       onClick={handleVideoClick}
     >
@@ -53,20 +60,20 @@ const LivestreamPreview: React.FC = () => {
           cursor: 'pointer',
           '&::before': {
             content: '""',
-            position: 'absolute',
-            top: '-8px',
-            left: '-8px',
-            right: '-8px',
-            bottom: '-8px',
+            position: "absolute",
+            top: "-8px",
+            left: "-8px",
+            right: "-8px",
+            bottom: "-8px",
             zIndex: 1,
             borderRadius: '8px',
             background: 'linear-gradient(45deg, #08d2ed, #282a39)',
             backgroundSize: '400% 400%',
             animation: `${gradientAnimation} 15s ease infinite`,
           },
-          '&::after': {
+          "&::after": {
             content: '""',
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -82,11 +89,11 @@ const LivestreamPreview: React.FC = () => {
       >
         <Box
           sx={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            borderRadius: '8px',
-            overflow: 'hidden',
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            borderRadius: "8px",
+            overflow: "hidden",
             zIndex: 2,
           }}
         >
@@ -101,18 +108,30 @@ const LivestreamPreview: React.FC = () => {
           />
         </Box>
 
-        <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', zIndex: 3 }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            display: "flex",
+            alignItems: "center",
+            zIndex: 3,
+          }}
+        >
           <Avatar alt="Username" src="/assets/your-avatar-image.jpg" />
           <Box sx={{ ml: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'white' }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: "bold", color: "white" }}
+            >
               Username
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ color: '#D8D8D8' }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" sx={{ color: "#D8D8D8" }}>
                 Livestream Name
               </Typography>
-              <Visibility sx={{ fontSize: '16px', color: '#D8D8D8' }} />
-              <Typography variant="body2" sx={{ color: '#D8D8D8' }}>
+              <Visibility sx={{ fontSize: "16px", color: "#D8D8D8" }} />
+              <Typography variant="body2" sx={{ color: "#D8D8D8" }}>
                 1234
               </Typography>
             </Box>
@@ -122,19 +141,35 @@ const LivestreamPreview: React.FC = () => {
         <Badge
           badgeContent="Live"
           color="error"
-          sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3, marginRight: 2, marginTop: 2 }}
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 3,
+            marginRight: 2,
+            marginTop: 2,
+          }}
         >
           <Box />
         </Badge>
 
-        <Box sx={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 1, zIndex: 3 }}>
-          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            right: 16,
+            display: "flex",
+            gap: 1,
+            zIndex: 3,
+          }}
+        >
+          <IconButton sx={{ color: "white" }}>
             <FeaturedVideo />
           </IconButton>
-          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
+          <IconButton sx={{ color: "white" }}>
             <Fullscreen />
           </IconButton>
-          <IconButton sx={{ color: 'white' }} onClick={handleButtonClick}>
+          <IconButton sx={{ color: "white" }}>
             <VolumeOff />
           </IconButton>
         </Box>

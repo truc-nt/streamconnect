@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AppBar, Box, IconButton, InputBase, Toolbar, Avatar, Menu, MenuItem, Divider, Typography } from '@mui/material';
+import { AppBar, Box, IconButton, InputBase, Toolbar, Avatar, Menu, MenuItem, Divider } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -11,6 +11,7 @@ import { useRouter, usePathname } from 'next/navigation';
 interface HeaderProps {
   showName?: boolean;
 }
+
 
 const Header: React.FC<HeaderProps> = ({ showName }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -36,46 +37,55 @@ const Header: React.FC<HeaderProps> = ({ showName }) => {
   return (
     <AppBar position="static" sx={{ backgroundColor: 'black', height: '70px' }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        {showName && (
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 'bold', cursor: 'pointer', width: '200px' }}
-            onClick={handleNameClick}
-          >
-            NAME
-          </Typography>
-        )}
         <Box sx={{ display: 'flex', alignItems: 'center', width: '70%', justifyContent: 'flex-end' }}>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor: '#282a39',
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "background.default",
               borderRadius: 1,
               width: '100%',
               padding: '0 10px',
-              height: 40,
-              marginRight: (pathname === '/cart' || pathname === '/checkout') ? 10 : 0, 
+              height: 40
             }}
           >
-            <IconButton sx={{ padding: 0, color: 'white' }}>
+            <IconButton sx={{ padding: 0, color: "white" }}>
               <SearchIcon />
             </IconButton>
             <InputBase
               placeholder="Search for something..."
-              sx={{ ml: 1, flex: 1, color: 'white', fontWeight: '200', fontSize: '14px' }}
-              inputProps={{ 'aria-label': 'search' }}
+              sx={{
+                ml: 1,
+                flex: 1,
+                color: "white",
+                fontWeight: "200",
+                fontSize: "14px",
+              }}
+              inputProps={{ "aria-label": "search" }}
             />
           </Box>
         </Box>
+        {/* <Button
+          sx={{
+            height: 40,
+            backgroundColor: '#08D2ED',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#06b1cc',
+            },
+            px: 2
+          }}
+        >
+          Đăng nhập
+        </Button> */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <IconButton sx={{ color: 'white' }}>
             <TelegramIcon />
           </IconButton>
-          <IconButton sx={{ color: 'white' }}>
+          <IconButton sx={{ color: "white" }}>
             <NotificationsIcon />
           </IconButton>
-          <IconButton sx={{ color: 'white' }} onClick={handleCartClick}>
+          <IconButton sx={{ color: 'white' }}>
             <ShoppingCartIcon />
           </IconButton>
           <IconButton onClick={handleMenuOpen} sx={{ padding: 0 }}>
@@ -87,23 +97,23 @@ const Header: React.FC<HeaderProps> = ({ showName }) => {
             onClose={handleMenuClose}
             PaperProps={{
               sx: {
-                backgroundColor: '#282A39',
-                color: '#F4F4F5',
-                width: '175px',
+                //backgroundColor: "#282A39",
+                color: "#F4F4F5",
+                width: "175px",
                 mt: 1.5,
-                '& .MuiMenuItem-root': {
-                  fontSize: '15px',
-                  marginX: '8px',
-                  borderRadius: '4px',
-                  '&:hover': {
-                    backgroundColor: '#535561',
+                "& .MuiMenuItem-root": {
+                  fontSize: "15px",
+                  marginX: "8px",
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#535561",
                   },
-                  '&.Mui-selected': {
-                    backgroundColor: '#535561',
+                  "&.Mui-selected": {
+                    backgroundColor: "#535561",
                   },
                 },
-                '& .MuiDivider-root': {
-                  backgroundColor: '#F4F4F5',
+                "& .MuiDivider-root": {
+                  //backgroundColor: "#F4F4F5",
                 },
               },
             }}
