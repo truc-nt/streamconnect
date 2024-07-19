@@ -4,19 +4,144 @@ import React, { useRef, useState } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import DetailModal from './DetailModal'; // Import DetailModal
+import DetailModal from './DetailModal';
 
-const products = [
-  { id: 1, name: 'Product 1', price: 100000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 1', categories1: ['Màu đỏ', 'Màu xanh', 'Màu vàng', 'Màu trắng'], categories2: ['Size L', 'Size XL'] },
-  { id: 2, name: 'Product 2', price: 200000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 2', categories1: ['Màu đỏ', 'Màu xanh'], categories2: ['Size L', 'Size XL'] },
-  { id: 3, name: 'Product 3', price: 300000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 3', categories1: ['Màu đỏ', 'Màu xanh', 'Màu vàng'], categories2: ['Size L', 'Size XL'] },
-  { id: 4, name: 'Product 4', price: 400000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 4', categories1: ['Màu đỏ', 'Màu xanh', 'Màu vàng'], categories2: ['Size L', 'Size XL'] },
-  { id: 5, name: 'Product 5', price: 500000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 5', categories1: ['Màu đỏ', 'Màu xanh', 'Màu vàng'], categories2: ['Size L', 'Size XL'] },
-  { id: 6, name: 'Product 6', price: 600000, image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg', description: 'Mô tả sản phẩm 6', categories1: ['Màu đỏ', 'Màu xanh', 'Màu vàng'], categories2: ['Size L', 'Size XL'] },
+interface Product {
+  id: number;
+  name: string;
+  image: string;
+  description: string;
+  categories: string[];
+  categoryValues: {
+    [category: string]: string[];
+  };
+  prices: {
+    platform: string;
+    category1: string;
+    category2: string;
+    price: number;
+  }[];
+}
+
+const products: Product[] = [
+  {
+    id: 1,
+    name: 'Product 1',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 1',
+    categories: ['Màu', 'Size'],
+    categoryValues: {
+      'Màu': ['Đỏ', 'Xanh', 'Vàng', 'Trắng'],
+      'Size': ['S', 'M']
+    },
+    prices: [
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'S', price: 100000 },
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'M', price: 100000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'S', price: 105000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'M', price: 110000 },
+      { platform: 'Shopee', category1: 'Vàng', category2: 'S', price: 105000 },
+      { platform: 'Shopee', category1: 'Vàng', category2: 'M', price: 110000 },
+      { platform: 'Shopee', category1: 'Trắng', category2: 'S', price: 105000 },
+      { platform: 'Shopee', category1: 'Trắng', category2: 'M', price: 110000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'S', price: 105000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'M', price: 125000 },
+      { platform: 'Lazada', category1: 'Xanh', category2: 'S', price: 100000 },
+      { platform: 'Lazada', category1: 'Xanh', category2: 'M', price: 115000 },
+      { platform: 'Lazada', category1: 'Vàng', category2: 'S', price: 105000 },
+      { platform: 'Lazada', category1: 'Vàng', category2: 'M', price: 130000 },
+      { platform: 'Lazada', category1: 'Trắng', category2: 'S', price: 105000 },
+      { platform: 'Lazada', category1: 'Trắng', category2: 'M', price: 125000 },
+    ]
+  },
+  {
+    id: 2,
+    name: 'Product 2',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 2',
+    categories: ['Màu', 'Size'],
+    categoryValues: {
+      'Màu': ['Đỏ', 'Xanh', 'Vàng', 'Trắng'],
+      'Size': ['L', 'XL']
+    },
+    prices: [
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'XL', price: 120000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'XL', price: 120000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'L', price: 105000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'XL', price: 125000 },
+    ]
+  },
+  {
+    id: 3,
+    name: 'Product 3',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 3',
+    categories: [],
+    categoryValues: {},
+    prices: [
+      { platform: 'Shopee', category1: '', category2: '', price: 50000 },
+      { platform: 'Lazada', category1: '', category2: '', price: 65000 },
+    ]
+  },
+  {
+    id: 4,
+    name: 'Product 4',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 4',
+    categories: ['Size'],
+    categoryValues: {
+      'Size': ['S', 'M'],
+    },
+    prices: [
+      { platform: 'Shopee', category1: 'S', category2: '', price: 80000 },
+      { platform: 'Shopee', category1: 'M', category2: '', price: 90000 },
+      { platform: 'Lazada', category1: 'S', category2: '', price: 95000 },
+      { platform: 'Lazada', category1: 'M', category2: '', price: 125000 },
+    ]
+  },
+  {
+    id: 5,
+    name: 'Product 5',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 5',
+    categories: ['Màu', 'Size'],
+    categoryValues: {
+      'Màu': ['Đỏ', 'Xanh'],
+      'Size': ['L', 'XL']
+    },
+    prices: [
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'XL', price: 120000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'XL', price: 120000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'L', price: 105000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'XL', price: 125000 },
+    ]
+  },
+  {
+    id: 6,
+    name: 'Product 6',
+    image: 'https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg',
+    description: 'Mô tả sản phẩm 6',
+    categories: ['Màu', 'Size'],
+    categoryValues: {
+      'Màu': ['Đỏ', 'Xanh'],
+      'Size': ['L', 'XL']
+    },
+    prices: [
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Đỏ', category2: 'XL', price: 120000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'L', price: 100000 },
+      { platform: 'Shopee', category1: 'Xanh', category2: 'XL', price: 120000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'L', price: 105000 },
+      { platform: 'Lazada', category1: 'Đỏ', category2: 'XL', price: 125000 },
+    ]
+  },
 ];
 
 const ProductList: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const formatPrice = (price: number) => {
@@ -37,13 +162,20 @@ const ProductList: React.FC = () => {
     }
   };
 
-  const handleProductClick = (product) => {
+  const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const getPriceRange = (prices: { price: number }[]) => {
+    if (prices.length === 0) return '';
+    const minPrice = Math.min(...prices.map(p => p.price));
+    const maxPrice = Math.max(...prices.map(p => p.price));
+    return `${formatPrice(minPrice)} đ`;
   };
 
   return (
@@ -99,7 +231,7 @@ const ProductList: React.FC = () => {
               <img
                 src={product.image}
                 alt={product.name}
-                style={{ width: '50%', height: 'auto', borderRadius: '8px', marginRight: '16px' }}
+                style={{ width: '50%', height: 'auto', borderRadius: '8px', marginRight: '16px', objectFit: 'cover' }}
               />
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography
@@ -117,7 +249,7 @@ const ProductList: React.FC = () => {
                   {product.name}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'white', fontSize: '18px' }}>
-                  đ {formatPrice(Number(product.price))}
+                  {getPriceRange(product.prices)}
                 </Typography>
               </Box>
             </Box>
