@@ -218,3 +218,4 @@ const DetailModal: React.FC<DetailModalProps> = ({ open, onClose, product }) => 
 };
 
 export default DetailModal;
+
