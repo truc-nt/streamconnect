@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const isCheckoutPage = pathname === '/cart';
+  const isCheckoutPage = pathname === '/cart' || pathname === '/checkout';
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>

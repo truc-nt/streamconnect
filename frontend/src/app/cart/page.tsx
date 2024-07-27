@@ -1,8 +1,17 @@
+'use client'
+
 import React from 'react';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useRouter } from 'next/navigation';
 
 const Cart: React.FC = () => {
+  const router = useRouter()
+
+  const handleCheckoutClick = () => {
+    router.push('/checkout');
+  }
+
   return (
     <>
       <Typography variant="h6" sx={{ color: 'white', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', marginBottom: 2 }}>
@@ -95,6 +104,7 @@ const Cart: React.FC = () => {
               marginTop: 2,
               '&:hover': { backgroundColor: '#08d1ed', borderColor: 'transparent' }
             }}
+            onClick={handleCheckoutClick}
           >
             Mua hàng
           </Button>

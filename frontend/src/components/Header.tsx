@@ -55,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ showName }) => {
               width: '100%',
               padding: '0 10px',
               height: 40,
-              marginRight: pathname === '/checkout' ? 10 : 0, 
+              marginRight: (pathname === '/cart' || pathname === '/checkout') ? 10 : 0, 
             }}
           >
             <IconButton sx={{ padding: 0, color: 'white' }}>
