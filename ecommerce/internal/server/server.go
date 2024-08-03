@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"ecommerce/api/handlers"
-	"ecommerce/api/routers"
+	"ecommerce/api/handler"
+	"ecommerce/api/router"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/database"
-	"ecommerce/internal/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,14 +21,17 @@ type Server struct {
 	HttpServer *http.Server
 	Engine     *gin.Engine
 
-	Handlers *handlers.Handlers
-	Services *services.Services
+	Handlers *handler.Handlers
 
 	PostgresDatabase *database.PostgresqlDatabase
 }
 
-func NewServer(cfg *configs.Config, h *handlers.Handlers, s *services.Services, pDb *database.PostgresqlDatabase) IServer {
+func NewServer(cfg *configs.Config, h *handler.Handlers) IServer {
 	e := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"}
+	e.Use(cors.New(config))
+
 	return &Server{
 		HttpServer: &http.Server{
 			Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
@@ -36,9 +39,6 @@ func NewServer(cfg *configs.Config, h *handlers.Handlers, s *services.Services, 
 		},
 		Engine:   e,
 		Handlers: h,
-		Services: s,
-
-		PostgresDatabase: pDb,
 	}
 }
 
@@ -57,5 +57,5 @@ func (s *Server) Stop() {
 }
 
 func (s *Server) LoadRouter() {
-	routers.LoadApiRouter(s.Engine, s.Handlers)
+	router.LoadApiRouter(s.Engine, s.Handlers)
 }

@@ -7,13 +7,13 @@
 package cmd
 
 import (
-	"ecommerce/api/handlers"
-	"ecommerce/internal/adapters"
+	"ecommerce/api/handler"
+	"ecommerce/internal/adapter"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/database"
-	"ecommerce/internal/repositories"
+	"ecommerce/internal/repository"
 	"ecommerce/internal/server"
-	"ecommerce/internal/services"
+	"ecommerce/internal/service"
 )
 
 // Injectors from wire.go:
@@ -21,18 +21,23 @@ import (
 //go:generate wire -package=cmd
 func initServer() server.IServer {
 	config := configs.NewConfig()
-	iShopifyAdapter := adapters.NewShopifyAdapter(config)
 	postgresqlDatabase := database.NewPostgresDatabase(config)
-	iExternalShopRepository := repositories.NewExternalShopRepository(postgresqlDatabase)
-	iShopifyExternalShopAuthRepository := repositories.NewShopifyExternalShopAuthRepository(postgresqlDatabase)
-	iShopifyService := services.NewShopifyService(iShopifyAdapter, config, iExternalShopRepository, iShopifyExternalShopAuthRepository)
-	iShopifyHandler := handlers.NewShopifyHandler(iShopifyService)
-	v := services.ProvideEcommerceServices(iShopifyService)
-	iExternalShopService := services.NewExternalShopService(iExternalShopRepository, config, v)
-	iExternalShopHandler := handlers.NewExternalShopHandler(iExternalShopService)
-	handlersHandlers := handlers.NewHandlers(iShopifyHandler, iExternalShopHandler)
-	iExternalShopAuthService := services.NewExternalShopAuthService(iShopifyExternalShopAuthRepository, config)
-	servicesServices := services.NewServices(iShopifyService, iExternalShopService, iExternalShopAuthService)
-	iServer := server.NewServer(config, handlersHandlers, servicesServices, postgresqlDatabase)
+	iProductRepository := repository.NewProductRepository(postgresqlDatabase)
+	iShopifyAdapter := adapter.NewShopifyAdapter(config)
+	iVariantRepository := repository.NewVariantRepository(postgresqlDatabase)
+	iExternalShopRepository := repository.NewExternalShopRepository(postgresqlDatabase)
+	iExternalShopShopifyAuthRepository := repository.NewExternalShopShopifyAuthRepository(postgresqlDatabase)
+	iExternalProductShopifyRepository := repository.NewExternalProductShopifyRepository(postgresqlDatabase)
+	iShopifyService := service.NewShopifyService(iShopifyAdapter, iProductRepository, iVariantRepository, iExternalShopRepository, iExternalShopShopifyAuthRepository, iExternalProductShopifyRepository)
+	v := service.ProvideEcommerceServices(iShopifyService)
+	iProductService := service.NewProductService(iProductRepository, v)
+	iProductHandler := handler.NewProductHandler(iProductService)
+	iShopifyHandler := handler.NewShopifyHandler(iShopifyService)
+	iExternalShopService := service.NewExternalShopService(iExternalShopRepository, v)
+	iExternalShopHandler := handler.NewExternalShopHandler(iExternalShopService)
+	iExternalProductService := service.NewExternalProductService(v, iExternalShopService)
+	iExternalProductHandler := handler.NewExternalProductHandler(iExternalProductService)
+	handlers := handler.ProvideHandlers(iProductHandler, iShopifyHandler, iExternalShopHandler, iExternalProductHandler)
+	iServer := server.NewServer(config, handlers)
 	return iServer
 }

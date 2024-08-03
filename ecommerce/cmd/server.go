@@ -1,48 +1,45 @@
 package cmd
 
 import (
-	"ecommerce/api/handlers"
-	"ecommerce/internal/adapters"
-	"ecommerce/internal/database"
-	"ecommerce/internal/repositories"
-	"ecommerce/internal/services"
+	"ecommerce/api/handler"
+	"ecommerce/internal/adapter"
+	"ecommerce/internal/repository"
+	"ecommerce/internal/service"
 	"fmt"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
 var HandlersSet = wire.NewSet(
-	handlers.NewShopifyHandler,
-	handlers.NewExternalShopHandler,
+	handler.NewProductHandler,
+	handler.NewShopifyHandler,
+	handler.NewExternalShopHandler,
+	handler.NewExternalProductHandler,
+
+	handler.ProvideHandlers,
 )
 
 var ServicesSet = wire.NewSet(
-	services.NewShopifyService,
-	services.NewExternalShopService,
-	services.NewExternalShopAuthService,
-	services.ProvideEcommerceServices,
+	service.NewShopifyService,
+	service.ProvideEcommerceServices,
+
+	service.NewProductService,
+	service.NewExternalShopService,
+	service.NewExternalShopAuthService,
+	service.NewExternalProductService,
 )
 
 var RepositoriesSet = wire.NewSet(
-	repositories.NewExternalShopRepository,
-	repositories.NewShopifyExternalShopAuthRepository,
+	repository.NewProductRepository,
+	repository.NewVariantRepository,
+	repository.NewExternalShopRepository,
+	repository.NewExternalShopShopifyAuthRepository,
+	repository.NewExternalProductShopifyRepository,
 )
 
 var AdapterSet = wire.NewSet(
-	adapters.NewShopifyAdapter,
+	adapter.NewShopifyAdapter,
 )
-
-type Server struct {
-	HttpServer *http.Server
-	Engine     *gin.Engine
-
-	Handlers *handlers.Handlers
-	Services *services.Services
-
-	PostgresDatabase *database.PostgresqlDatabase
-}
 
 func runServer() {
 	//var err error

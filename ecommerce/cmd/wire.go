@@ -4,11 +4,9 @@
 package cmd
 
 import (
-	"ecommerce/api/handlers"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/database"
 	"ecommerce/internal/server"
-	"ecommerce/internal/services"
 
 	"github.com/google/wire"
 )
@@ -26,10 +24,8 @@ func initServer() server.IServer {
 		//ExternalShopService,
 
 		ServicesSet,
-		services.NewServices,
 
 		HandlersSet,
-		handlers.NewHandlers,
 
 		database.NewPostgresDatabase,
 
