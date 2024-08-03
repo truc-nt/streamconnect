@@ -71,7 +71,11 @@ const NavigationBoard: React.FC = () => {
           textTransform: 'none',
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', cursor: 'pointer' }}
+        onClick={(e) => {
+          e.preventDefault();
+          handleButtonClick('explore', '/');
+        }}>
           NAME
         </Typography>
       </Box>
