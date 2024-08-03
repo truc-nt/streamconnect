@@ -1,12 +1,15 @@
 "use client";
 import DataGrid from "@/components/core/DataGrid";
 import { GridColDef } from "@mui/x-data-grid";
-import Stack from "@mui/material/Stack";
+import { Stack, Autocomplete, TextField, Box } from "@mui/material";
+
 import {
   VisibilityOutlined,
   DeleteOutlined,
   CachedOutlined,
 } from "@mui/icons-material";
+import { useGetExternalShops } from "@/hook/external_shop";
+import { useState } from "react";
 
 const columns: GridColDef[] = [
   {
@@ -17,10 +20,6 @@ const columns: GridColDef[] = [
     field: "sku",
     headerName: "Sku",
   },
-  /*{
-    field: "externalIndentifier",
-    headerName: "Định danh ngoại",
-  },*/
   {
     field: "status",
     headerName: "Trạng thái",
@@ -105,5 +104,5 @@ const rows = [
 ];
 
 export default function Page() {
-  return <DataGrid rows={rows} columns={columns} />;
+  return <DataGrid rows={[]} columns={[]} />;
 }

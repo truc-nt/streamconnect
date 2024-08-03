@@ -1,24 +1,23 @@
 "use client";
 
-import {
-  DataGrid as MuiDataGrid,
-  DEFAULT_GRID_AUTOSIZE_OPTIONS,
-} from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid } from "@mui/x-data-grid";
 import React from "react";
-import Button from "@mui/material/Button";
 
 interface IDataGridProps {
   rows: any;
   columns: any;
+  getRowId?: (row: any) => string;
 }
 
-export default function DataGrid({ rows, columns }: IDataGridProps) {
+export default function DataGrid({ rows, columns, getRowId }: IDataGridProps) {
+  console.log(rows);
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <MuiDataGrid
         checkboxSelection
         rows={rows}
         columns={columns}
+        getRowId={getRowId}
         sx={{
           border: 0,
           "& .MuiDataGrid-columnHeaders *": {

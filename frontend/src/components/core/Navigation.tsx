@@ -11,6 +11,7 @@ import {
   MenuItem,
   MenuList,
   SvgIcon,
+  Collapse,
 } from "@mui/material";
 import { Circle } from "@mui/icons-material";
 import {
@@ -24,6 +25,8 @@ import {
   Store,
   Category,
   SmartDisplay,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
 import ListSubheader from "@mui/material/ListSubheader";
 import List from "@mui/material/List";
@@ -36,12 +39,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import Link from "next/link";
 import { useSelectedLayoutSegment, usePathname } from "next/navigation";
-
-interface INavigationItem {
-  path: string;
-  label: string;
-  icon: React.ElementType<any>;
-}
 
 const mainNavigator: INavigationItem[] = [
   {
@@ -96,15 +93,106 @@ const sellerNavigator: INavigationItem[] = [
     icon: Store,
   },
   {
-    path: "/seller/products",
     label: "Sản phẩm",
     icon: Category,
+    children: [
+      {
+        path: "/seller/products",
+        label: "Hệ thống",
+      },
+      {
+        path: "/seller/external_products",
+        label: "Liên kết",
+      },
+    ],
   },
 ];
 
+interface INavigationItem {
+  path?: string;
+  label: string;
+  icon?: React.ElementType<any>;
+  children?: INavigationItem[];
+}
+
+const NavigationItem = ({ path, label, icon, children }: INavigationItem) => {
+  const [open, setOpen] = useState(false);
+
+  const pathname = usePathname();
+
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
+  return (
+    <>
+      <NavigationLink path={path}>
+        <ListItemButton
+          style={{
+            backgroundColor: pathname === path ? "#535561" : "transparent",
+            borderRadius: 8,
+          }}
+          selected={pathname === path}
+          onClick={children ? handleClick : undefined}
+        >
+          {icon && (
+            <ListItemIcon style={{ minWidth: "40px" }}>
+              <SvgIcon
+                component={icon}
+                style={{
+                  borderRadius: 50,
+                  backgroundColor: "white",
+                  color: "black",
+                  padding: "2px",
+                  fontSize: "18px",
+                }}
+              />
+            </ListItemIcon>
+          )}
+          <ListItemText primary={<Typography>{label}</Typography>} />
+          {children && (open ? <ExpandLess /> : <ExpandMore />)}
+        </ListItemButton>
+      </NavigationLink>
+      {children && (
+        <Collapse
+          in={open}
+          timeout="auto"
+          unmountOnExit
+          style={{ paddingLeft: "10px" }}
+        >
+          <List component="nav">
+            {children.map((child, index) => (
+              <NavigationItem key={index} {...child} />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </>
+  );
+};
+
+const NavigationLink = ({
+  path,
+  children,
+}: {
+  path: string | undefined;
+  children: React.ReactNode;
+}) => {
+  return path ? (
+    <Link
+      href={path}
+      passHref
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      {children}
+    </Link>
+  ) : (
+    <>{children}</>
+  );
+};
+
 const Navigation = () => {
   const activeSegment = useSelectedLayoutSegment();
-  const pathname = usePathname();
 
   let items = mainNavigator;
 
@@ -115,53 +203,11 @@ const Navigation = () => {
   }
 
   return (
-    <MenuList style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-      {items.map((item) => (
-        <Link
-          key={item.path}
-          href={item.path}
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <MenuItem
-            style={{
-              backgroundColor:
-                pathname === item.path ? "#535561" : "transparent",
-              borderRadius: 8,
-            }}
-            selected={pathname === item.path}
-          >
-            <ListItemIcon
-              style={{
-                minWidth: "20px",
-              }}
-            >
-              <SvgIcon
-                component={item.icon}
-                style={{
-                  borderRadius: 50,
-                  backgroundColor: "white",
-                  color: "black",
-                  fontSize: "13px",
-                  padding: "1px",
-                }}
-              />
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Typography
-                  style={{
-                    fontWeight: pathname === item.path ? "bold" : "normal",
-                    fontSize: 14,
-                  }}
-                >
-                  {item.label}
-                </Typography>
-              }
-            />
-          </MenuItem>
-        </Link>
+    <List component="nav">
+      {items.map((item, index) => (
+        <NavigationItem key={index} {...item} />
       ))}
-    </MenuList>
+    </List>
   );
 };
 

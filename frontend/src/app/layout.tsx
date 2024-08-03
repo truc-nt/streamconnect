@@ -2,7 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import NavigationBoard from "@/components/core/NavigationBoard";
 import Header from "@/components/Header";
-import { Grid, Container } from "@mui/material";
+import { Grid, Container, Stack } from "@mui/material";
 import StoreProvider from "./store-provider";
 import ThemeProvider from "./theme-provider";
 import Sidebar from "@/components/core/Sidebar";
@@ -34,11 +34,12 @@ export default function RootLayout({
               <Grid item xs={10} md={10} style={{ backgroundColor: "#1C1C1C" }}>
                 <Header />
                 <Container
+                  maxWidth="xl"
                   sx={{
-                    py: "20px"
+                    py: "20px",
                   }}
                 >
-                  {children}
+                  <Stack gap={2}>{children}</Stack>
                 </Container>
               </Grid>
             </Grid>
