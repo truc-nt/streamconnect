@@ -125,7 +125,13 @@ export default function Page() {
           />
         )}
       />
-      {externalProducts && <DataGrid rows={externalProducts} columns={columns} getRowId ={(row) => row.id_external_product_shopify} />}
+      {externalProducts && (
+        <DataGrid
+          rows={externalProducts}
+          columns={columns}
+          getRowId={(row) => row.id_external_product_shopify}
+        />
+      )}
     </>
   );
 }

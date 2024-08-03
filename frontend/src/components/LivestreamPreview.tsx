@@ -30,7 +30,7 @@ const LivestreamPreview: React.FC = () => {
   const router = useRouter();
 
   const handleVideoClick = () => {
-    router.push('/livestream');
+    router.push("/livestream");
   };
 
   const handleButtonClick = (event: React.MouseEvent) => {
@@ -51,14 +51,14 @@ const LivestreamPreview: React.FC = () => {
     >
       <Box
         sx={{
-          position: 'relative',
-          width: '100%',
-          height: '400px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          cursor: 'pointer',
-          '&::before': {
+          position: "relative",
+          width: "100%",
+          height: "400px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+          "&::before": {
             content: '""',
             position: "absolute",
             top: "-8px",
@@ -66,9 +66,9 @@ const LivestreamPreview: React.FC = () => {
             right: "-8px",
             bottom: "-8px",
             zIndex: 1,
-            borderRadius: '8px',
-            background: 'linear-gradient(45deg, #08d2ed, #282a39)',
-            backgroundSize: '400% 400%',
+            borderRadius: "8px",
+            background: "linear-gradient(45deg, #08d2ed, #282a39)",
+            backgroundSize: "400% 400%",
             animation: `${gradientAnimation} 15s ease infinite`,
           },
           "&::after": {
@@ -79,11 +79,11 @@ const LivestreamPreview: React.FC = () => {
             right: 0,
             bottom: 0,
             zIndex: 1,
-            borderRadius: '8px',
-            padding: '8px',
-            boxSizing: 'border-box',
-            background: 'inherit',
-            backgroundClip: 'padding-box',
+            borderRadius: "8px",
+            padding: "8px",
+            boxSizing: "border-box",
+            background: "inherit",
+            backgroundClip: "padding-box",
           },
         }}
       >
@@ -104,7 +104,7 @@ const LivestreamPreview: React.FC = () => {
             controls
             playing
             muted
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: "none" }}
           />
         </Box>
 
