@@ -1,2 +1,11 @@
+#IDE
+/.idea
 .vscode
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-source
+bazel-testlogs
+bazel-streamconnect
+.ijwb
 .DS_Store
