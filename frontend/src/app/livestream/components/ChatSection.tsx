@@ -78,6 +78,7 @@ const ChatSection: React.FC = () => {
         borderRadius: 2,
         display: "flex",
         flexDirection: "column",
+        height: "100%",
       }}
     >
       <Typography

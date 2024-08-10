@@ -13,7 +13,7 @@ import (
 type IExternalShopRepository interface {
 	IBaseRepository[model.ExternalShop]
 
-	GetByShopId(db qrm.Queryable, shopId int64, limit int32, offset int32) (interface{}, error)
+	GetByShopId(db qrm.Queryable, shopId int64, limit int64, offset int64) (interface{}, error)
 }
 
 type ExternalShopRepository struct {
@@ -52,7 +52,12 @@ func (r *ExternalShopRepository) CreateMany(db qrm.Queryable, columnList postgre
 	return r.insertMany(db, stmt)
 }
 
-func (r *ExternalShopRepository) GetByShopId(db qrm.Queryable, shopId int64, limit int32, offset int32) (interface{}, error) {
+func (r *ExternalShopRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalShop) (*model.ExternalShop, error) {
+	stmt := table.ExternalShop.UPDATE(columnList).MODEL(data).RETURNING(table.ExternalShop.AllColumns)
+	return r.update(db, stmt)
+}
+
+func (r *ExternalShopRepository) GetByShopId(db qrm.Queryable, shopId int64, limit int64, offset int64) (interface{}, error) {
 	stmt := table.ExternalShop.SELECT(
 		table.ExternalShop.AllColumns,
 		table.Ecommerce.Name).

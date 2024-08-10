@@ -1,12 +1,17 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
-import placeholderReducer from "./navigation";
+import livestreamCreate from "./livestream_create";
+import { useSelector, useDispatch } from "react-redux";
+import type { TypedUseSelectorHook } from "react-redux";
 
 export const store = configureStore({
   reducer: {
-    placeholder: placeholderReducer,
+    livestreamCreate: livestreamCreate,
   },
 });
 
-export type RootStore = ReturnType<typeof store.getState>;
+export type AppStore = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<AppStore> = useSelector;

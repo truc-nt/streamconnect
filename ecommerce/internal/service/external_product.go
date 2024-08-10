@@ -5,7 +5,7 @@ import (
 )
 
 type IExternalProductService interface {
-	GetExternalProductsByExternalShopId(externalShopId int64, limit int32, offset int32) (interface{}, error)
+	GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error)
 }
 
 type ExternalProductService struct {
@@ -20,7 +20,7 @@ func NewExternalProductService(ecommerceService map[int16]IEcommerceService, ext
 	}
 }
 
-func (s *ExternalProductService) GetExternalProductsByExternalShopId(externalShopId int64, limit int32, offset int32) (interface{}, error) {
+func (s *ExternalProductService) GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error) {
 	externalShop, err := s.ExternalShopService.GetExternalShopById(externalShopId)
 	if err != nil {
 		return nil, err
@@ -35,5 +35,6 @@ func (s *ExternalProductService) GetExternalProductsByExternalShopId(externalSho
 	if err != nil {
 		return nil, err
 	}
+
 	return externalProducts, nil
 }

@@ -13,7 +13,7 @@ import (
 type IExternalShopService interface {
 	CreateExternalShopShopify(name string) (int64, error)
 	GetExternalShopById(externalShopId int64) (*model.ExternalShop, error)
-	GetExternalShopsByShopId(shopId int64, limit int32, offset int32) (interface{}, error)
+	GetExternalShopsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
 	SyncExternalProductsByExternalShopId(externalShopId int64) error
 }
 
@@ -34,7 +34,7 @@ func (s *ExternalShopService) CreateExternalShopShopify(name string) (int64, err
 	newExternalShop := model.ExternalShop{
 		Name:        name,
 		FkShop:      1,
-		FkEcommerce: constants.SHOPIFY,
+		FkEcommerce: constants.SHOPIFY_ID,
 	}
 
 	newData, err := s.Repository.CreateOne(
@@ -58,7 +58,7 @@ func (s *ExternalShopService) GetExternalShopById(externalShopId int64) (*model.
 	return externalShop, nil
 }
 
-func (s *ExternalShopService) GetExternalShopsByShopId(shopId int64, limit int32, offset int32) (interface{}, error) {
+func (s *ExternalShopService) GetExternalShopsByShopId(shopId int64, limit int64, offset int64) (interface{}, error) {
 	externalShops, err := s.Repository.GetByShopId(s.Repository.GetDefaultDatabase().Db, shopId, limit, offset)
 	if err != nil {
 		return nil, err

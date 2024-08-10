@@ -1,23 +1,13 @@
 "use client";
 
-import { DataGrid as MuiDataGrid } from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid, DataGridProps } from "@mui/x-data-grid";
 import React from "react";
 
-interface IDataGridProps {
-  rows: any;
-  columns: any;
-  getRowId?: (row: any) => string;
-}
-
-export default function DataGrid({ rows, columns, getRowId }: IDataGridProps) {
-  console.log(rows);
+const DataGrid = (props: DataGridProps) => {
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <MuiDataGrid
-        checkboxSelection
-        rows={rows}
-        columns={columns}
-        getRowId={getRowId}
+        {...props}
         sx={{
           border: 0,
           "& .MuiDataGrid-columnHeaders *": {
@@ -43,6 +33,8 @@ export default function DataGrid({ rows, columns, getRowId }: IDataGridProps) {
             alignItems: "center",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            minHeight: 56,
+            maxHeight: 80,
           },
           "& .MuiCheckbox-root": {
             color: "inherit",
@@ -53,8 +45,9 @@ export default function DataGrid({ rows, columns, getRowId }: IDataGridProps) {
         }}
         autosizeOnMount={true}
         autosizeOptions={{
-          columns: columns.map((column: any) => column.field),
-          includeHeaders: true,
+          columns: props.columns.map((column: any) => column.field),
+          //includeHeaders: true,
+          //includeOutliers: true,
           expand: true,
         }}
         getRowSpacing={(params) => {
@@ -68,4 +61,6 @@ export default function DataGrid({ rows, columns, getRowId }: IDataGridProps) {
       />
     </div>
   );
-}
+};
+
+export default DataGrid;

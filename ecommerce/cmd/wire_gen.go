@@ -32,12 +32,14 @@ func initServer() server.IServer {
 	v := service.ProvideEcommerceServices(iShopifyService)
 	iProductService := service.NewProductService(iProductRepository, v)
 	iProductHandler := handler.NewProductHandler(iProductService)
+	iVariantService := service.NewVariantService(iVariantRepository, v)
+	iVariantHandler := handler.NewVariantHandler(iProductService, iVariantService)
 	iShopifyHandler := handler.NewShopifyHandler(iShopifyService)
 	iExternalShopService := service.NewExternalShopService(iExternalShopRepository, v)
 	iExternalShopHandler := handler.NewExternalShopHandler(iExternalShopService)
 	iExternalProductService := service.NewExternalProductService(v, iExternalShopService)
 	iExternalProductHandler := handler.NewExternalProductHandler(iExternalProductService)
-	handlers := handler.ProvideHandlers(iProductHandler, iShopifyHandler, iExternalShopHandler, iExternalProductHandler)
+	handlers := handler.ProvideHandlers(iProductHandler, iVariantHandler, iShopifyHandler, iExternalShopHandler, iExternalProductHandler)
 	iServer := server.NewServer(config, handlers)
 	return iServer
 }

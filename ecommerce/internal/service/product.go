@@ -2,11 +2,14 @@ package service
 
 import (
 	"ecommerce/api/model"
+	internalModal "ecommerce/internal/model"
 	"ecommerce/internal/repository"
 	"errors"
 )
 
 type IProductService interface {
+	GetProductById(productId int64) (*internalModal.Product, error)
+	GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
 	CreateProductsVariantsFromExternalProducts(productsVariantsList *model.CreateProductsVariantsRequest) error
 }
 
@@ -21,6 +24,15 @@ func NewProductService(productRepository repository.IProductRepository, ecommerc
 		ProductRepository: productRepository,
 		EcommerceService:  ecommerceService,
 	}
+}
+
+func (s *ProductService) GetProductById(productId int64) (*internalModal.Product, error) {
+	return s.ProductRepository.GetById(s.ProductRepository.GetDefaultDatabase().Db, productId)
+}
+
+func (s *ProductService) GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error) {
+	return s.ProductRepository.GetByShopId(s.ProductRepository.GetDefaultDatabase().Db, shopId, limit, offset)
+
 }
 
 func (s *ProductService) CreateProductsVariantsFromExternalProducts(productsVariantsList *model.CreateProductsVariantsRequest) error {

@@ -20,6 +20,7 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import { useGetExternalShops } from "@/hook/external_shop";
+import { syncExternalProducts } from "@/api/external_shop";
 import CardHeader from "@mui/material/CardHeader";
 
 const columns: GridColDef[] = [
@@ -77,10 +78,18 @@ const columns: GridColDef[] = [
   {
     field: "actions",
     headerName: "",
-    renderCell: () => (
+    renderCell: (data) => (
       <Stack direction="row" spacing={0.5}>
         <VisibilityOutlined />
-        <CachedOutlined />
+        <CachedOutlined
+          onClick={async () => {
+            try {
+              const res = await syncExternalProducts(data.row.id_external_shop);
+            } catch (error) {
+              console.log(error);
+            }
+          }}
+        />
         <DeleteOutlined />
       </Stack>
     ),
@@ -90,24 +99,22 @@ const columns: GridColDef[] = [
 export default function Page() {
   const [open, setOpen] = useState(false);
   const { data, error } = useGetExternalShops(process.env.NEXT_PUBLIC_SHOP_ID);
-  //console.log(data, error);
+  console.log(data, error);
   return (
-    <>
-      <>
-        <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="secondary">
-            Đồng bộ
-          </Button>
-          <Button variant="contained" onClick={() => setOpen(true)}>
-            Liên kết cửa hàng
-          </Button>
-        </Stack>
-        <DataGrid
-          rows={data}
-          columns={columns}
-          getRowId={(row) => row.id_external_shop}
-        />
-      </>
+    <Stack gap={2}>
+      <Stack direction="row" spacing={2}>
+        <Button variant="contained" color="secondary">
+          Đồng bộ
+        </Button>
+        <Button variant="contained" onClick={() => setOpen(true)}>
+          Liên kết cửa hàng
+        </Button>
+      </Stack>
+      <DataGrid
+        rows={data}
+        columns={columns}
+        getRowId={(row) => row.id_external_shop}
+      />
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -130,6 +137,6 @@ export default function Page() {
           </ListItem>
         </List>
       </Dialog>
-    </>
+    </Stack>
   );
 }

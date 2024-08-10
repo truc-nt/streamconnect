@@ -12,6 +12,7 @@ import (
 
 var HandlersSet = wire.NewSet(
 	handler.NewProductHandler,
+	handler.NewVariantHandler,
 	handler.NewShopifyHandler,
 	handler.NewExternalShopHandler,
 	handler.NewExternalProductHandler,
@@ -24,6 +25,7 @@ var ServicesSet = wire.NewSet(
 	service.ProvideEcommerceServices,
 
 	service.NewProductService,
+	service.NewVariantService,
 	service.NewExternalShopService,
 	service.NewExternalShopAuthService,
 	service.NewExternalProductService,

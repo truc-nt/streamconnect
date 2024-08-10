@@ -9,6 +9,7 @@ import (
 
 type Handlers struct {
 	ProductHandler         IProductHandler
+	VariantHandler         IVariantHandler
 	ShopifyHandler         IShopifyHandler
 	ExternalShopHandler    IExternalShopHandler
 	ExternalProductHandler IExternalProductHandler
@@ -16,12 +17,14 @@ type Handlers struct {
 
 func ProvideHandlers(
 	productHandler IProductHandler,
+	variantHandler IVariantHandler,
 	shopifyHandler IShopifyHandler,
 	externalShopHandler IExternalShopHandler,
 	externalProductHandler IExternalProductHandler,
 ) *Handlers {
 	return &Handlers{
 		ProductHandler:         productHandler,
+		VariantHandler:         variantHandler,
 		ShopifyHandler:         shopifyHandler,
 		ExternalShopHandler:    externalShopHandler,
 		ExternalProductHandler: externalProductHandler,

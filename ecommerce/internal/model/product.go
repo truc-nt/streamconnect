@@ -8,7 +8,7 @@
 package model
 
 import (
-	"github.com/jackc/pgx/pgtype"
+	"github.com/jackc/pgtype"
 	"time"
 )
 
@@ -19,7 +19,7 @@ type Product struct {
 	Description  *string      `json:"description" xml:"description"`
 	Status       string       `json:"status" xml:"status"`
 	Stock        *int32       `json:"stock" xml:"stock"`
-	OptionTitles pgtype.JSONB `json:"option_titles" xml:"option_titles"`
+	OptionTitles pgtype.JSON `json:"option_titles" xml:"option_titles"`
 	CreatedAt    time.Time    `json:"created_at" xml:"created_at"`
 	UpdatedAt    time.Time    `json:"updated_at" xml:"updated_at"`
 }

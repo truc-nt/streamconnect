@@ -1,19 +1,14 @@
 import axios from "./axios";
 
 interface IExternalProduct {
-  id_external_product_shopify: number;
-  fk_external_shop: number;
+  external_product_external_id: number;
+  external_product_name: string;
   fk_product: number;
-  fk_variant: number;
-  shopify_product_id: number;
-  shopify_variant_id: number;
-  name: string;
-  sku: string;
-  stock: number;
-  option: Record<string, string>;
-  price: number;
+  product_name: string;
+  total_stock: number;
+  min_price: number;
+  max_price: number;
   image_url: string;
-  created_at: string;
   updated_at: string;
 }
 
@@ -21,4 +16,8 @@ export const getExternalProducts = async (externalShopId: number) => {
   return axios.get<IExternalProduct[]>(
     `/external_shops/${externalShopId}/external_products`,
   );
+};
+
+export const syncExternalProducts = async (externalShopId: number) => {
+  return axios.get(`/external_shops/${externalShopId}/sync_external_products`);
 };

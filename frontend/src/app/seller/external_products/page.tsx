@@ -18,32 +18,31 @@ import { IExternalShop } from "@/api/shop";
 
 const columns: GridColDef[] = [
   {
-    field: "name",
+    field: "external_product_name",
     headerName: "Tên",
+    width: 300,
   },
   {
-    field: "sku",
-    headerName: "Sku",
+    field: "product_name",
+    headerName: "Tên hệ thống",
   },
   {
-    field: "fk_variant",
-    headerName: "Sản phẩm trong hệ thống",
-  },
-  {
-    field: "status",
-    headerName: "Trạng thái",
-  },
-  {
-    field: "price",
-    headerName: "Giá",
-  },
-  {
-    field: "quantity",
+    field: "total_stock",
     headerName: "Số lượng",
   },
   {
-    field: "updatedAt",
+    field: "",
+    headerName: "Giá",
+    renderCell: ({ row }) => (
+      <span>
+        {row.min_price} - {row.max_price}
+      </span>
+    ),
+  },
+  {
+    field: "updated_at",
     headerName: "Ngày cập nhật",
+    renderCell: ({ value }) => new Date(value).toLocaleString(),
   },
   {
     field: "actions",
@@ -89,7 +88,7 @@ export default function Page() {
 
   if (isLoading) return <></>;
   return (
-    <>
+    <Stack gap={2}>
       <Autocomplete
         value={externalShop}
         onChange={(event: any, newValue: any) => {
@@ -129,9 +128,9 @@ export default function Page() {
         <DataGrid
           rows={externalProducts}
           columns={columns}
-          getRowId={(row) => row.id_external_product_shopify}
+          getRowId={(row) => row.external_product_external_id}
         />
       )}
-    </>
+    </Stack>
   );
 }

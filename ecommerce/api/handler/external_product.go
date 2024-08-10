@@ -5,6 +5,7 @@ import (
 	"ecommerce/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type IExternalProductHandler interface {
@@ -40,5 +41,20 @@ func (h *ExternalProductHandler) GetExternalProductsByExternalShopId(ctx *gin.Co
 		h.handleFailed(ctx, err)
 		return
 	}
-	h.handleSuccessGet(ctx, products)
+
+	var res []*model.GetExternalProductsByExternalShopIdData
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result: &res,
+	})
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := decoder.Decode(products); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, res)
 }

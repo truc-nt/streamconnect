@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -17,6 +18,7 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx"
 	lop "github.com/samber/lo/parallel"
 )
@@ -32,7 +34,8 @@ type IShopifyService interface {
 
 	ConnectNewExternalShopShopify(shopDomain string, authorizeCode string) error
 	SyncProducts(externalShopId int64) error
-	GetExternalProductsByExternalShopId(externalShopId int64, limit int32, offset int32) (interface{}, error)
+	GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error)
+	GetExternalProductByVariantIds(variantIds []int64) (interface{}, error)
 }
 
 type ShopifyService struct {
@@ -65,7 +68,7 @@ func NewShopifyService(
 }
 
 func (s *ShopifyService) GetEcommerceId() int16 {
-	return constants.SHOPIFY
+	return constants.SHOPIFY_ID
 }
 
 func (s *ShopifyService) getShopOriginFromShopDomain(shopDomain string) string {
@@ -112,7 +115,7 @@ func (s *ShopifyService) createExternalShopShopify(shopName string, accessToken 
 			model.ExternalShop{
 				Name:        shopName,
 				FkShop:      1,
-				FkEcommerce: constants.SHOPIFY,
+				FkEcommerce: constants.SHOPIFY_ID,
 			})
 		var pgErr pgx.PgError
 		if errors.As(err, &pgErr) {
@@ -191,8 +194,8 @@ func (s *ShopifyService) SyncProducts(externalShopId int64) error {
 	return nil
 }
 
-func (s *ShopifyService) GetExternalProductsByExternalShopId(externalShopId int64, limit int32, offset int32) (interface{}, error) {
-	externalProducts, err := s.ExternalProductShopifyRepository.GetByExternalShopId(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, externalShopId, limit, offset)
+func (s *ShopifyService) GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error) {
+	externalProducts, err := s.ExternalProductShopifyRepository.GetExternalProductsByExternalShopId(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, externalShopId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -216,6 +219,11 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 				return nil, err
 			}
 
+			if externalProducts[0].FkProduct != nil {
+				fmt.Printf("shopify priduct id %d already been created", _shopifyProductId)
+				continue
+			}
+
 			newProduct, err := s.ProductRepository.CreateOne(
 				db,
 				postgres.ColumnList{
@@ -231,6 +239,8 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 				return nil, err
 			}
 
+			var options = make(map[string][]string)
+
 			for _, externalProduct := range externalProducts {
 				newVariant, err := s.VariantRepository.CreateOne(
 					db,
@@ -240,6 +250,7 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 						table.Variant.Sku,
 						table.Variant.Stock,
 						table.Variant.Price,
+						table.Variant.Option,
 					},
 					model.Variant{
 						FkProduct: newProduct.IDProduct,
@@ -247,10 +258,21 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 						Sku:       externalProduct.Sku,
 						Stock:     externalProduct.Stock,
 						Price:     externalProduct.Price,
+						Option:    externalProduct.Option,
 					},
 				)
+
 				if err != nil {
 					return nil, err
+				}
+
+				var variantOption map[string]string
+				if err := json.Unmarshal(externalProduct.Option.Bytes, &variantOption); err != nil {
+					return nil, err
+				}
+
+				for key, value := range variantOption {
+					options[key] = append(options[key], value)
 				}
 
 				//updateProductVariantList = append(updateProductVariantList, []int64{newProduct.IDProduct, newVariant.IDVariant, externalProduct.ShopifyVariantID})
@@ -259,6 +281,24 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 					return nil, err
 				}
 			}
+
+			marshalOptions, err := json.Marshal(options)
+			if err != nil {
+				return nil, err
+			}
+
+			s.ProductRepository.UpdateById(
+				db,
+				postgres.ColumnList{table.Product.OptionTitles},
+				model.Product{
+					IDProduct: newProduct.IDProduct,
+					OptionTitles: pgtype.JSON{
+						Bytes:  marshalOptions,
+						Status: pgtype.Present,
+					},
+				},
+			)
+
 		}
 
 		return nil, nil
@@ -269,4 +309,12 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 	}
 
 	return nil
+}
+
+func (s *ShopifyService) GetExternalProductByVariantIds(variantIds []int64) (interface{}, error) {
+	externalProducts, err := s.ExternalProductShopifyRepository.GetByVariantIds(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, variantIds)
+	if err != nil {
+		return nil, err
+	}
+	return externalProducts, nil
 }

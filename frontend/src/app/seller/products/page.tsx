@@ -1,24 +1,20 @@
 "use client";
 import DataGrid from "@/components/core/DataGrid";
 import { GridColDef } from "@mui/x-data-grid";
-import { Stack, Autocomplete, TextField, Box } from "@mui/material";
+import { Stack, Autocomplete, TextField, Box, Button } from "@mui/material";
 
 import {
   VisibilityOutlined,
   DeleteOutlined,
   CachedOutlined,
 } from "@mui/icons-material";
-import { useGetExternalShops } from "@/hook/external_shop";
+import { useGetProducts } from "@/hook/shop";
 import { useState } from "react";
 
 const columns: GridColDef[] = [
   {
     field: "name",
     headerName: "Tên",
-  },
-  {
-    field: "sku",
-    headerName: "Sku",
   },
   {
     field: "status",
@@ -29,11 +25,11 @@ const columns: GridColDef[] = [
     headerName: "Giá",
   },
   {
-    field: "quantity",
+    field: "stock",
     headerName: "Số lượng",
   },
   {
-    field: "updatedAt",
+    field: "updated_at",
     headerName: "Ngày cập nhật",
   },
   {
@@ -49,60 +45,19 @@ const columns: GridColDef[] = [
   },
 ];
 
-const rows = [
-  {
-    id: 1,
-    name: "Tên 1",
-    sku: "Sku 1bcgivegfvievierbvivribervibeivbeviebvierivribvribvibbirvbirvivribibvribrvbivbibvj",
-    status: "Đang hoạt đô",
-  },
-  {
-    id: 2,
-    name: "Tên 2",
-    sku: "Sku 2",
-  },
-  {
-    id: 3,
-    name: "Tên 3",
-    sku: "Sku 3",
-  },
-  {
-    id: 4,
-    name: "Tên 4",
-    sku: "Sku 4",
-  },
-  {
-    id: 5,
-    name: "Tên 5",
-    sku: "Sku 5",
-  },
-  /*{
-    id: 6,
-    name: "Tên 6",
-    sku: "Sku 6",
-  },
-  {
-    id: 7,
-    name: "Tên 7",
-    sku: "Sku 7",
-  },
-  {
-    id: 8,
-    name: "Tên 8",
-    sku: "Sku 8",
-  },
-  {
-    id: 9,
-    name: "Tên 9",
-    sku: "Sku 9",
-  },
-  {
-    id: 10,
-    name: "Tên 10",
-    sku: "Sku 10",
-  },*/
-];
-
 export default function Page() {
-  return <DataGrid rows={[]} columns={[]} />;
+  const { data, error } = useGetProducts(process.env.NEXT_PUBLIC_SHOP_ID);
+
+  return (
+    <Stack gap={2}>
+      <Stack direction="row" spacing={2}>
+        <Button variant="contained">Thêm sản phẩm</Button>
+      </Stack>
+      <DataGrid
+        rows={data}
+        columns={columns}
+        getRowId={(row) => row.id_product}
+      />
+    </Stack>
+  );
 }

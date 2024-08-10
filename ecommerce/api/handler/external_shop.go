@@ -30,12 +30,12 @@ func (h *ExternalShopHandler) GetExternalShopsByShopId(ctx *gin.Context) {
 		return
 	}
 
-	var queryParams *model.GetExternalShopsByShopIdParam
-	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
+	var queryParam *model.GetExternalShopsByShopIdParam
+	if err := ctx.ShouldBindQuery(&queryParam); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-	shops, err := h.Service.GetExternalShopsByShopId(shopId, queryParams.Limit, queryParams.Offset)
+	shops, err := h.Service.GetExternalShopsByShopId(shopId, queryParam.Limit, queryParam.Offset)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return

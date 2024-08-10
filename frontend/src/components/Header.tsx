@@ -11,12 +11,15 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Stack,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 
 interface HeaderProps {
   showName?: boolean;
@@ -35,16 +38,11 @@ const Header: React.FC<HeaderProps> = ({ showName }) => {
     setAnchorEl(null);
   };
 
-  const handleCartClick = () => {
-    router.push("/cart");
-  };
-
-  const handleNameClick = () => {
-    router.push("/");
-  };
-
   return (
-    <AppBar position="static" sx={{ backgroundColor: "transparent" }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundColor: "transparent", boxShadow: "none" }}
+    >
       <Toolbar
         sx={{
           display: "flex",
@@ -88,66 +86,89 @@ const Header: React.FC<HeaderProps> = ({ showName }) => {
             />
           </Box>
         </Box>
-        {/* <Button
-          sx={{
-            height: 40,
-            backgroundColor: '#08D2ED',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: '#06b1cc',
-            },
-            px: 2
-          }}
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          alignItems="center"
         >
-          Đăng nhập
-        </Button> */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <IconButton sx={{ color: "white" }}>
-            <TelegramIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <NotificationsIcon />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <ShoppingCartIcon />
-          </IconButton>
-          <IconButton onClick={handleMenuOpen} sx={{ padding: 0 }}>
-            <Avatar alt="User Avatar" src="/path-to-avatar.jpg" />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: {
-                //backgroundColor: "#282A39",
-                color: "#F4F4F5",
-                width: "175px",
-                mt: 1.5,
-                "& .MuiMenuItem-root": {
-                  fontSize: "15px",
-                  marginX: "8px",
-                  borderRadius: "4px",
-                  "&:hover": {
-                    backgroundColor: "#535561",
+          {true ? (
+            <>
+              <IconButton>
+                <TelegramIcon />
+              </IconButton>
+              <IconButton>
+                <NotificationsIcon />
+              </IconButton>
+              <IconButton onClick={() => router.push("/cart")}>
+                <ShoppingCartIcon />
+              </IconButton>
+              <IconButton
+                onClick={(event: React.MouseEvent<HTMLElement>) => {
+                  setAnchorEl(event.currentTarget);
+                }}
+                sx={{ padding: 0 }}
+              >
+                <Avatar alt="User Avatar" src="/path-to-avatar.jpg" />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() => setAnchorEl(null)}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                /*sx={{
+                  width: "300px",
+                  //mt: 1.5,
+                  py: 10,
+                  "& .MuiMenuItem-root": {
+                    fontSize: "15px",
+                    marginX: "20px",
+                    borderRadius: "4px",
+                    "&:hover": {
+                      backgroundColor: "#535561",
+                    },
+                    "&.Mui-selected": {
+                      backgroundColor: "#535561",
+                    },
                   },
-                  "&.Mui-selected": {
-                    backgroundColor: "#535561",
+                }}*/
+                PaperProps={{
+                  sx: {
+                    width: "175px",
+                    mt: 1.5,
+                    "& .MuiMenuItem-root": {
+                      fontSize: "15px",
+                      marginX: "8px",
+                      borderRadius: "4px",
+                    },
                   },
-                },
-                "& .MuiDivider-root": {
-                  //backgroundColor: "#F4F4F5",
-                },
-              },
-            }}
-          >
-            <MenuItem onClick={handleMenuClose}>Hồ sơ</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Livestream</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Cửa hàng</MenuItem>
-            <Divider />
-            <MenuItem onClick={handleMenuClose}>Đăng xuất</MenuItem>
-          </Menu>
-        </Box>
+                }}
+              >
+                <MenuItem onClick={handleMenuClose}>Hồ sơ</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Livestream</MenuItem>
+                <MenuItem onClick={() => router.push("/seller")}>
+                  Cửa hàng
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleMenuClose}>Đăng xuất</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Button variant="contained" color="secondary">
+                Đăng kí
+              </Button>
+              <Button variant="contained">Đăng nhập</Button>
+            </>
+          )}
+        </Stack>
       </Toolbar>
     </AppBar>
   );

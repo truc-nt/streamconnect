@@ -10,8 +10,10 @@ import {
   Badge,
   IconButton,
 } from "@mui/material";
-import ReactPlayer from "react-player";
+import dynamic from "next/dynamic";
 import { Fullscreen, Visibility, VolumeOff } from "@mui/icons-material";
+
+const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
 
 const formatViews = (views: number) => {
   return views.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");

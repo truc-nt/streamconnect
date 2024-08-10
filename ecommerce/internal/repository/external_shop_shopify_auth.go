@@ -36,6 +36,11 @@ func (r *ExternalShopShopifyAuthRepository) CreateMany(db qrm.Queryable, columnL
 	return r.insertMany(db, stmt)
 }
 
+func (r *ExternalShopShopifyAuthRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalShopShopifyAuth) (*model.ExternalShopShopifyAuth, error) {
+	stmt := table.ExternalShopShopifyAuth.INSERT(columnList).MODELS(data).RETURNING(table.ExternalShopShopifyAuth.AllColumns)
+	return r.update(db, stmt)
+}
+
 func (r *ExternalShopShopifyAuthRepository) GetById(db qrm.Queryable, id int64) (*model.ExternalShopShopifyAuth, error) {
 	stmt := table.ExternalShopShopifyAuth.SELECT(table.ExternalShopShopifyAuth.AllColumns).WHERE(table.ExternalShopShopifyAuth.IDExternalShopShopifyAuth.EQ(postgres.Int(int64(id))))
 	var data model.ExternalShopShopifyAuth

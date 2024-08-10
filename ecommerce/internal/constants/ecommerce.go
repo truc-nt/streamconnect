@@ -1,5 +1,6 @@
 package constants
 
 const (
-	SHOPIFY = 1
+	SHOPIFY_ID   = 1
+	SHOPIFY_NAME = "Shopify"
 )

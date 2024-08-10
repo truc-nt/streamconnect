@@ -39,7 +39,7 @@ export default function RootLayout({
                     py: "20px",
                   }}
                 >
-                  <Stack gap={2}>{children}</Stack>
+                  {children}
                 </Container>
               </Grid>
             </Grid>
