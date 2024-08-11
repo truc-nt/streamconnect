@@ -1,48 +1,53 @@
 package cmd
 
 import (
-	"ecommerce/api/handlers"
-	"ecommerce/internal/adapters"
-	"ecommerce/internal/database"
-	"ecommerce/internal/repositories"
-	"ecommerce/internal/services"
+	"ecommerce/api/handler"
+	"ecommerce/internal/adapter"
+	"ecommerce/internal/repository"
+	"ecommerce/internal/service"
 	"fmt"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
 var HandlersSet = wire.NewSet(
-	handlers.NewShopifyHandler,
-	handlers.NewExternalShopHandler,
+	handler.NewProductHandler,
+	handler.NewVariantHandler,
+	handler.NewShopifyHandler,
+	handler.NewExternalShopHandler,
+	handler.NewExternalProductHandler,
+	handler.NewLivestreamHandler,
+
+	handler.ProvideHandlers,
 )
 
 var ServicesSet = wire.NewSet(
-	services.NewShopifyService,
-	services.NewExternalShopService,
-	services.NewExternalShopAuthService,
-	services.ProvideEcommerceServices,
+	service.NewShopifyService,
+	service.ProvideEcommerceServices,
+
+	service.NewProductService,
+	service.NewVariantService,
+	service.NewExternalShopService,
+	service.NewExternalShopAuthService,
+	service.NewExternalProductService,
+	service.NewLivestreamService,
 )
 
 var RepositoriesSet = wire.NewSet(
-	repositories.NewExternalShopRepository,
-	repositories.NewShopifyExternalShopAuthRepository,
+	repository.NewProductRepository,
+	repository.NewVariantRepository,
+	repository.NewExternalShopRepository,
+	repository.NewExternalShopShopifyAuthRepository,
+	repository.NewExternalVariantRepository,
+
+	repository.NewLivestreamRepository,
+	repository.NewLivestreamProductRepository,
+	repository.NewLivestreamExternalVariantRepository,
 )
 
 var AdapterSet = wire.NewSet(
-	adapters.NewShopifyAdapter,
+	adapter.NewShopifyAdapter,
 )
-
-type Server struct {
-	HttpServer *http.Server
-	Engine     *gin.Engine
-
-	Handlers *handlers.Handlers
-	Services *services.Services
-
-	PostgresDatabase *database.PostgresqlDatabase
-}
 
 func runServer() {
 	//var err error
