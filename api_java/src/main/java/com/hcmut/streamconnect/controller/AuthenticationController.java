@@ -32,6 +32,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(loginResponse);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<Account> register(@RequestBody Account account) {
+        Account registeredAccount = authenticationService.register(account);
+        return ResponseEntity.ok(registeredAccount);
+    }
+
     public static class LoginUserDto {
         private String username;
         private String password;

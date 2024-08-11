@@ -4,11 +4,14 @@ import com.hcmut.streamconnect.model.entity.Account;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.util.Assert;
 
 public interface AccountRepository extends JpaRepository<Account, Long>{
 
     Optional<Account> findByUsername(String username);
+
+    @Query("SELECT a FROM Account a WHERE a.username = ?1 OR a.email = ?2")
     List<Account> findByUsernameOrEmail(String username, String email);
 
     default Optional<Account> findByUsernameOrEmail(String usernameOrEmail) {

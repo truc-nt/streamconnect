@@ -1,5 +1,7 @@
 package com.hcmut.streamconnect.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +34,7 @@ public class Account implements Serializable {
     @Column(name = "full_name")
     private String fullName;
 
+    @JsonIgnore
     @Column(name = "hashed_password")
     private String hashedPassword;
 
@@ -39,6 +42,7 @@ public class Account implements Serializable {
     @Transient
     private String password;
 
+    @JsonIgnore
     @Column(name = "role")
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "account_roles", joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"))
@@ -90,10 +94,12 @@ public class Account implements Serializable {
         this.hashedPassword = hashedPassword;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
