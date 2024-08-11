@@ -6,6 +6,8 @@ import { Grid, Container, Stack } from "@mui/material";
 import StoreProvider from "./store-provider";
 import ThemeProvider from "./theme-provider";
 import Sidebar from "@/components/core/Sidebar";
+import LocalizationProvider from "./localization-provider";
+import AlertProvider from "./alert_provider";
 
 export const metadata = {
   title: "Create Next App",
@@ -22,27 +24,36 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <StoreProvider>
-            <Grid container>
-              <Grid
-                item
-                xs={2}
-                md={2}
-                style={{ position: "sticky", minHeight: "100vh" }}
-              >
-                <Sidebar />
-              </Grid>
-              <Grid item xs={10} md={10} style={{ backgroundColor: "#1C1C1C" }}>
-                <Header />
-                <Container
-                  maxWidth="xl"
-                  sx={{
-                    py: "20px",
-                  }}
-                >
-                  {children}
-                </Container>
-              </Grid>
-            </Grid>
+            <LocalizationProvider>
+              <AlertProvider>
+                <Grid container>
+                  <Grid
+                    item
+                    xs={2}
+                    md={2}
+                    style={{ position: "sticky", minHeight: "100vh" }}
+                  >
+                    <Sidebar />
+                  </Grid>
+                  <Grid
+                    item
+                    xs={10}
+                    md={10}
+                    style={{ backgroundColor: "#1C1C1C" }}
+                  >
+                    <Header />
+                    <Container
+                      maxWidth="xl"
+                      sx={{
+                        py: "20px",
+                      }}
+                    >
+                      {children}
+                    </Container>
+                  </Grid>
+                </Grid>
+              </AlertProvider>
+            </LocalizationProvider>
           </StoreProvider>
         </ThemeProvider>
       </body>

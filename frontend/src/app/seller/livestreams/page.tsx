@@ -20,9 +20,18 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import { useGetExternalShops } from "@/hook/external_shop";
-import { syncExternalProducts } from "@/api/external_shop";
+import { syncExternalVariants } from "@/api/external_shop";
 import CardHeader from "@mui/material/CardHeader";
+import Link from "next/link";
 
 export default function Page() {
-  return <></>;
+  return (
+    <Stack gap={2}>
+      <Stack direction="row" spacing={2}>
+        <Link href="/seller/livestreams/create">
+          <Button variant="contained">Thêm livestream</Button>
+        </Link>
+      </Stack>
+    </Stack>
+  );
 }

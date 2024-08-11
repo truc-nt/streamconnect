@@ -65,7 +65,7 @@ func (h *ProductHandler) CreateProductsVariants(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Service.CreateProductsVariantsFromExternalProducts(createProductsRequest); err != nil {
+	if err := h.Service.CreateProductVariantsFromExternalProducts(createProductsRequest); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

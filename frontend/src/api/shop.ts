@@ -24,7 +24,7 @@ export interface IProduct {
   min_price: number;
   max_price: number;
   total_stock: number;
-  option_titles: Record<string, string[]>;
+  option: Record<string, string[]>;
   created_at: string;
   updated_at: string;
 }

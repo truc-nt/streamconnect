@@ -14,6 +14,9 @@ import { useGetProducts } from "@/hook/shop";
 import { getVariants, IVariant } from "@/api/product";
 import { IProduct } from "@/api/shop";
 import ProductInfo from "@/components/product/ProductInfo";
+import { useAppDispatch } from "@/store/store";
+import { setChosenLivestreamVariants } from "@/store/livestream_create";
+import { setOpen } from "@/store/alert";
 
 interface IProductItem extends IProduct {
   isSelected?: boolean;
@@ -24,12 +27,12 @@ interface ILivestreamVariant {
   idVariant: number;
   name: string;
   option: Record<string, string>;
-  externalProducts: IExternalProduct[];
+  externalVariants: IExternalVariant[];
 }
 
-interface IExternalProduct {
+interface IExternalVariant {
   idVariant: number;
-  idExternalProduct: number;
+  idExternalVariant: number;
   idEcommerce: number;
   price: number;
   stock: number;
@@ -41,6 +44,12 @@ const LivestreamVariants = () => {
     ILivestreamVariant[]
   >([]);
   const [openChangePage, setChangePage] = useState(false);
+  const distpatch = useAppDispatch();
+
+  const handleSubmit = () => {
+    distpatch(setChosenLivestreamVariants(livestreamVariants));
+    console.log(livestreamVariants);
+  };
 
   return (
     <Stack gap={2}>
@@ -55,10 +64,9 @@ const LivestreamVariants = () => {
           </Button>
           <LivestreamVariantDataGrid rows={livestreamVariants} />
           <Stack direction="row" gap={1} sx={{ marginLeft: "auto" }}>
-            <Button variant="contained" color="secondary">
-              Quay lại
+            <Button variant="contained" onClick={handleSubmit}>
+              Tiếp theo
             </Button>
-            <Button variant="contained">Tiếp tục</Button>
           </Stack>
         </>
       ) : (
@@ -86,10 +94,10 @@ const LivestreamVariantDataGrid = ({
 }) => {
   const apiRef = useGridApiRef();
   useEffect(() => {
-    apiRef.current.autosizeColumns({
+    /*apiRef.current.autosizeColumns({
       columns: columns.map((column: any) => column.field),
       expand: true,
-    });
+    });*/
   }, [rows]);
   const columns: GridColDef<ILivestreamVariant>[] = [
     {
@@ -110,13 +118,24 @@ const LivestreamVariantDataGrid = ({
     {
       field: "price",
       headerName: "Giá",
+      renderCell: ({ row }) => (
+        <Stack direction="row" spacing={1}>
+          {row.externalVariants.map((externalProduct, index) => (
+            <Chip
+              key={index}
+              label={`Shopify: ${externalProduct.price}`}
+              size="small"
+            />
+          ))}
+        </Stack>
+      ),
     },
     {
       field: "stock",
       headerName: "Số lượng đã chọn",
       renderCell: ({ row }) => (
         <Stack direction="row" spacing={1}>
-          {row.externalProducts.map((externalProduct, index) => (
+          {row.externalVariants.map((externalProduct, index) => (
             <Chip
               key={index}
               label={`Shopify: ${externalProduct.quantity}`}
@@ -133,6 +152,7 @@ const LivestreamVariantDataGrid = ({
       rows={rows}
       columns={columns}
       getRowId={({ idVariant }) => `${idVariant}`}
+      disableRowSelectionOnClick
     />
   );
 };
@@ -154,7 +174,7 @@ const LivestreamVariantsChange = ({
   const [chosenVariantOption, setChosenVariantOption] = useState<
     Record<string, string>
   >({});
-  const [externalProducts, setExternalProducts] = useState<IExternalProduct[]>(
+  const [externalProducts, setExternalProducts] = useState<IExternalVariant[]>(
     [],
   );
 
@@ -162,7 +182,7 @@ const LivestreamVariantsChange = ({
     if (
       !product ||
       Object.keys(chosenVariantOption).length <
-        Object.keys(product?.option_titles).length
+        Object.keys(product?.option).length
     ) {
       return;
     }
@@ -186,16 +206,16 @@ const LivestreamVariantsChange = ({
     setExternalProducts(
       filteredVariants.external_products.map((externalProduct) => ({
         idVariant: filteredVariants.id_variant,
-        idExternalProduct: externalProduct.id_external_product,
+        idExternalVariant: externalProduct.id_external_product,
         idEcommerce: externalProduct.id_ecommerce,
         ecommerce: externalProduct.ecommerce,
         option: filteredVariants.option,
         stock: externalProduct.stock,
         price: externalProduct.price,
         quantity:
-          fileteredLivestreamVariants?.externalProducts.find(
+          fileteredLivestreamVariants?.externalVariants.find(
             (item) =>
-              item.idExternalProduct === externalProduct.id_external_product,
+              item.idExternalVariant === externalProduct.id_external_product,
           )?.quantity || 0,
       })),
     );
@@ -219,7 +239,7 @@ const LivestreamVariantsChange = ({
   };
 
   const handleChangeLivestreamVariantQuantity = (
-    externalProduct: IExternalProduct,
+    externalProduct: IExternalVariant,
     quantity: string,
   ) => {
     const parsedQuantity = parseInt(quantity, 10);
@@ -235,22 +255,22 @@ const LivestreamVariantsChange = ({
     if (existingLivestreamVariant > -1) {
       const existingExternalProduct = livestreamVariants[
         existingLivestreamVariant
-      ].externalProducts.findIndex(
+      ].externalVariants.findIndex(
         (item) =>
-          item.idExternalProduct === externalProduct.idExternalProduct &&
+          item.idExternalVariant === externalProduct.idExternalVariant &&
           item.idEcommerce === externalProduct.idEcommerce,
       );
 
       if (existingExternalProduct > -1) {
-        livestreamVariants[existingLivestreamVariant].externalProducts[
+        livestreamVariants[existingLivestreamVariant].externalVariants[
           existingExternalProduct
         ].quantity = parsedQuantity;
         setLivestreamVariants([...livestreamVariants]);
         return;
       }
 
-      livestreamVariants[existingLivestreamVariant].externalProducts = [
-        ...livestreamVariants[existingLivestreamVariant].externalProducts,
+      livestreamVariants[existingLivestreamVariant].externalVariants = [
+        ...livestreamVariants[existingLivestreamVariant].externalVariants,
         {
           ...externalProduct,
           quantity: parsedQuantity,
@@ -265,7 +285,7 @@ const LivestreamVariantsChange = ({
           idVariant: externalProduct.idVariant,
           name: product.name,
           option: chosenVariantOption,
-          externalProducts: [
+          externalVariants: [
             {
               ...externalProduct,
               quantity: parsedQuantity,
@@ -283,7 +303,7 @@ const LivestreamVariantsChange = ({
           <Grid item xs={12} sm={6}>
             <ProductInfo
               name={product.name}
-              option={product.option_titles}
+              option={product.option}
               chosenOption={chosenVariantOption}
               handleChangeOption={handleChangeOption}
             />
@@ -320,15 +340,14 @@ const ExternalProductDataGrid = ({
   setRows,
   handleChangeLivestreamVariantQuantity,
 }: {
-  rows: IExternalProduct[];
-  setRows: React.Dispatch<React.SetStateAction<IExternalProduct[]>>;
+  rows: IExternalVariant[];
+  setRows: React.Dispatch<React.SetStateAction<IExternalVariant[]>>;
   handleChangeLivestreamVariantQuantity: (
-    externalProduct: IExternalProduct,
+    externalProduct: IExternalVariant,
     quantity: string,
   ) => void;
 }) => {
-  console.log(rows);
-  const externalProductChoiceColumns: GridColDef<IExternalProduct>[] = [
+  const externalProductChoiceColumns: GridColDef<IExternalVariant>[] = [
     {
       field: "ecommerce",
       headerName: "Sàn thương mại",
@@ -352,7 +371,7 @@ const ExternalProductDataGrid = ({
             handleChangeLivestreamVariantQuantity(row, e.target.value);
             setRows((prev) =>
               prev.map((item) =>
-                item.idExternalProduct === row.idExternalProduct &&
+                item.idExternalVariant === row.idExternalVariant &&
                 item.idEcommerce === row.idEcommerce
                   ? { ...item, quantity: parseInt(e.target.value, 10) }
                   : item,
@@ -368,7 +387,7 @@ const ExternalProductDataGrid = ({
     <DataGrid
       rows={rows}
       columns={externalProductChoiceColumns}
-      getRowId={(row) => row.idExternalProduct}
+      getRowId={(row) => row.idExternalVariant}
       disableRowSelectionOnClick
     ></DataGrid>
   );
@@ -389,10 +408,10 @@ const ProductDataGrid = ({
         apiRef.current.selectRow(row.id_product, true);
       }
     });
-    apiRef.current.autosizeColumns({
+    /*apiRef.current.autosizeColumns({
       columns: columns.map((column: any) => column.field),
       expand: true,
-    });
+    });*/
   }, [rows]);
 
   const columns: GridColDef<IProductItem>[] = [

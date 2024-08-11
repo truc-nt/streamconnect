@@ -1,9 +1,15 @@
 "use client";
 
 import { DataGrid as MuiDataGrid, DataGridProps } from "@mui/x-data-grid";
-import React from "react";
+import React, { useEffect } from "react";
 
 const DataGrid = (props: DataGridProps) => {
+  useEffect(() => {
+    props.apiRef?.current.autosizeColumns({
+      columns: props.columns.map((column: any) => column.field),
+      expand: true,
+    });
+  }, [props.rows]);
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <MuiDataGrid

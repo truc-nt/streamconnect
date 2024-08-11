@@ -4,17 +4,26 @@ const initialState = {
   currentStep: 0,
   title: "",
   description: "",
-  livestreamExternalProduct: [],
+  livestreamExternalVariants: [],
   startTime: "",
   endTime: "",
 } as {
   currentStep: number;
   title: string;
   description: string;
-  livestreamExternalProduct: {
-    idExternalProduct: number;
-    idEcommerce: number;
-    quantity: number;
+  livestreamExternalVariants: {
+    idProduct: number;
+    idVariant: number;
+    name: string;
+    option: Record<string, string>;
+    externalVariants: {
+      idVariant: number;
+      idExternalVariant: number;
+      idEcommerce: number;
+      price: number;
+      stock: number;
+      quantity: number;
+    }[];
   }[];
   startTime: string;
   endTime: string;
@@ -34,16 +43,22 @@ export const createReducer = createSlice({
     setLivestreamInformation: (state, action: PayloadAction<any>) => {
       state.title = action.payload?.title;
       state.description = action.payload?.description;
+      state.startTime = action.payload?.startTime;
+      //state.currentStep = Math.min(state.currentStep + 1, 2);
+    },
+    setChosenLivestreamVariants: (state, action: PayloadAction<any>) => {
+      state.livestreamExternalVariants = action.payload;
       state.currentStep = Math.min(state.currentStep + 1, 2);
     },
-    setLivestreamProducts: (state, action: PayloadAction<any>) => {
-      state.livestreamExternalProduct = action.payload;
-      state.currentStep = Math.min(state.currentStep + 1, 2);
-    }
   },
 });
 
-export const { reset, setPrevStep, setNextStep, setLivestreamInformation } =
-  createReducer.actions;
+export const {
+  reset,
+  setPrevStep,
+  setNextStep,
+  setLivestreamInformation,
+  setChosenLivestreamVariants,
+} = createReducer.actions;
 
 export default createReducer.reducer;

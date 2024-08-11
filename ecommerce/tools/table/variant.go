@@ -19,11 +19,9 @@ type variantTable struct {
 	// Columns
 	IDVariant postgres.ColumnInteger
 	FkProduct postgres.ColumnInteger
-	Name      postgres.ColumnString
 	Sku       postgres.ColumnString
-	Stock     postgres.ColumnInteger
+	Status    postgres.ColumnString
 	Option    postgres.ColumnString
-	Price     postgres.ColumnFloat
 	CreatedAt postgres.ColumnTimestamp
 	UpdatedAt postgres.ColumnTimestamp
 
@@ -68,15 +66,13 @@ func newVariantTableImpl(schemaName, tableName, alias string) variantTable {
 	var (
 		IDVariantColumn = postgres.IntegerColumn("id_variant")
 		FkProductColumn = postgres.IntegerColumn("fk_product")
-		NameColumn      = postgres.StringColumn("name")
 		SkuColumn       = postgres.StringColumn("sku")
-		StockColumn     = postgres.IntegerColumn("stock")
+		StatusColumn    = postgres.StringColumn("status")
 		OptionColumn    = postgres.StringColumn("option")
-		PriceColumn     = postgres.FloatColumn("price")
 		CreatedAtColumn = postgres.TimestampColumn("created_at")
 		UpdatedAtColumn = postgres.TimestampColumn("updated_at")
-		allColumns      = postgres.ColumnList{IDVariantColumn, FkProductColumn, NameColumn, SkuColumn, StockColumn, OptionColumn, PriceColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = postgres.ColumnList{FkProductColumn, NameColumn, SkuColumn, StockColumn, OptionColumn, PriceColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns      = postgres.ColumnList{IDVariantColumn, FkProductColumn, SkuColumn, StatusColumn, OptionColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns  = postgres.ColumnList{FkProductColumn, SkuColumn, StatusColumn, OptionColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return variantTable{
@@ -85,11 +81,9 @@ func newVariantTableImpl(schemaName, tableName, alias string) variantTable {
 		//Columns
 		IDVariant: IDVariantColumn,
 		FkProduct: FkProductColumn,
-		Name:      NameColumn,
 		Sku:       SkuColumn,
-		Stock:     StockColumn,
+		Status:    StatusColumn,
 		Option:    OptionColumn,
-		Price:     PriceColumn,
 		CreatedAt: CreatedAtColumn,
 		UpdatedAt: UpdatedAtColumn,
 

@@ -50,7 +50,7 @@ func (h *ExternalShopHandler) SyncExternalShopsByExternalShopId(ctx *gin.Context
 		return
 	}
 
-	if err := h.Service.SyncExternalProductsByExternalShopId(externalShopId); err != nil {
+	if err := h.Service.SyncExternalVariantsByExternalShopId(externalShopId); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

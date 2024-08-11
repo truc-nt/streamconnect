@@ -5,6 +5,8 @@ import { Box, Typography, IconButton } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 //import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DetailModal from "./DetailModal";
+import { ILivestreamProduct, getLivestreamProducts } from "@/api/livestream";
+import { useEffect } from "react";
 
 interface Product {
   id: number;
@@ -149,6 +151,17 @@ const products: Product[] = [
 const ProductList: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [livestreamProducts, setLivestreamProducts] = useState<
+    ILivestreamProduct[]
+  >([]);
+
+  useEffect(() => {
+    const fetchLivestreamProducts = async () => {
+      const response = await getLivestreamProducts(6);
+      setLivestreamProducts(response.data);
+    };
+    fetchLivestreamProducts();
+  }, []);
 
   const formatPrice = (price: number) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -195,7 +208,7 @@ const ProductList: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <IconButton
+        {/*<IconButton
           onClick={scrollLeft}
           sx={{
             backgroundColor: "#01E0EE",
@@ -203,7 +216,7 @@ const ProductList: React.FC = () => {
             "&:hover": { backgroundColor: "#01E0EE" },
             marginRight: 2,
           }}
-        ></IconButton>
+        ></IconButton>*/}
 
         <Box
           ref={scrollContainerRef}
@@ -216,10 +229,10 @@ const ProductList: React.FC = () => {
             "::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {products.map((product) => (
+          {livestreamProducts.map((livestreamProduct) => (
             <Box
-              key={product.id}
-              onClick={() => handleProductClick(product)}
+              key={livestreamProduct.id_livestream_product}
+              //onClick={() => handleProductClick(livestreamProduct)}
               sx={{
                 flex: "0 0 auto",
                 width: "30%",
@@ -233,8 +246,10 @@ const ProductList: React.FC = () => {
               }}
             >
               <img
-                src={product.image}
-                alt={product.name}
+                src={
+                  "https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg"
+                }
+                alt={livestreamProduct.name}
                 style={{
                   width: "50%",
                   height: "auto",
@@ -256,20 +271,20 @@ const ProductList: React.FC = () => {
                     maxWidth: "100%",
                   }}
                 >
-                  {product.name}
+                  {livestreamProduct.name}
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{ color: "white", fontSize: "18px" }}
                 >
-                  {getPriceRange(product.prices)}
+                  {livestreamProduct.min_price} - {livestreamProduct.max_price}
                 </Typography>
               </Box>
             </Box>
           ))}
         </Box>
 
-        <IconButton
+        {/*<IconButton
           onClick={scrollRight}
           sx={{
             backgroundColor: "#01E0EE",
@@ -277,7 +292,7 @@ const ProductList: React.FC = () => {
             "&:hover": { backgroundColor: "#01E0EE" },
             marginLeft: 2,
           }}
-        ></IconButton>
+        ></IconButton>*/}
       </Box>
 
       {selectedProduct && (

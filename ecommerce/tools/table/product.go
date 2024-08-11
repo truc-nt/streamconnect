@@ -17,15 +17,14 @@ type productTable struct {
 	postgres.Table
 
 	// Columns
-	IDProduct    postgres.ColumnInteger
-	FkShop       postgres.ColumnInteger
-	Name         postgres.ColumnString
-	Description  postgres.ColumnString
-	Status       postgres.ColumnString
-	Stock        postgres.ColumnInteger
-	OptionTitles postgres.ColumnString
-	CreatedAt    postgres.ColumnTimestamp
-	UpdatedAt    postgres.ColumnTimestamp
+	IDProduct   postgres.ColumnInteger
+	FkShop      postgres.ColumnInteger
+	Name        postgres.ColumnString
+	Description postgres.ColumnString
+	Status      postgres.ColumnString
+	Option      postgres.ColumnString
+	CreatedAt   postgres.ColumnTimestamp
+	UpdatedAt   postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -66,32 +65,30 @@ func newProductTable(schemaName, tableName, alias string) *ProductTable {
 
 func newProductTableImpl(schemaName, tableName, alias string) productTable {
 	var (
-		IDProductColumn    = postgres.IntegerColumn("id_product")
-		FkShopColumn       = postgres.IntegerColumn("fk_shop")
-		NameColumn         = postgres.StringColumn("name")
-		DescriptionColumn  = postgres.StringColumn("description")
-		StatusColumn       = postgres.StringColumn("status")
-		StockColumn        = postgres.IntegerColumn("stock")
-		OptionTitlesColumn = postgres.StringColumn("option_titles")
-		CreatedAtColumn    = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn    = postgres.TimestampColumn("updated_at")
-		allColumns         = postgres.ColumnList{IDProductColumn, FkShopColumn, NameColumn, DescriptionColumn, StatusColumn, StockColumn, OptionTitlesColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns     = postgres.ColumnList{FkShopColumn, NameColumn, DescriptionColumn, StatusColumn, StockColumn, OptionTitlesColumn, CreatedAtColumn, UpdatedAtColumn}
+		IDProductColumn   = postgres.IntegerColumn("id_product")
+		FkShopColumn      = postgres.IntegerColumn("fk_shop")
+		NameColumn        = postgres.StringColumn("name")
+		DescriptionColumn = postgres.StringColumn("description")
+		StatusColumn      = postgres.StringColumn("status")
+		OptionColumn      = postgres.StringColumn("option")
+		CreatedAtColumn   = postgres.TimestampColumn("created_at")
+		UpdatedAtColumn   = postgres.TimestampColumn("updated_at")
+		allColumns        = postgres.ColumnList{IDProductColumn, FkShopColumn, NameColumn, DescriptionColumn, StatusColumn, OptionColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns    = postgres.ColumnList{FkShopColumn, NameColumn, DescriptionColumn, StatusColumn, OptionColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return productTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDProduct:    IDProductColumn,
-		FkShop:       FkShopColumn,
-		Name:         NameColumn,
-		Description:  DescriptionColumn,
-		Status:       StatusColumn,
-		Stock:        StockColumn,
-		OptionTitles: OptionTitlesColumn,
-		CreatedAt:    CreatedAtColumn,
-		UpdatedAt:    UpdatedAtColumn,
+		IDProduct:   IDProductColumn,
+		FkShop:      FkShopColumn,
+		Name:        NameColumn,
+		Description: DescriptionColumn,
+		Status:      StatusColumn,
+		Option:      OptionColumn,
+		CreatedAt:   CreatedAtColumn,
+		UpdatedAt:   UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

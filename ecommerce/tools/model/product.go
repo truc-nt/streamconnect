@@ -13,13 +13,12 @@ import (
 )
 
 type Product struct {
-	IDProduct    int64       `sql:"primary_key" json:"id_product" xml:"id_product"`
-	FkShop       int64       `json:"fk_shop" xml:"fk_shop"`
-	Name         string      `json:"name" xml:"name"`
-	Description  *string     `json:"description" xml:"description"`
-	Status       string      `json:"status" xml:"status"`
-	Stock        *int32      `json:"stock" xml:"stock"`
-	OptionTitles pgtype.JSON `json:"option_titles" xml:"option_titles"`
-	CreatedAt    time.Time   `json:"created_at" xml:"created_at"`
-	UpdatedAt    time.Time   `json:"updated_at" xml:"updated_at"`
+	IDProduct   int64       `sql:"primary_key" json:"id_product" xml:"id_product"`
+	FkShop      int64       `json:"fk_shop" xml:"fk_shop"`
+	Name        string      `json:"name" xml:"name"`
+	Description *string     `json:"description" xml:"description"`
+	Status      string      `json:"status" xml:"status"`
+	Option      pgtype.JSON `json:"option" xml:"option"`
+	CreatedAt   time.Time   `json:"created_at" xml:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at" xml:"updated_at"`
 }

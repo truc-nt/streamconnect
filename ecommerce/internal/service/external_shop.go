@@ -14,7 +14,7 @@ type IExternalShopService interface {
 	CreateExternalShopShopify(name string) (int64, error)
 	GetExternalShopById(externalShopId int64) (*model.ExternalShop, error)
 	GetExternalShopsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
-	SyncExternalProductsByExternalShopId(externalShopId int64) error
+	SyncExternalVariantsByExternalShopId(externalShopId int64) error
 }
 
 type ExternalShopService struct {
@@ -67,7 +67,7 @@ func (s *ExternalShopService) GetExternalShopsByShopId(shopId int64, limit int64
 	return externalShops, nil
 }
 
-func (s *ExternalShopService) SyncExternalProductsByExternalShopId(externalShopId int64) error {
+func (s *ExternalShopService) SyncExternalVariantsByExternalShopId(externalShopId int64) error {
 	externalShop, err := s.Repository.GetById(s.Repository.GetDefaultDatabase().Db, externalShopId)
 	if err != nil {
 		return err

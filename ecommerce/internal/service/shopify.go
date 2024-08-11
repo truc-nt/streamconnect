@@ -1,11 +1,9 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 
 	"ecommerce/internal/adapter"
 	"ecommerce/internal/client/shopify"
@@ -18,7 +16,6 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx"
 	lop "github.com/samber/lo/parallel"
 )
@@ -30,7 +27,7 @@ const (
 type IShopifyService interface {
 	GetEcommerceId() int16
 	GetAuthorizePath(shopDomain string) string
-	CreateProductVariants(shopifyProductIdList interface{}) error
+	CreateExternalVariants(shopifyProductIdList interface{}) error
 
 	ConnectNewExternalShopShopify(shopDomain string, authorizeCode string) error
 	SyncProducts(externalShopId int64) error
@@ -41,11 +38,11 @@ type IShopifyService interface {
 type ShopifyService struct {
 	Database *database.PostgresqlDatabase
 
-	ProductRepository                repository.IProductRepository
-	VariantRepository                repository.IVariantRepository
-	ExternalShopRepository           repository.IExternalShopRepository
-	ExternalShopAuthRepository       repository.IExternalShopShopifyAuthRepository
-	ExternalProductShopifyRepository repository.IExternalProductShopifyRepository
+	ProductRepository          repository.IProductRepository
+	VariantRepository          repository.IVariantRepository
+	ExternalShopRepository     repository.IExternalShopRepository
+	ExternalShopAuthRepository repository.IExternalShopShopifyAuthRepository
+	ExternalVariantRepository  repository.IExternalVariantRepository
 
 	ShopifyAdapter adapter.IShopifyAdapter
 }
@@ -56,14 +53,14 @@ func NewShopifyService(
 	variantRepository repository.IVariantRepository,
 	externalShopRepository repository.IExternalShopRepository,
 	externalShopAuthRepository repository.IExternalShopShopifyAuthRepository,
-	externalProductShopify repository.IExternalProductShopifyRepository) IShopifyService {
+	ExternalVariant repository.IExternalVariantRepository) IShopifyService {
 	return &ShopifyService{
-		ProductRepository:                productRepository,
-		VariantRepository:                variantRepository,
-		ExternalShopRepository:           externalShopRepository,
-		ExternalShopAuthRepository:       externalShopAuthRepository,
-		ExternalProductShopifyRepository: externalProductShopify,
-		ShopifyAdapter:                   shopifyAdapter,
+		ProductRepository:          productRepository,
+		VariantRepository:          variantRepository,
+		ExternalShopRepository:     externalShopRepository,
+		ExternalShopAuthRepository: externalShopAuthRepository,
+		ExternalVariantRepository:  ExternalVariant,
+		ShopifyAdapter:             shopifyAdapter,
 	}
 }
 
@@ -167,23 +164,23 @@ func (s *ShopifyService) SyncProducts(externalShopId int64) error {
 		return err
 	}
 
-	externalProducts = lop.Map(externalProducts, func(product *model.ExternalProductShopify, _ int) *model.ExternalProductShopify {
+	externalProducts = lop.Map(externalProducts, func(product *model.ExternalVariant, _ int) *model.ExternalVariant {
 		product.FkExternalShop = externalShopId
 		return product
 	})
 
-	_, err = s.ExternalProductShopifyRepository.CreateMany(
-		s.ExternalProductShopifyRepository.GetDefaultDatabase().Db,
+	_, err = s.ExternalVariantRepository.CreateMany(
+		s.ExternalVariantRepository.GetDefaultDatabase().Db,
 		postgres.ColumnList{
-			table.ExternalProductShopify.FkExternalShop,
-			table.ExternalProductShopify.ShopifyProductID,
-			table.ExternalProductShopify.ShopifyVariantID,
-			table.ExternalProductShopify.Name,
-			table.ExternalProductShopify.Sku,
-			table.ExternalProductShopify.Stock,
-			table.ExternalProductShopify.Option,
-			table.ExternalProductShopify.Price,
-			table.ExternalProductShopify.ImageURL,
+			table.ExternalVariant.FkExternalShop,
+			table.ExternalVariant.IDExternalProduct,
+			table.ExternalVariant.IDExternal,
+			table.ExternalVariant.Name,
+			table.ExternalVariant.Sku,
+			table.ExternalVariant.Stock,
+			table.ExternalVariant.Option,
+			table.ExternalVariant.Price,
+			table.ExternalVariant.ImageURL,
 		},
 		externalProducts,
 	)
@@ -195,18 +192,15 @@ func (s *ShopifyService) SyncProducts(externalShopId int64) error {
 }
 
 func (s *ShopifyService) GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error) {
-	externalProducts, err := s.ExternalProductShopifyRepository.GetExternalProductsByExternalShopId(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, externalShopId, limit, offset)
+	externalProducts, err := s.ExternalVariantRepository.GetExternalProductsByExternalShopId(s.ExternalVariantRepository.GetDefaultDatabase().Db, externalShopId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	return externalProducts, nil
 }
 
-func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{}) error {
-	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
-		//var updateProductVariantList [][]int64
-
-		//shouldUpdateProductVariants := postgres.CTE("should_update_product_variants")
+func (s *ShopifyService) CreateExternalVariants(shopifyProductIdList interface{}) error {
+	/*var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
 
 		for _, shopifyProductId := range shopifyProductIdList.([]string) {
 			_shopifyProductId, err := strconv.ParseInt(shopifyProductId, 10, 64)
@@ -214,12 +208,12 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 				return nil, err
 			}
 
-			externalProducts, err := s.ExternalProductShopifyRepository.GetByShopifyProductId(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, int64(_shopifyProductId))
+			externalProducts, err := s.ExternalVariantRepository.GetByShopifyProductId(s.ExternalVariantRepository.GetDefaultDatabase().Db, int64(_shopifyProductId))
 			if err != nil {
 				return nil, err
 			}
 
-			if externalProducts[0].FkProduct != nil {
+			if externalProducts[0].FkVariant != nil {
 				fmt.Printf("shopify priduct id %d already been created", _shopifyProductId)
 				continue
 			}
@@ -246,18 +240,12 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 					db,
 					postgres.ColumnList{
 						table.Variant.FkProduct,
-						table.Variant.Name,
 						table.Variant.Sku,
-						table.Variant.Stock,
-						table.Variant.Price,
 						table.Variant.Option,
 					},
 					model.Variant{
 						FkProduct: newProduct.IDProduct,
-						Name:      externalProduct.Name,
 						Sku:       externalProduct.Sku,
-						Stock:     externalProduct.Stock,
-						Price:     externalProduct.Price,
 						Option:    externalProduct.Option,
 					},
 				)
@@ -277,7 +265,7 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 
 				//updateProductVariantList = append(updateProductVariantList, []int64{newProduct.IDProduct, newVariant.IDVariant, externalProduct.ShopifyVariantID})
 
-				if err := s.ExternalProductShopifyRepository.UpdateProductVariant(db, newProduct.IDProduct, newVariant.IDVariant, externalProduct.ShopifyVariantID); err != nil {
+				if err := s.ExternalVariantRepository.UpdateExternalVariant(db, newVariant.IDVariant, externalProduct.IDExternal); err != nil {
 					return nil, err
 				}
 			}
@@ -289,10 +277,10 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 
 			s.ProductRepository.UpdateById(
 				db,
-				postgres.ColumnList{table.Product.OptionTitles},
+				postgres.ColumnList{table.Product.Option},
 				model.Product{
 					IDProduct: newProduct.IDProduct,
-					OptionTitles: pgtype.JSON{
+					Option: pgtype.JSON{
 						Bytes:  marshalOptions,
 						Status: pgtype.Present,
 					},
@@ -306,13 +294,13 @@ func (s *ShopifyService) CreateProductVariants(shopifyProductIdList interface{})
 
 	if _, err := s.ProductRepository.ExecWithinTransaction(execWithinTransaction); err != nil {
 		return err
-	}
+	}*/
 
 	return nil
 }
 
 func (s *ShopifyService) GetExternalProductByVariantIds(variantIds []int64) (interface{}, error) {
-	externalProducts, err := s.ExternalProductShopifyRepository.GetByVariantIds(s.ExternalProductShopifyRepository.GetDefaultDatabase().Db, variantIds)
+	externalProducts, err := s.ExternalVariantRepository.GetByVariantIds(s.ExternalVariantRepository.GetDefaultDatabase().Db, variantIds)
 	if err != nil {
 		return nil, err
 	}

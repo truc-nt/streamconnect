@@ -24,13 +24,12 @@ func (m JsonType) Value() (driver.Value, error) {
 }*/
 
 var tagsMapping = map[string]interface{}{
-	"external_product_shopify": map[string]interface{}{
-		"shopify_product_id": `shopify:"ProductID"`,
-		"shopify_variant_id": `shopify:"ID"`,
-		"name":               `shopify:"Title"`,
-		"sku":                `shopify:"Sku"`,
-		"stock":              `shopify:"InventoryQuantity"`,
-		"default":            `shopify:"-"`,
+	"external_variant": map[string]interface{}{
+		"id_variant": `shopify:"ID"`,
+		"name":       `shopify:"Title"`,
+		"sku":        `shopify:"Sku"`,
+		"stock":      `shopify:"InventoryQuantity"`,
+		"default":    `shopify:"-"`,
 	},
 }
 

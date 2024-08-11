@@ -1,12 +1,14 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
 import livestreamCreate from "./livestream_create";
+import alertReducer from "./alert";
 import { useSelector, useDispatch } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 
 export const store = configureStore({
   reducer: {
     livestreamCreate: livestreamCreate,
+    alert: alertReducer,
   },
 });
 

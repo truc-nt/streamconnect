@@ -15,11 +15,9 @@ import (
 type Variant struct {
 	IDVariant int64       `sql:"primary_key" json:"id_variant" xml:"id_variant"`
 	FkProduct int64       `json:"fk_product" xml:"fk_product"`
-	Name      string      `json:"name" xml:"name"`
 	Sku       *string     `json:"sku" xml:"sku"`
-	Stock     *int32      `json:"stock" xml:"stock"`
+	Status    string      `json:"status" xml:"status"`
 	Option    pgtype.JSON `json:"option" xml:"option"`
-	Price     *float64    `json:"price" xml:"price"`
 	CreatedAt time.Time   `json:"created_at" xml:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at" xml:"updated_at"`
 }

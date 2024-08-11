@@ -14,10 +14,10 @@ interface IExternalProduct {
 
 export const getExternalProducts = async (externalShopId: number) => {
   return axios.get<IExternalProduct[]>(
-    `/external_shops/${externalShopId}/external_products`,
+    `/external_shops/${externalShopId}/external_variants`,
   );
 };
 
-export const syncExternalProducts = async (externalShopId: number) => {
-  return axios.get(`/external_shops/${externalShopId}/sync_external_products`);
+export const syncExternalVariants = async (externalShopId: number) => {
+  return axios.get(`/external_shops/${externalShopId}/sync_external_variants`);
 };

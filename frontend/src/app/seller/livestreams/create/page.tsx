@@ -8,34 +8,23 @@ import { FormGroup, TextField, FormControl, FormLabel } from "@mui/material";
 import { useState } from "react";
 import LivestreamInfo from "./components/LivestreamInfo";
 import LivestreamVariants from "./components/AddLivestreamProduct";
+import LivestreamSchedule from "./components/LivestreamSchedule";
 
-import LivestreamProductsInfo from "./components/LivestreamProductsInfo";
 import ProductDetail from "./components/ProductDetail";
 import { useAppSelector, useAppDispatch } from "@/store/store";
-import { setPrevStep, setNextStep } from "@/store/livestream_create";
-import { current } from "@reduxjs/toolkit";
 
 const steps = [
-  {
-    label: "Thông tin livestream",
-    component: <LivestreamInfo />,
-  },
   {
     label: "Thêm sản phẩm",
     component: <LivestreamVariants />,
   },
   {
-    label: "Hoàn thành",
-    component: <ProductDetail />,
+    label: "Thông tin livestream",
+    component: <LivestreamInfo />,
   },
 ];
 
 const Page = () => {
-  const dispatch = useAppDispatch();
-  /*const { currentStep } = useSelector(
-    (state: RootStore) => state.livestreamCreate,
-  );*/
-
   const { currentStep } = useAppSelector((state) => state.livestreamCreate);
 
   return (

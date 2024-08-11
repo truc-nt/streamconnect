@@ -13,5 +13,6 @@ func LoadApiRouter(e *gin.Engine, h *handler.Handlers) {
 		LoadShopRouter(apiRouter, h)
 		LoadExternalShopRouter(apiRouter, h)
 		LoadShopifyRouter(apiRouter, h)
+		LoadLivestreamRouter(apiRouter, h)
 	}
 }

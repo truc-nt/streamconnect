@@ -20,86 +20,102 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import { useGetExternalShops } from "@/hook/external_shop";
-import { syncExternalProducts } from "@/api/external_shop";
+import { syncExternalVariants } from "@/api/external_shop";
 import CardHeader from "@mui/material/CardHeader";
-
-const columns: GridColDef[] = [
-  {
-    field: "name",
-    headerName: "Tên",
-    renderCell: (data) => {
-      return (
-        <Stack
-          direction="row"
-          spacing={1}
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Avatar
-            alt="Shopify Logo"
-            src={"/assets/imgs/logo-shopify.jpg"}
-            sx={{ padding: 1, backgroundColor: "white" }}
-          />
-          <p>{data?.value}</p>
-        </Stack>
-      );
-    },
-  },
-  {
-    field: "status",
-    headerName: "Trạng thái",
-    renderCell: (data) => {
-      switch (data.value) {
-        case "active":
-          return (
-            <Chip label="Đang hoạt động" color="success" variant="outlined" />
-          );
-        case "inactive":
-          return (
-            <Chip label="Ngưng hoạt động" color="error" variant="outlined" />
-          );
-      }
-    },
-  },
-  {
-    field: "created_at",
-    headerName: "Ngày kết nối",
-    renderCell: (data) => {
-      return new Date(data.value).toLocaleString();
-    },
-  },
-  {
-    field: "updated_at",
-    headerName: "Ngày cập nhật",
-    renderCell: (data) => {
-      return new Date(data.value).toLocaleString();
-    },
-  },
-  {
-    field: "actions",
-    headerName: "",
-    renderCell: (data) => (
-      <Stack direction="row" spacing={0.5}>
-        <VisibilityOutlined />
-        <CachedOutlined
-          onClick={async () => {
-            try {
-              const res = await syncExternalProducts(data.row.id_external_shop);
-            } catch (error) {
-              console.log(error);
-            }
-          }}
-        />
-        <DeleteOutlined />
-      </Stack>
-    ),
-  },
-];
+import { setOpen as setOpenAlert } from "@/store/alert";
+import { useAppDispatch } from "@/store/store";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
   const { data, error } = useGetExternalShops(process.env.NEXT_PUBLIC_SHOP_ID);
-  console.log(data, error);
+  const dispatch = useAppDispatch();
+  const columns: GridColDef[] = [
+    {
+      field: "name",
+      headerName: "Tên",
+      renderCell: (data) => {
+        return (
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Avatar
+              alt="Shopify Logo"
+              src={"/assets/imgs/logo-shopify.jpg"}
+              sx={{ padding: 1, backgroundColor: "white" }}
+            />
+            <p>{data?.value}</p>
+          </Stack>
+        );
+      },
+    },
+    {
+      field: "status",
+      headerName: "Trạng thái",
+      renderCell: (data) => {
+        switch (data.value) {
+          case "active":
+            return (
+              <Chip label="Đang hoạt động" color="success" variant="outlined" />
+            );
+          case "inactive":
+            return (
+              <Chip label="Ngưng hoạt động" color="error" variant="outlined" />
+            );
+        }
+      },
+    },
+    {
+      field: "created_at",
+      headerName: "Ngày kết nối",
+      renderCell: (data) => {
+        return new Date(data.value).toLocaleString();
+      },
+    },
+    {
+      field: "updated_at",
+      headerName: "Ngày cập nhật",
+      renderCell: (data) => {
+        return new Date(data.value).toLocaleString();
+      },
+    },
+    {
+      field: "actions",
+      headerName: "",
+      renderCell: (data) => (
+        <Stack direction="row" spacing={0.5}>
+          <VisibilityOutlined />
+          <CachedOutlined
+            onClick={async () => {
+              try {
+                const res = await syncExternalVariants(
+                  data.row.id_external_shop,
+                );
+                dispatch(
+                  setOpenAlert({
+                    message: "Đồng bộ thành công",
+                    type: "success",
+                  }),
+                );
+              } catch (error) {
+                dispatch(
+                  setOpenAlert({
+                    message: "Đồng bộ không thành công",
+                    type: "error",
+                  }),
+                );
+                console.log(error);
+              }
+            }}
+          />
+          <DeleteOutlined />
+        </Stack>
+      ),
+    },
+  ];
+
   return (
     <Stack gap={2}>
       <Stack direction="row" spacing={2}>

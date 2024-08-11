@@ -48,14 +48,14 @@ func (s *VariantService) GetVariantsByProductId(shopId int64, limit int64, offse
 	for _, variant := range variants {
 		variantIds = append(variantIds, variant.IDVariant)
 	}
-	externalProductShopify, err := s.EcommerceService[constants.SHOPIFY_ID].GetExternalProductByVariantIds(variantIds)
+	ExternalVariant, err := s.EcommerceService[constants.SHOPIFY_ID].GetExternalProductByVariantIds(variantIds)
 	if err != nil {
 		return nil, err
 	}
 
 	res := make([]*GetVariantsByProductId, 0)
 	for _, variant := range variants {
-		for _, externalProduct := range externalProductShopify.([]*model.ExternalProductShopify) {
+		for _, externalProduct := range ExternalVariant.([]*model.ExternalVariant) {
 			if variant.IDVariant == *externalProduct.FkVariant {
 				res = append(res, &GetVariantsByProductId{
 					IDVariant: variant.IDVariant,
@@ -71,7 +71,7 @@ func (s *VariantService) GetVariantsByProductId(shopId int64, limit int64, offse
 					}{
 						{
 							IDEcommerce:       constants.SHOPIFY_ID,
-							IDExternalProduct: externalProduct.IDExternalProductShopify,
+							IDExternalProduct: externalProduct.IDExternalVariant,
 							Ecommerce:         constants.SHOPIFY_NAME,
 							Price:             *externalProduct.Price,
 							Stock:             *externalProduct.Stock,

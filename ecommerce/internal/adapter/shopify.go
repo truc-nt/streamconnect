@@ -31,7 +31,7 @@ type IShopifyAdapter interface {
 
 	GetAuthorizePath(param *shopify.ShopifyClientParam) string
 	GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error)
-	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalProductShopify, error)
+	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error)
 	//GetShopifyAuthConfig() *oauth2.Config
 }
 
@@ -83,16 +83,16 @@ func (a *ShopifyAdapter) GetAccessToken(param *shopify.ShopifyClientParam, code 
 	return token.AccessToken, nil
 }
 
-func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalProductShopify, error) {
+func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error) {
 	products, err := a.getShopifyClient(param).GetProducts()
 	if err != nil {
 		return nil, err
 	}
 
-	var externalProducts []*model.ExternalProductShopify
+	var externalProducts []*model.ExternalVariant
 	for _, product := range products.Products {
 		for _, variant := range product.Variants {
-			var externalProduct *model.ExternalProductShopify
+			var externalProduct *model.ExternalVariant
 			decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 				Result:  &externalProduct,
 				TagName: "shopify",
@@ -105,6 +105,11 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 			if err != nil {
 				return nil, err
 			}
+
+			var externalProductId = strconv.FormatInt(product.ID, 10)
+
+			externalProduct.IDExternal = strconv.FormatInt(variant.ID, 10)
+			externalProduct.IDExternalProduct = &externalProductId
 
 			if foundImage, ok := lo.Find(product.Images, func(image *shopify.Image) bool {
 				if variant.ImageID == nil {

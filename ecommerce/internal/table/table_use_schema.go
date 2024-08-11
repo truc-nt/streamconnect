@@ -12,9 +12,9 @@ package table
 func UseSchema(schema string) {
 	Category = Category.FromSchema(schema)
 	Ecommerce = Ecommerce.FromSchema(schema)
-	ExternalProductShopify = ExternalProductShopify.FromSchema(schema)
 	ExternalShop = ExternalShop.FromSchema(schema)
 	ExternalShopShopifyAuth = ExternalShopShopifyAuth.FromSchema(schema)
+	ExternalVariant = ExternalVariant.FromSchema(schema)
 	Product = Product.FromSchema(schema)
 	Shop = Shop.FromSchema(schema)
 	User = User.FromSchema(schema)
