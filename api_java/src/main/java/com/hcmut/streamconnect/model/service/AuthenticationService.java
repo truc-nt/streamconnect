@@ -5,4 +5,5 @@ import com.hcmut.streamconnect.model.entity.Account;
 
 public interface AuthenticationService {
     Account authenticate(LoginUserDto input);
+    Account register(Account account);
 }
