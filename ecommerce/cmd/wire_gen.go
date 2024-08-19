@@ -44,7 +44,12 @@ func initServer() server.IServer {
 	iLivestreamExternalVariantRepository := repository.NewLivestreamExternalVariantRepository(postgresqlDatabase)
 	iLivestreamService := service.NewLivestreamService(iLivestreamRepository, iLivestreamProductRepository, iLivestreamExternalVariantRepository)
 	iLivestreamHandler := handler.NewLivestreamHandler(iLivestreamService)
-	handlers := handler.ProvideHandlers(iProductHandler, iVariantHandler, iShopifyHandler, iExternalShopHandler, iExternalProductHandler, iLivestreamHandler)
+	iLivestreamProductService := service.NewLivestreamProductService(iLivestreamProductRepository, iLivestreamExternalVariantRepository)
+	iLivestreamProductHandler := handler.NewLivestreamProductHandler(iLivestreamProductService)
+	iCartRepository := repository.NewCartRepository(postgresqlDatabase)
+	iCartService := service.NewCartService(iCartRepository)
+	iCartHandler := handler.NewCartHandler(iCartService)
+	handlers := handler.ProvideHandlers(iProductHandler, iVariantHandler, iShopifyHandler, iExternalShopHandler, iExternalProductHandler, iLivestreamHandler, iLivestreamProductHandler, iCartHandler)
 	iServer := server.NewServer(config, handlers)
 	return iServer
 }

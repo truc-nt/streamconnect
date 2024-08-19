@@ -9,7 +9,6 @@ import (
 
 type ILivestreamHandler interface {
 	CreateLivestream(ctx *gin.Context)
-	GetProductsByLivestreamId(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -42,20 +41,4 @@ func (h *LivestreamHandler) CreateLivestream(ctx *gin.Context) {
 	}
 
 	h.handleSuccessCreate(ctx)
-}
-
-func (h *LivestreamHandler) GetProductsByLivestreamId(ctx *gin.Context) {
-	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}
-
-	products, err := h.Service.GetProductsByLivestreamId(livestreamId)
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}
-
-	h.handleSuccessGet(ctx, products)
 }

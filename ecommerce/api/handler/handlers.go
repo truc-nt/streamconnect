@@ -8,12 +8,14 @@ import (
 )
 
 type Handlers struct {
-	ProductHandler         IProductHandler
-	VariantHandler         IVariantHandler
-	ShopifyHandler         IShopifyHandler
-	ExternalShopHandler    IExternalShopHandler
-	ExternalProductHandler IExternalProductHandler
-	LivestreamHandler      ILivestreamHandler
+	ProductHandler           IProductHandler
+	VariantHandler           IVariantHandler
+	ShopifyHandler           IShopifyHandler
+	ExternalShopHandler      IExternalShopHandler
+	ExternalProductHandler   IExternalProductHandler
+	LivestreamHandler        ILivestreamHandler
+	LivestreamProductHandler ILivestreamProductHandler
+	CartHandler              ICartHandler
 }
 
 func ProvideHandlers(
@@ -23,14 +25,18 @@ func ProvideHandlers(
 	externalShopHandler IExternalShopHandler,
 	externalProductHandler IExternalProductHandler,
 	livestreamHandler ILivestreamHandler,
+	livestreamProductHandler ILivestreamProductHandler,
+	cartHandler ICartHandler,
 ) *Handlers {
 	return &Handlers{
-		ProductHandler:         productHandler,
-		VariantHandler:         variantHandler,
-		ShopifyHandler:         shopifyHandler,
-		ExternalShopHandler:    externalShopHandler,
-		ExternalProductHandler: externalProductHandler,
-		LivestreamHandler:      livestreamHandler,
+		ProductHandler:           productHandler,
+		VariantHandler:           variantHandler,
+		ShopifyHandler:           shopifyHandler,
+		ExternalShopHandler:      externalShopHandler,
+		ExternalProductHandler:   externalProductHandler,
+		LivestreamHandler:        livestreamHandler,
+		LivestreamProductHandler: livestreamProductHandler,
+		CartHandler:              cartHandler,
 	}
 }
 

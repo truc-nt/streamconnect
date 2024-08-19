@@ -25,6 +25,7 @@ import SendIcon from "@mui/icons-material/Send";
 import Navigation from "@/components/core/Navigation";
 
 const Sidebar = () => {
+  const router = useRouter();
   return (
     <Stack
       spacing={2}
@@ -36,7 +37,10 @@ const Sidebar = () => {
         color: "#fff",
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+      <Typography variant="h6" sx={{ fontWeight: "bold" }} onClick={(e) => {
+            e.preventDefault();
+            router.push("/");
+          }}>
         NAME
       </Typography>
       <Navigation />

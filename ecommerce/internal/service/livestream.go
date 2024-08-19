@@ -5,7 +5,6 @@ import (
 	internalModel "ecommerce/internal/model"
 	"ecommerce/internal/repository"
 	"ecommerce/internal/table"
-	"fmt"
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
@@ -15,7 +14,6 @@ import (
 
 type ILivestreamService interface {
 	CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) error
-	GetProductsByLivestreamId(livestreamId int64) (interface{}, error)
 }
 
 type LivestreamService struct {
@@ -82,8 +80,6 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 			return nil, err
 		}
 
-		fmt.Println(newLivestreamProductList)
-
 		livestreamExternalVariants := lo.Map(createLivestreamRequest.LivestreamExternalVariants, func(externalVariant *model.CreateLivestreamExternalVariants, index int) *internalModel.LivestreamExternalVariant {
 			livestreamProduct, ok := lo.Find(newLivestreamProductList, func(livestreamProduct *internalModel.LivestreamProduct) bool {
 				return livestreamProduct.FkProduct == externalVariant.IDProduct
@@ -121,13 +117,4 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 	}
 
 	return nil
-}
-
-func (s *LivestreamService) GetProductsByLivestreamId(livestreamId int64) (interface{}, error) {
-	livestreamProducts, err := s.LivestreamProductRepository.GetByLivestreamId(s.LivestreamProductRepository.GetDefaultDatabase().Db, livestreamId)
-	if err != nil {
-		return nil, err
-	}
-
-	return livestreamProducts, nil
 }

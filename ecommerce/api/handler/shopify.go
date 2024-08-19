@@ -48,4 +48,5 @@ func (h *ShopifyHandler) Redirect(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessCreate(ctx)
+	ctx.Redirect(http.StatusMovedPermanently, "http://localhost:3000/seller/shops")
 }
