@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 export const useGetLivestreamProducts = (livestreamId: number) => {
   return useSWR(
-    [`/api/livestreams/${livestreamId}/products`, livestreamId],
+    [`/api/livestreams/${livestreamId}/livestream_products`, livestreamId],
     async ([_, livestreamId]) => await getLivestreamProducts(livestreamId),
     {
       //shouldRetryOnError: false,

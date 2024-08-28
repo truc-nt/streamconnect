@@ -9,7 +9,6 @@ import (
 func LoadProductRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 	externalShopRouter := apiRouter.Group("/products")
 	{
-		externalShopRouter.POST("/", h.ProductHandler.CreateProductsVariants)
 		externalShopRouter.GET("/:product_id/variants", h.VariantHandler.GetVariantsByProductId)
 	}
 }

@@ -2,9 +2,9 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/table"
+	"ecommerce/internal/database/table"
 
-	"ecommerce/internal/model"
+	"ecommerce/internal/database/model"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"

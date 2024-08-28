@@ -1,8 +1,8 @@
 import { useGetLivestreamProducts } from "@/hook/livestream";
-import { message } from "@/store/antd_app";
 import ProductCard from "@/component/product/Card";
 import { List } from "antd";
-import LivestreamProductInfo from "./LivestreamProductInfo";
+import LivestreamProductInformation from "./LivestreamProductInformation";
+import LivestreamProductModal from "./LivestreamProductModal";
 import { useState } from "react";
 
 const LivestreamProductSegmented = ({
@@ -15,9 +15,6 @@ const LivestreamProductSegmented = ({
     null,
   );
 
-  /*if (!data) {
-    return null;
-  }*/
   return (
     <>
       <List
@@ -36,9 +33,9 @@ const LivestreamProductSegmented = ({
         className="overflow-y-scroll overflow-x-visible p-1"
       />
       {livestreamProductId !== null && (
-        <LivestreamProductInfo
+        <LivestreamProductModal
+          onCancel={() => setLivestreamProductId(null)}
           livestreamProductId={livestreamProductId}
-          setLivestreamProductId={setLivestreamProductId}
         />
       )}
     </>

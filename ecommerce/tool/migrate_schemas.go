@@ -21,7 +21,7 @@ func (m *JsonType) Scan(value interface{}) error {
 
 func (m JsonType) Value() (driver.Value, error) {
 	return json.Marshal(m)
-}*/
+}
 
 var tagsMapping = map[string]interface{}{
 	"external_variant": map[string]interface{}{
@@ -31,7 +31,7 @@ var tagsMapping = map[string]interface{}{
 		"stock":      `shopify:"InventoryQuantity"`,
 		"default":    `shopify:"-"`,
 	},
-}
+}*/
 
 func main() {
 	c := configs.NewConfig()
@@ -86,13 +86,13 @@ func main() {
 										fmt.Sprintf(`xml:"%s"`, columnMetaData.Name),
 									)
 
-									if tags, ok := tagsMapping[table.Name].(map[string]interface{}); ok {
+									/*if tags, ok := tagsMapping[table.Name].(map[string]interface{}); ok {
 										if tag, ok := tags[columnMetaData.Name].(string); ok {
 											defaultTableModelField.Tags = append(defaultTableModelField.Tags, tag)
 										} else {
 											defaultTableModelField.Tags = append(defaultTableModelField.Tags, tags["default"].(string))
 										}
-									}
+									}*/
 
 									/*if table.Name == "external_product_shopify" {
 										switch columnMetaData.Name {

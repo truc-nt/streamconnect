@@ -1,42 +1,10 @@
 "use client";
 import { Space, Flex, Table, Button, InputNumber, Input } from "antd";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
+import { useGetCart } from "@/hook/cart";
+import CartGroupByShop from "./component/CartGroupByShop";
 
 const Page = () => {
-  const columns = [
-    {
-      title: () => <span>Shop Name</span>,
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "",
-      dataIndex: "price",
-      key: "price",
-    },
-    {
-      title: "",
-      dataIndex: "quantity",
-      key: "quantity",
-      render: () => (
-        <Space.Compact block>
-          <Button icon={<MinusOutlined />} size="small" />
-          <Input size="small" defaultValue={1} style={{ width: "30px" }} />
-          <Button icon={<PlusOutlined />} size="small" />
-        </Space.Compact>
-      ),
-    },
-    {
-      title: "",
-      dataIndex: "total",
-      key: "total",
-    },
-    {
-      title: "",
-      dataIndex: "action",
-      key: "action",
-    },
-  ];
   const data = [
     {
       key: "1",
@@ -46,16 +14,16 @@ const Page = () => {
       action: "Edit",
     },
   ];
+
+  const { data: cart, error } = useGetCart(1);
+
   return (
     <Space.Compact direction="vertical" style={{ display: "flex" }}>
       <div></div>
       <Flex vertical>
-        <Table
-          //showHeader={false}
-          columns={columns}
-          dataSource={data}
-          rowSelection={{}}
-        />
+        {cart?.data.map((cartGroupByShop, index) => (
+          <CartGroupByShop key={index} {...cartGroupByShop} />
+        ))}
       </Flex>
     </Space.Compact>
   );

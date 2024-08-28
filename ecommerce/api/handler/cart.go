@@ -45,7 +45,7 @@ func (h *CartHandler) AddToCart(ctx *gin.Context) {
 		return
 	}
 
-	var addToCart *model.AddToCartRequest
+	var addToCart []*model.AddToCartRequest
 	if err := ctx.ShouldBindJSON(&addToCart); err != nil {
 		h.handleFailed(ctx, err)
 		return

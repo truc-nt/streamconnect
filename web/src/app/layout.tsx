@@ -3,11 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "./store_provider";
 import ThemeProvider from "./theme_provider";
+import LoadingProvider from "./loading_provider";
 import { Layout } from "antd";
 import Sider from "@/component/core/Sider";
 import Header from "@/component/core/Header";
 import Content from "@/component/core/Content";
-import { App } from "antd";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +26,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <StoreProvider>
           <ThemeProvider>
-            <App>
+            <LoadingProvider>
               <Layout hasSider>
                 <Sider />
                 <Layout>
@@ -34,7 +34,7 @@ export default function RootLayout({
                   <Content>{children}</Content>
                 </Layout>
               </Layout>
-            </App>
+            </LoadingProvider>
           </ThemeProvider>
         </StoreProvider>
       </body>

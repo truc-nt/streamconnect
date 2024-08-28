@@ -12,7 +12,7 @@ type Handlers struct {
 	VariantHandler           IVariantHandler
 	ShopifyHandler           IShopifyHandler
 	ExternalShopHandler      IExternalShopHandler
-	ExternalProductHandler   IExternalProductHandler
+	ExternalProductHandler   IExternalVariantHandler
 	LivestreamHandler        ILivestreamHandler
 	LivestreamProductHandler ILivestreamProductHandler
 	CartHandler              ICartHandler
@@ -23,7 +23,7 @@ func ProvideHandlers(
 	variantHandler IVariantHandler,
 	shopifyHandler IShopifyHandler,
 	externalShopHandler IExternalShopHandler,
-	externalProductHandler IExternalProductHandler,
+	externalProductHandler IExternalVariantHandler,
 	livestreamHandler ILivestreamHandler,
 	livestreamProductHandler ILivestreamProductHandler,
 	cartHandler ICartHandler,

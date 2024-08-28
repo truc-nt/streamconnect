@@ -3,7 +3,7 @@ import { Segmented, Card, Space, Flex } from "antd";
 import { SkinFilled, MessageFilled } from "@ant-design/icons";
 import LivestreamProductSegmented from "./LivestreamProductSegmented";
 import { useState } from "react";
-import LivestreamProductInfo from "./LivestreamProductInfo";
+import LivestreamProductInfo from "./LivestreamProductInformation";
 
 const Sidebar = ({ livestreamId }: { livestreamId: number }) => {
   const segmentedOptions = [

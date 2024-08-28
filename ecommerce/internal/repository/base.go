@@ -19,12 +19,20 @@ type IBaseRepository[T interface{}] interface {
 	UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data T) (*T, error)
 	GetById(db qrm.Queryable, id int64) (*T, error)
 	ExecWithinTransaction(funcTx func(qrm.Queryable) (interface{}, error)) (interface{}, error)
-	GetDefaultDatabase() *database.PostgresqlDatabase
+	GetDatabase() *database.PostgresqlDatabase
 }
 
 type BaseRepository[T interface{}] struct {
 	Database *database.PostgresqlDatabase
 }
+
+/*func (r *BaseRepository[T]) Exec(fn func(db qrm.Queryable) (interface{}, error)) (interface{}, error) {
+	return fn(r.Database.Db)
+}
+
+func (r *BaseRepository[T]) ExecTx(db qrm.Queryable, fn func(db qrm.Queryable) (interface{}, error)) (interface{}, error) {
+	return fn(db)
+}*/
 
 func (r *BaseRepository[T]) insertOne(db qrm.Queryable, stmt postgres.Statement) (*T, error) {
 	var data T
@@ -59,7 +67,7 @@ func (r *BaseRepository[T]) update(db qrm.Queryable, stmt postgres.Statement) (*
 	return &data, nil
 }
 
-func (r *BaseRepository[T]) ExecWithinTransaction(funcTx func(db qrm.Queryable) (interface{}, error)) (res interface{}, err error) {
+func (r *BaseRepository[T]) ExecWithinTransaction(fnTx func(db qrm.Queryable) (interface{}, error)) (res interface{}, err error) {
 	var tx *sql.Tx
 	tx, err = r.Database.Db.Begin()
 	if err != nil {
@@ -71,19 +79,19 @@ func (r *BaseRepository[T]) ExecWithinTransaction(funcTx func(db qrm.Queryable) 
 			_ = tx.Rollback()
 			panic(p)
 		} else if err != nil {
-			xerr := tx.Rollback() // err is non-nil; don't change it
+			xerr := tx.Rollback()
 			if xerr != nil {
 				err = errors.Join(err, xerr)
 			}
 		} else {
-			err = tx.Commit() // err is nil; if Commit returns error update err
+			err = tx.Commit()
 		}
 	}()
 
-	res, err = funcTx(tx)
+	res, err = fnTx(tx)
 	return
 }
 
-func (r *BaseRepository[T]) GetDefaultDatabase() *database.PostgresqlDatabase {
+func (r *BaseRepository[T]) GetDatabase() *database.PostgresqlDatabase {
 	return r.Database
 }

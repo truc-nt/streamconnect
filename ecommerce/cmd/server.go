@@ -15,7 +15,7 @@ var HandlersSet = wire.NewSet(
 	handler.NewVariantHandler,
 	handler.NewShopifyHandler,
 	handler.NewExternalShopHandler,
-	handler.NewExternalProductHandler,
+	handler.NewExternalVariantHandler,
 	handler.NewLivestreamHandler,
 	handler.NewLivestreamProductHandler,
 	handler.NewCartHandler,
@@ -31,7 +31,7 @@ var ServicesSet = wire.NewSet(
 	service.NewVariantService,
 	service.NewExternalShopService,
 	service.NewExternalShopAuthService,
-	service.NewExternalProductService,
+	service.NewExternalVariantService,
 	service.NewLivestreamService,
 	service.NewLivestreamProductService,
 	service.NewCartService,
@@ -40,6 +40,7 @@ var ServicesSet = wire.NewSet(
 var RepositoriesSet = wire.NewSet(
 	repository.NewProductRepository,
 	repository.NewVariantRepository,
+	repository.NewImageVariantRepository,
 	repository.NewExternalShopRepository,
 	repository.NewExternalShopShopifyAuthRepository,
 	repository.NewExternalVariantRepository,
@@ -48,7 +49,8 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewLivestreamProductRepository,
 	repository.NewLivestreamExternalVariantRepository,
 
-	repository.NewCartRepository,
+	repository.NewCartItemRepository,
+	repository.NewCartItemLivestreamExternalVariantRepository,
 )
 
 var AdapterSet = wire.NewSet(

@@ -4,9 +4,17 @@ import { Space, Table, Tag, Avatar } from "antd";
 import type { TableProps } from "antd";
 import { IExternalShop } from "@/api/external_shop";
 import { useGetExternalShops } from "@/hook/external_shop";
-import { EyeOutlined, SyncOutlined, DeleteOutlined } from "@ant-design/icons";
+import { SyncOutlined, DeleteOutlined } from "@ant-design/icons";
+import { syncExternalVariants } from "@/api/external_product";
+import useLoading from "@/hook/loading";
 
 const Page = () => {
+  const handleSyncExternalVariants = useLoading(
+    () => syncExternalVariants(1),
+    "Đồng bộ sản phẩm thành công",
+    "Đồng bộ sản phẩm thất bại",
+  );
+
   const columns: TableProps<IExternalShop>["columns"] = [
     {
       title: "Tên shop",
@@ -59,8 +67,7 @@ const Page = () => {
       key: "action",
       render: () => (
         <Space>
-          <EyeOutlined />
-          <SyncOutlined />
+          <SyncOutlined onClick={handleSyncExternalVariants} />
           <DeleteOutlined />
         </Space>
       ),

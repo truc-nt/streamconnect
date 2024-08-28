@@ -2,8 +2,8 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/model"
-	"ecommerce/internal/table"
+	"ecommerce/internal/database/model"
+	"ecommerce/internal/database/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -53,27 +53,36 @@ func (r *VariantRepository) UpdateById(db qrm.Queryable, columnList postgres.Col
 }
 
 type GetVariantsByProductId struct {
-	IDVariant         int64       `alias:"variant.id_variant" json:"id_variant"`
-	Sku               string      `alias:"variant.sku" json:"sku"`
-	Status            string      `alias:"variant.status" json:"status"`
-	Option            pgtype.JSON `alias:"variant.option" json:"option"`
-	IDExternalVariant int64       `alias:"external_product_shopify.id_external_product_shopify" json:"id_external_product_shopify"`
-	Price             float64     `alias:"external_product_shopify.price" json:"price"`
-	Stock             int64       `alias:"external_product_shopify.stock" json:"stock"`
+	IDVariant        int64       `sql:"primary_key" alias:"variant.id_variant" json:"id_variant"`
+	Sku              string      `alias:"variant.sku" json:"sku"`
+	Option           pgtype.JSON `alias:"variant.option" json:"option"`
+	Status           string      `alias:"variant.status" json:"status"`
+	ExternalVariants []*struct {
+		IDExternalVariant        int64   `alias:"external_variant.id_external_variant" json:"id_external_variant"`
+		ExternalProductIdMapping string  `alias:"external_variant.external_product_id_mapping" json:"-"`
+		ExternalIdMapping        string  `alias:"external_variant.external_id_mapping" json:"-"`
+		IDEcommerce              int16   `alias:"external_shop.fk_ecommerce" json:"id_ecommerce"`
+		IDExternalShop           int64   `alias:"external_variant.fk_external_shop"`
+		Sku                      string  `alias:"external_variant.sku" json:"sku"`
+		Price                    float64 `alias:"external_variant.price" json:"price"`
+		Stock                    int64   `json:"stock"`
+	} `json:"external_variants"`
 }
 
 func (r *VariantRepository) GetVariantsByProductId(db qrm.Queryable, productId int64, limit int64, offset int64) ([]*GetVariantsByProductId, error) {
 	stmt := table.Variant.SELECT(
 		table.Variant.AllColumns,
 		table.ExternalVariant.AllColumns,
+		table.ExternalShop.AllColumns,
 	).FROM(
 		table.Variant.
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)),
+			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)).
+			INNER_JOIN(table.ExternalShop, table.ExternalShop.IDExternalShop.EQ(table.ExternalVariant.FkExternalShop)),
 	).WHERE(
 		table.Variant.FkProduct.EQ(postgres.Int(productId)),
 	).LIMIT(limit).OFFSET(offset)
 
-	var data []*GetVariantsByProductId
+	data := make([]*GetVariantsByProductId, 0)
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err

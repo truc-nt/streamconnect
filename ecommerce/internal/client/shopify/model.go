@@ -4,6 +4,10 @@ type GetProductsResponse struct {
 	Products []*Product `json:"products"`
 }
 
+type GetProductVariantsResponse struct {
+	Variants []*Variant `json:"variants"`
+}
+
 type Product struct {
 	ID                int64       `json:"id"`
 	Title             string      `json:"title"`
@@ -59,8 +63,8 @@ type Variant struct {
 	FulfillmentService   string              `json:"fulfillment_service"`
 	InventoryManagement  string              `json:"inventory_management"`
 	Option1              string              `json:"option1"`
-	Option2              interface{}         `json:"option2"`
-	Option3              interface{}         `json:"option3"`
+	Option2              string              `json:"option2"`
+	Option3              string              `json:"option3"`
 	CreatedAt            string              `json:"created_at"`
 	UpdatedAt            string              `json:"updated_at"`
 	Taxable              bool                `json:"taxable"`
