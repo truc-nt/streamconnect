@@ -27,7 +27,8 @@ export interface ILivestreamProduct {
 }
 
 export const getLivestreamProducts = async (livestreamId: number) => {
-  return axios.get(`livestreams/${livestreamId}/products`);
+  const res = await axios.get<ILivestreamProduct[]>(`livestreams/${livestreamId}/products`)
+  return res.data;
 };
 
 export interface ILivestreamExternalVariant {

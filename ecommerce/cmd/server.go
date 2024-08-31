@@ -17,6 +17,8 @@ var HandlersSet = wire.NewSet(
 	handler.NewExternalShopHandler,
 	handler.NewExternalProductHandler,
 	handler.NewLivestreamHandler,
+	handler.NewLivestreamProductHandler,
+	handler.NewCartHandler,
 
 	handler.ProvideHandlers,
 )
@@ -31,6 +33,8 @@ var ServicesSet = wire.NewSet(
 	service.NewExternalShopAuthService,
 	service.NewExternalProductService,
 	service.NewLivestreamService,
+	service.NewLivestreamProductService,
+	service.NewCartService,
 )
 
 var RepositoriesSet = wire.NewSet(
@@ -43,6 +47,8 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewLivestreamRepository,
 	repository.NewLivestreamProductRepository,
 	repository.NewLivestreamExternalVariantRepository,
+
+	repository.NewCartRepository,
 )
 
 var AdapterSet = wire.NewSet(

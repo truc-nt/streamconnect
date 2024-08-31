@@ -7,10 +7,13 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/jackc/pgtype"
 )
 
 type ILivestreamExternalVariantRepository interface {
 	IBaseRepository[model.LivestreamExternalVariant]
+
+	GetByLivestreamProductId(db qrm.Queryable, livestreamProductId int64) ([]*GetByLivestreamProductId, error)
 }
 
 type LivestreamExternalVariantRepository struct {
@@ -47,4 +50,35 @@ func (r *LivestreamExternalVariantRepository) GetById(db qrm.Queryable, id int64
 		return nil, err
 	}
 	return &data, nil
+}
+
+type GetByLivestreamProductId struct {
+	IDLivestreamExternalVariant int64       `alias:"livestream_external_variant.id_livestream_external_variant" json:"id_livestream_external_variant"`
+	IDEcommerce                 int16       `alias:"external_shop.fk_ecommerce" json:"id_ecommerce"`
+	Quantity                    int64       `alias:"livestream_external_variant.quantity" json:"quantity"`
+	Option                      pgtype.JSON `alias:"variant.option" json:"option"`
+	Price                       float64     `alias:"external_variant.price" json:"price"`
+}
+
+func (r *LivestreamExternalVariantRepository) GetByLivestreamProductId(db qrm.Queryable, livestreamProductId int64) ([]*GetByLivestreamProductId, error) {
+	stmt := table.LivestreamExternalVariant.SELECT(
+		table.LivestreamExternalVariant.IDLivestreamExternalVariant,
+		table.ExternalShop.FkEcommerce,
+		table.LivestreamExternalVariant.Quantity,
+		table.Variant.IDVariant,
+		table.Variant.Option,
+		table.ExternalVariant.Price,
+	).FROM(
+		table.LivestreamExternalVariant.
+			INNER_JOIN(table.LivestreamProduct, table.LivestreamProduct.IDLivestreamProduct.EQ(table.LivestreamExternalVariant.FkLivestreamProduct)).
+			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.IDExternalVariant.EQ(table.LivestreamExternalVariant.FkExternalVariant)).
+			INNER_JOIN(table.ExternalShop, table.ExternalShop.IDExternalShop.EQ(table.ExternalVariant.FkExternalShop)).
+			INNER_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExternalVariant.FkVariant)),
+	).WHERE(table.LivestreamExternalVariant.FkLivestreamProduct.EQ(postgres.Int(livestreamProductId)))
+	var data []*GetByLivestreamProductId
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

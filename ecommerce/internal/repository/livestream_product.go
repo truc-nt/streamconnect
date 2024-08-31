@@ -7,11 +7,13 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/jackc/pgtype"
 )
 
 type ILivestreamProductRepository interface {
 	IBaseRepository[model.LivestreamProduct]
 
+	GetInfoById(db qrm.Queryable, id int64) (*GetInfoById, error)
 	GetByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*GetByLivestreamId, error)
 }
 
@@ -44,6 +46,32 @@ func (r *LivestreamProductRepository) GetById(db qrm.Queryable, id int64) (*mode
 	stmt := table.LivestreamProduct.SELECT(table.Livestream.AllColumns).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
 
 	var data model.LivestreamProduct
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+type GetInfoById struct {
+	*model.LivestreamProduct
+	Name        string      `alias:"product.name" json:"name"`
+	Description string      `alias:"product.description" json:"description"`
+	Option      pgtype.JSON `alias:"product.option" json:"option"`
+}
+
+func (r *LivestreamProductRepository) GetInfoById(db qrm.Queryable, id int64) (*GetInfoById, error) {
+	stmt := table.LivestreamProduct.SELECT(
+		table.LivestreamProduct.AllColumns,
+		table.Product.Name,
+		table.Product.Description,
+		table.Product.Option,
+	).FROM(
+		table.LivestreamProduct.
+			INNER_JOIN(table.Product, table.Product.IDProduct.EQ(table.LivestreamProduct.FkProduct)),
+	).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
+
+	var data GetInfoById
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err

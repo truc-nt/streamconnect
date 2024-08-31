@@ -158,7 +158,19 @@ const ProductList: React.FC = () => {
   useEffect(() => {
     const fetchLivestreamProducts = async () => {
       const response = await getLivestreamProducts(6);
-      setLivestreamProducts(response.data);
+      const fakeData = response.data.map((product: ILivestreamProduct) => ({
+        ...product,
+        image: "https://assets.tmecosys.com/image/upload/t_web767x639/img/recipe/ras/Assets/5C4B5768-8901-433D-8A8E-7A2E912BB22E/Derivates/49b89a69-8241-460b-9d56-8b4438b5636d.jpg",
+        categories: ["Denominations"],
+        categoryValues: {
+          Denominations: ["$10", "$20"],
+        },
+        prices: [
+          { platform: "Shopify", category1: "$10", price: 10 },
+          { platform: "Shopify", category1: "$20", price: 20 },
+        ],
+      }))
+      setLivestreamProducts(fakeData);
     };
     fetchLivestreamProducts();
   }, []);
@@ -232,7 +244,7 @@ const ProductList: React.FC = () => {
           {livestreamProducts.map((livestreamProduct) => (
             <Box
               key={livestreamProduct.id_livestream_product}
-              //onClick={() => handleProductClick(livestreamProduct)}
+              onClick={() => handleProductClick(livestreamProduct)}
               sx={{
                 flex: "0 0 auto",
                 width: "30%",
