@@ -8,6 +8,9 @@ import ThemeProvider from "./theme-provider";
 import Sidebar from "@/components/core/Sidebar";
 import LocalizationProvider from "./localization-provider";
 import AlertProvider from "./alert_provider";
+import {useRouter} from "next/navigation";
+import {useEffect} from "react";
+import {headers} from "next/headers";
 
 export const metadata = {
   title: "Create Next App",
@@ -19,6 +22,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const requestUrl: string = headers().get('x-url') ?? "";
+  const isLoginPage = requestUrl.includes("auth");
+  console.log(requestUrl);
   return (
     <html lang="en">
       <body>
@@ -26,7 +32,7 @@ export default function RootLayout({
           <StoreProvider>
             <LocalizationProvider>
               <AlertProvider>
-                <Grid container>
+                {!isLoginPage ? (<Grid container>
                   <Grid
                     item
                     xs={2}
@@ -51,7 +57,7 @@ export default function RootLayout({
                       {children}
                     </Container>
                   </Grid>
-                </Grid>
+                </Grid>) : (<>{children}</>)}
               </AlertProvider>
             </LocalizationProvider>
           </StoreProvider>
