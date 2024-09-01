@@ -1,9 +1,8 @@
 package com.hcmut.streamconnect.controller;
 
 import com.hcmut.streamconnect.configuration.JwtService;
-import com.hcmut.streamconnect.model.entity.Account;
+import com.hcmut.streamconnect.model.entity.User;
 import com.hcmut.streamconnect.model.service.AuthenticationService;
-import com.hcmut.streamconnect.model.service.AuthenticationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,16 +25,16 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        Account authenticatedUser = authenticationService.authenticate(loginUserDto);
+        User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse().setToken(jwtToken).setExpiresIn(jwtService.getExpirationTime());
         return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Account> register(@RequestBody Account account) {
-        Account registeredAccount = authenticationService.register(account);
-        return ResponseEntity.ok(registeredAccount);
+    public ResponseEntity<User> register(@RequestBody User user) {
+        User registeredUser = authenticationService.register(user);
+        return ResponseEntity.ok(registeredUser);
     }
 
     public static class LoginUserDto {

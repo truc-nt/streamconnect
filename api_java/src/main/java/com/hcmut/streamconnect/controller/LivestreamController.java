@@ -25,7 +25,7 @@ public class LivestreamController {
         this.livestreamService = livestreamService;
     }
 
-    @PreAuthorize("hasAnyAuthority('SELLER')")
+//    @PreAuthorize("hasAnyAuthority('SELLER')")
     @PostMapping("")
     public ResponseEntity<Livestream> createLivestream(@RequestBody LivestreamDTO livestreamDTO) {
         Livestream createdLivestream = livestreamService.createLivestream(livestreamDTO);

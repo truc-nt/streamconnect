@@ -1,4 +1,4 @@
-create table account
+create table user
 (
     id                     serial primary key,
     username               varchar(100) not null unique,
@@ -16,5 +16,5 @@ create table account_roles
     username     varchar(100) NOT NULL,
     role         varchar(20)  NOT NULL,
     UNIQUE (username, role),
-    FOREIGN KEY (username) REFERENCES account (username)
+    FOREIGN KEY (username) REFERENCES user (username)
 );

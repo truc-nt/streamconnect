@@ -7,7 +7,7 @@ import com.hcmut.streamconnect.account.CurrentUserDetails;
 import com.hcmut.streamconnect.model.DTO.LivestreamDTO;
 import com.hcmut.streamconnect.model.constant.LivestreamStatus;
 import com.hcmut.streamconnect.model.entity.Livestream;
-import com.hcmut.streamconnect.model.repository.AccountRepository;
+import com.hcmut.streamconnect.model.repository.UserRepository;
 import com.hcmut.streamconnect.model.repository.LivestreamRepository;
 import com.hcmut.streamconnect.util.AccountUtils;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class LivestreamServiceImpl implements LivestreamService{
     @Value("${videosdk.token}")
     private String videoSdkToken;
 
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
     private final LivestreamRepository livestreamRepository;
 
@@ -35,8 +35,8 @@ public class LivestreamServiceImpl implements LivestreamService{
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    public LivestreamServiceImpl(AccountRepository accountRepository, LivestreamRepository livestreamRepository) {
-        this.accountRepository = accountRepository;
+    public LivestreamServiceImpl(UserRepository userRepository, LivestreamRepository livestreamRepository) {
+        this.userRepository = userRepository;
         this.livestreamRepository = livestreamRepository;
     }
 
@@ -45,7 +45,7 @@ public class LivestreamServiceImpl implements LivestreamService{
         Livestream newLiveStream = new Livestream();
         copyForUpdate(livestream, newLiveStream);
         CurrentUserDetails currentUserDetails = AccountUtils.getCurrentUserDetails();
-        newLiveStream.setOwner(accountRepository.findById(currentUserDetails.getId())
+        newLiveStream.setOwner(userRepository.findById(currentUserDetails.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Owner not found")));
         newLiveStream.setStatus(LivestreamStatus.CREATED.getValue());
         newLiveStream.setMeetingId(createVideoSdkRoom());

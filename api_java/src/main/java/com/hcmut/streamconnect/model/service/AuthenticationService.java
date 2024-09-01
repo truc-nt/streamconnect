@@ -1,9 +1,9 @@
 package com.hcmut.streamconnect.model.service;
 
 import com.hcmut.streamconnect.controller.AuthenticationController.LoginUserDto;
-import com.hcmut.streamconnect.model.entity.Account;
+import com.hcmut.streamconnect.model.entity.User;
 
 public interface AuthenticationService {
-    Account authenticate(LoginUserDto input);
-    Account register(Account account);
+    User authenticate(LoginUserDto input);
+    User register(User user);
 }

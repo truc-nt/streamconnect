@@ -1,0 +1,8 @@
+.avatar {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar:hover, .avatar:active{
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}

@@ -18,10 +18,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "account")
-public class Account implements Serializable {
+@Table(name="\"user\"")
+public class User implements Serializable {
 
     @Id
+    @Column(name = "id_user")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -45,7 +46,7 @@ public class Account implements Serializable {
     @JsonIgnore
     @Column(name = "role")
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "account_roles", joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"))
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"))
     private List<String> roles;
 
     @Column(name = "created_date_time")

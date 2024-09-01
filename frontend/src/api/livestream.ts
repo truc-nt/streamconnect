@@ -1,4 +1,5 @@
 import axios from "./axios";
+import {axiosJava} from "./axios";
 
 interface ILivestream {
   title: string;
@@ -15,6 +16,23 @@ interface ILivestream {
 export const createLivestream = async (shopId: number, data: ILivestream) => {
   console.log(data);
   return axios.post(`shops/${shopId}/livestreams/create`, data);
+};
+
+export const fetchMeeting = async (status: string, findAll: boolean) => {
+  const params = new URLSearchParams();
+  if (status) {
+    params.append("status", status);
+  }
+  params.append("fetchAll", findAll.toString());
+
+  try {
+    const res = await axiosJava.get(`/livestream`, {params});
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 };
 
 export interface ILivestreamProduct {

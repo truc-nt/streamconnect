@@ -48,3 +48,25 @@ export const getLivstreamExternalVariants = async (
 ) => {
   return axios.get(`livestream_products/${idLivestreamProduct}`);
 };
+
+// export const fetchMeeting = async ({ status, findAll }) => {
+//   const url = new URL(BASE_URL + "/livestream");
+//   if (status) {
+//     url.searchParams.append("status", status);
+//   }
+//   url.searchParams.append("fetchAll", findAll.toString());
+//
+//   const res = await fetch(url.toString(), {
+//     method: "GET",
+//     headers: {
+//       authorization: `Bearer ${JWT_TOKEN}`,
+//       "Content-Type": "application/json",
+//     },
+//   });
+//
+//   if (!res.ok) {
+//     throw new Error(`Error fetching livestreams: ${res.statusText}`);
+//   }
+//
+//   return res.json();
+// };

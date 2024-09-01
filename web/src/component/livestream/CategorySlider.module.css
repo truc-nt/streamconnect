@@ -1,0 +1,28 @@
+.category-slider {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px 0;
+    white-space: nowrap;
+}
+
+.category-button {
+    background-color: #6b6b6b;
+    color: white;
+    margin: 0 5px;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+.category-button.active {
+    background-color: #dddddd;
+    color: #020202;
+}
+
+.category-button:hover {
+    background-color: #5a5a5a;
+}
+
+.category-button.active:hover {
+    background-color: #dddddd;
+}

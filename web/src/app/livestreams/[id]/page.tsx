@@ -1,17 +1,28 @@
-import { Row, Col } from "antd";
-import Sidebar from "./component/Sidebar";
+"use client"
+import {sdkToken} from "@/api/axios";
+import {MeetingProvider} from "@videosdk.live/react-sdk";
+import LiveStreamPageContainer from "@/app/livestreams/[id]/IlsContainer";
 
 const Page = ({ params }: { params: { id: number } }) => {
+  const meetingId = "v00o-wrk7-p0dr";
   return (
-    <>
-      <Row gutter={{ xs: 8 }} className="h-full flex items-stretch">
-        <Col span={16}></Col>
-        <Col span={8} className="relative">
-          <Sidebar livestreamId={params.id} />
-        </Col>
-      </Row>
-    </>
-  );
+      <MeetingProvider
+          config={{
+            meetingId: meetingId,
+            micEnabled: true,
+            webcamEnabled: true,
+            name: "TestUser",
+            mode: "VIEWER",
+            multiStream: false,
+            debugMode: true
+          }}
+          token={sdkToken}
+          reinitialiseMeetingOnConfigChange={true}
+          joinWithoutUserInteraction={true}
+      >
+        <LiveStreamPageContainer params={params} />
+      </MeetingProvider>
+  )
 };
 
 export default Page;

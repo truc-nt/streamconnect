@@ -1,22 +1,15 @@
 package com.hcmut.streamconnect.configuration;
 
-import static com.hcmut.streamconnect.util.CollectionUtils.mapToList;
-
-import com.hcmut.streamconnect.account.CustomUserDetails;
-import com.hcmut.streamconnect.model.entity.Account;
+import com.hcmut.streamconnect.model.entity.User;
 import io.jsonwebtoken.Jwts;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -39,7 +32,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(Account user) {
+    public String generateToken(User user) {
         return buildToken(new HashMap<>(), user.getUsername(), jwtExpiration);
     }
 

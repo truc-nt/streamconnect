@@ -137,42 +137,6 @@ const LivestreamPreview: React.FC = () => {
             </Box>
           </Box>
         </Box>
-
-        <Badge
-          badgeContent="Live"
-          color="error"
-          sx={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            zIndex: 3,
-            marginRight: 2,
-            marginTop: 2,
-          }}
-        >
-          <Box />
-        </Badge>
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 16,
-            right: 16,
-            display: "flex",
-            gap: 1,
-            zIndex: 3,
-          }}
-        >
-          <IconButton sx={{ color: "white" }}>
-            <FeaturedVideo />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <Fullscreen />
-          </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <VolumeOff />
-          </IconButton>
-        </Box>
       </Box>
     </Box>
   );

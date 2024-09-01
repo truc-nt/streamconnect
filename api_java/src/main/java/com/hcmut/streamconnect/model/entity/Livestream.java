@@ -19,7 +19,7 @@ public class Livestream {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    private Account owner;
+    private User owner;
 
     @Column(name = "status", nullable = false)
     private String status;
@@ -63,11 +63,11 @@ public class Livestream {
         this.description = description;
     }
 
-    public Account getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(Account owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 
