@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"ecommerce/internal/client/shopify"
+	clientModel "ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/constants"
 	"ecommerce/internal/model"
@@ -32,7 +33,9 @@ type IShopifyAdapter interface {
 	GetAuthorizePath(param *shopify.ShopifyClientParam) string
 	GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error)
 	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error)
-	//GetShopifyAuthConfig() *oauth2.Config
+	GetExternalVariantStockByproductIds(param *shopify.ShopifyClientParam, productIds []string) ([]*model.ExternalVariantStock, error)
+
+	CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error)
 }
 
 type ShopifyAdapterConfig struct {
@@ -89,12 +92,12 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 		return nil, err
 	}
 
-	var externalProducts []*model.ExternalVariant
+	var externalVariants []*model.ExternalVariant
 	for _, product := range products.Products {
 		for _, variant := range product.Variants {
-			var externalProduct *model.ExternalVariant
+			var externalVariant *model.ExternalVariant
 			decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-				Result:  &externalProduct,
+				Result:  &externalVariant,
 				TagName: "shopify",
 			})
 			if err != nil {
@@ -106,10 +109,10 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 				return nil, err
 			}
 
-			var externalProductId = strconv.FormatInt(product.ID, 10)
+			var externalProductIdMapping = strconv.FormatInt(product.ID, 10)
 
-			externalProduct.IDExternal = strconv.FormatInt(variant.ID, 10)
-			externalProduct.IDExternalProduct = &externalProductId
+			externalVariant.ExternalIdMapping = strconv.FormatInt(variant.ID, 10)
+			externalVariant.ExternalProductIdMapping = &externalProductIdMapping
 
 			if foundImage, ok := lo.Find(product.Images, func(image *shopify.Image) bool {
 				if variant.ImageID == nil {
@@ -117,11 +120,15 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 				}
 				return image.ID == *variant.ImageID
 			}); ok {
-				externalProduct.ImageURL = foundImage.Src
+				externalVariant.ImageUrl = *foundImage.Src
+			} else {
+				if product.Image != nil && product.Image.Src != nil {
+					externalVariant.ImageUrl = *product.Image.Src
+				}
 			}
 
 			if price, err := strconv.ParseFloat(variant.Price, 64); err == nil {
-				externalProduct.Price = &price
+				externalVariant.Price = price
 			}
 
 			_option := make(map[string]string)
@@ -138,14 +145,66 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 				continue
 			}
 
-			externalProduct.Name = product.Title
-			externalProduct.Option = pgtype.JSON{
+			externalVariant.Name = product.Title
+			externalVariant.Sku = &variant.Sku
+			if product.Status == constants.ACTIVE {
+				externalVariant.Status = constants.ACTIVE
+			} else {
+				externalVariant.Status = constants.INACTIVE
+			}
+			externalVariant.Option = pgtype.JSON{
 				Bytes:  jsonData,
 				Status: pgtype.Present,
 			}
 
-			externalProducts = append(externalProducts, externalProduct)
+			externalVariants = append(externalVariants, externalVariant)
 		}
 	}
-	return externalProducts, nil
+	return externalVariants, nil
+}
+
+func (a *ShopifyAdapter) GetExternalVariantStockByproductIds(param *shopify.ShopifyClientParam, productIds []string) ([]*model.ExternalVariantStock, error) {
+	externalProducts, err := a.getShopifyClient(param).GetProductsByProductIds(productIds)
+	if err != nil {
+		return nil, err
+	}
+
+	var externalVariantStocks []*model.ExternalVariantStock
+	for _, product := range externalProducts.Products {
+		for _, variant := range product.Variants {
+			var externalProductIdMapping = strconv.FormatInt(product.ID, 10)
+
+			externalVariantStocks = append(externalVariantStocks, &model.ExternalVariantStock{
+				ExternalProductIdMapping: &externalProductIdMapping,
+				ExternalIdMapping:        strconv.FormatInt(variant.ID, 10),
+				Stock:                    variant.InventoryQuantity,
+			})
+		}
+	}
+	return externalVariantStocks, nil
+}
+
+func (a *ShopifyAdapter) CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error) {
+	createOrderRequest := &clientModel.CreateOrderRequest{
+		Order: &clientModel.OrderRequest{
+			LineItems: make([]*clientModel.LineItemRequest, 0),
+		},
+	}
+	for _, externalOrderItem := range externalOrderItems {
+		variantId, err := strconv.Atoi(externalOrderItem.ExternalIdMapping)
+		if err != nil {
+			return "", err
+		}
+		createOrderRequest.Order.LineItems = append(createOrderRequest.Order.LineItems, &clientModel.LineItemRequest{
+			VariantID: variantId,
+			Quantity:  externalOrderItem.Quantity,
+		})
+
+	}
+
+	newExternalOrder, err := a.getShopifyClient(param).CreateOrder(createOrderRequest)
+	if err != nil {
+		return "", err
+	}
+	return string(newExternalOrder.Order.ID), nil
 }

@@ -11,19 +11,22 @@ import (
 )
 
 var HandlersSet = wire.NewSet(
+	handler.NewUserHandler,
 	handler.NewProductHandler,
 	handler.NewVariantHandler,
 	handler.NewShopifyHandler,
 	handler.NewExternalShopHandler,
-	handler.NewExternalProductHandler,
+	handler.NewExternalVariantHandler,
 	handler.NewLivestreamHandler,
 	handler.NewLivestreamProductHandler,
 	handler.NewCartHandler,
+	handler.NewOrderHandler,
 
 	handler.ProvideHandlers,
 )
 
 var ServicesSet = wire.NewSet(
+	service.NewUserService,
 	service.NewShopifyService,
 	service.ProvideEcommerceServices,
 
@@ -31,15 +34,20 @@ var ServicesSet = wire.NewSet(
 	service.NewVariantService,
 	service.NewExternalShopService,
 	service.NewExternalShopAuthService,
-	service.NewExternalProductService,
+	service.NewExternalVariantService,
 	service.NewLivestreamService,
 	service.NewLivestreamProductService,
 	service.NewCartService,
+
+	service.NewOrderService,
 )
 
 var RepositoriesSet = wire.NewSet(
+	repository.NewUserAddressRepository,
+
 	repository.NewProductRepository,
 	repository.NewVariantRepository,
+	repository.NewImageVariantRepository,
 	repository.NewExternalShopRepository,
 	repository.NewExternalShopShopifyAuthRepository,
 	repository.NewExternalVariantRepository,
@@ -48,7 +56,13 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewLivestreamProductRepository,
 	repository.NewLivestreamExternalVariantRepository,
 
-	repository.NewCartRepository,
+	repository.NewCartItemRepository,
+	repository.NewCartItemLivestreamExternalVariantRepository,
+
+	repository.NewOrderRepository,
+	repository.NewOrderItemRepository,
+	repository.NewOrderItemLivestreamExternalVariantRepository,
+	repository.NewExternalOrderRepository,
 )
 
 var AdapterSet = wire.NewSet(

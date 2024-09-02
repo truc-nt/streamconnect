@@ -4,7 +4,6 @@ import (
 	"ecommerce/internal/repository"
 
 	"github.com/jackc/pgtype"
-	"github.com/samber/lo"
 )
 
 type ILivestreamProductService interface {
@@ -25,7 +24,7 @@ func NewLivestreamProductService(livestreamProductRepository repository.ILivestr
 }
 
 func (s *LivestreamProductService) GetLivestreamProductsByLivestreamId(livestreamId int64) (interface{}, error) {
-	livestreamProducts, err := s.LivestreamProductRepository.GetByLivestreamId(s.LivestreamProductRepository.GetDefaultDatabase().Db, livestreamId)
+	livestreamProducts, err := s.LivestreamProductRepository.GetByLivestreamId(s.LivestreamProductRepository.GetDatabase().Db, livestreamId)
 	if err != nil {
 		return nil, err
 	}
@@ -45,49 +44,11 @@ type GetLivestreamVariantsByLivestreamProductId struct {
 	LivestreamExternalVariants []*GetLivestreamExternalVariantByLivestreamProductId `json:"livestream_external_variants"`
 }
 
-type GetLivestreamProductInfoByLivestreamProductId struct {
-	Name               string                                        `json:"name"`
-	Description        string                                        `json:"description"`
-	Option             pgtype.JSON                                   `json:"option"`
-	LivestreamVariants []*GetLivestreamVariantsByLivestreamProductId `json:"livestream_variants"`
-}
-
 func (s *LivestreamProductService) GetLivestreamProductInfoByLivestreamProductId(livestreamProductId int64) (interface{}, error) {
-	livesetreamProduct, err := s.LivestreamProductRepository.GetInfoById(s.LivestreamProductRepository.GetDefaultDatabase().Db, livestreamProductId)
+	livestreamExternalVariants, err := s.LivestreamExternalVariantRepository.GetByLivestreamProductId(s.LivestreamExternalVariantRepository.GetDatabase().Db, livestreamProductId)
 	if err != nil {
 		return nil, err
 	}
 
-	livestreamExternalVariants, err := s.LivestreamExternalVariantRepository.GetByLivestreamProductId(s.LivestreamExternalVariantRepository.GetDefaultDatabase().Db, livestreamProductId)
-	if err != nil {
-		return nil, err
-	}
-	livestreamVariantsMapping := make(map[int64]*GetLivestreamVariantsByLivestreamProductId)
-	for _, livestreamExternalVariant := range livestreamExternalVariants {
-		if _, ok := livestreamVariantsMapping[livestreamExternalVariant.IDLivestreamExternalVariant]; !ok {
-			livestreamVariantsMapping[livestreamExternalVariant.IDLivestreamExternalVariant] = &GetLivestreamVariantsByLivestreamProductId{
-				Option: livestreamExternalVariant.Option,
-			}
-		}
-
-		livestreamVariantsMapping[livestreamExternalVariant.IDLivestreamExternalVariant].LivestreamExternalVariants = append(livestreamVariantsMapping[livestreamExternalVariant.IDLivestreamExternalVariant].LivestreamExternalVariants, &GetLivestreamExternalVariantByLivestreamProductId{
-			IDLivestreamExternalVariant: livestreamExternalVariant.IDLivestreamExternalVariant,
-			IDEcommerce:                 livestreamExternalVariant.IDEcommerce,
-			Quantity:                    livestreamExternalVariant.Quantity,
-			Price:                       livestreamExternalVariant.Price,
-		})
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	livestreamVariants := lo.Values(livestreamVariantsMapping)
-	res := &GetLivestreamProductInfoByLivestreamProductId{
-		Name:               livesetreamProduct.Name,
-		Description:        livesetreamProduct.Description,
-		Option:             livesetreamProduct.Option,
-		LivestreamVariants: livestreamVariants,
-	}
-
-	return res, nil
+	return livestreamExternalVariants, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type ILivestreamProductHandler interface {
-	GetProductsByLivestreamId(ctx *gin.Context)
+	GetLivestreamProductsByLivestreamId(ctx *gin.Context)
 	GetLivestreamProductInfoByLivestreamProductId(ctx *gin.Context)
 }
 
@@ -22,7 +22,7 @@ func NewLivestreamProductHandler(s service.ILivestreamProductService) ILivestrea
 	}
 }
 
-func (h *LivestreamProductHandler) GetProductsByLivestreamId(ctx *gin.Context) {
+func (h *LivestreamProductHandler) GetLivestreamProductsByLivestreamId(ctx *gin.Context) {
 	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)

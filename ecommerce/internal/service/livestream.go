@@ -2,9 +2,9 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/model"
+	internalModel "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
-	"ecommerce/internal/table"
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
@@ -53,61 +53,54 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 			return nil, err
 		}
 
-		livestreamProductsMapping := make(map[int64]bool, 0)
-		for _, product := range createLivestreamRequest.LivestreamExternalVariants {
-			livestreamProductsMapping[product.IDProduct] = true
-		}
-
-		livestreamProducts := lo.Map(lo.Keys(livestreamProductsMapping), func(productId int64, index int) *internalModel.LivestreamProduct {
-			var priority int32 = int32(index)
-			return &internalModel.LivestreamProduct{
+		for _, livestreamProduct := range createLivestreamRequest.LivestreamProducts {
+			newLivestreamProductData := internalModel.LivestreamProduct{
 				FkLivestream: newLivestream.IDLivestream,
-				FkProduct:    productId,
-				Priority:     &priority,
+				FkProduct:    livestreamProduct.IDProduct,
+				Priority:     livestreamProduct.Priority,
 			}
-		})
+			newLivestreamProduct, err := s.LivestreamProductRepository.CreateOne(
+				db,
+				postgres.ColumnList{
+					table.LivestreamProduct.FkLivestream,
+					table.LivestreamProduct.FkProduct,
+					table.LivestreamProduct.Priority,
+				},
+				newLivestreamProductData,
+			)
+			if err != nil {
+				return nil, err
+			}
 
-		newLivestreamProductList, err := s.LivestreamProductRepository.CreateMany(
-			db,
-			postgres.ColumnList{
-				table.LivestreamProduct.FkLivestream,
-				table.LivestreamProduct.FkProduct,
-				table.LivestreamProduct.Priority,
-			},
-			livestreamProducts,
-		)
-		if err != nil {
-			return nil, err
+			newExternalLivestreamVariantData := make([]*internalModel.LivestreamExternalVariant, 0)
+			for _, livestreamVariant := range livestreamProduct.LivestreamVariants {
+				livestreamExternalVariants := lo.Map(livestreamVariant.LivestreamExternalVariants, func(externalVariant *struct {
+					IDExternalVariant int64 `json:"id_external_variant"`
+					Quantity          int32 `json:"quantity"`
+				}, index int) *internalModel.LivestreamExternalVariant {
+					return &internalModel.LivestreamExternalVariant{
+						FkLivestreamProduct: newLivestreamProduct.IDLivestreamProduct,
+						FkExternalVariant:   externalVariant.IDExternalVariant,
+						Quantity:            externalVariant.Quantity,
+					}
+				})
+				newExternalLivestreamVariantData = append(newExternalLivestreamVariantData, livestreamExternalVariants...)
+			}
+
+			_, err = s.LivestreamExternalVariantRepository.CreateMany(
+				db,
+				postgres.ColumnList{
+					table.LivestreamExternalVariant.FkLivestreamProduct,
+					table.LivestreamExternalVariant.FkExternalVariant,
+					table.LivestreamExternalVariant.Quantity,
+				},
+				newExternalLivestreamVariantData,
+			)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		livestreamExternalVariants := lo.Map(createLivestreamRequest.LivestreamExternalVariants, func(externalVariant *model.CreateLivestreamExternalVariants, index int) *internalModel.LivestreamExternalVariant {
-			livestreamProduct, ok := lo.Find(newLivestreamProductList, func(livestreamProduct *internalModel.LivestreamProduct) bool {
-				return livestreamProduct.FkProduct == externalVariant.IDProduct
-			})
-
-			if !ok {
-				return nil
-			}
-
-			return &internalModel.LivestreamExternalVariant{
-				FkLivestreamProduct: livestreamProduct.IDLivestreamProduct,
-				FkExternalVariant:   externalVariant.IDExternalVariant,
-				Quantity:            externalVariant.Quantity,
-			}
-		})
-
-		_, err = s.LivestreamExternalVariantRepository.CreateMany(
-			db,
-			postgres.ColumnList{
-				table.LivestreamExternalVariant.FkLivestreamProduct,
-				table.LivestreamExternalVariant.FkExternalVariant,
-				table.LivestreamExternalVariant.Quantity,
-			},
-			livestreamExternalVariants,
-		)
-		if err != nil {
-			return nil, err
-		}
 		return nil, nil
 	}
 

@@ -1,13 +1,15 @@
 package service
 
+import "ecommerce/internal/model"
+
 type IEcommerceService interface {
 	GetEcommerceId() int16
-	SyncProducts(externalShopId int64) error
+	SyncVariants(externalShopId int64) error
+	GetStockByExternalProductExternalId(externalShopId int64, externalProductIdMappings []string) ([]*model.ExternalVariantStock, error)
+	CreateOrder(externalShopId int64, externalOrderItems []*model.ExternalOrderItem) (string, error)
 
-	GetExternalProductsByExternalShopId(externalShopId int64, limit int64, offset int64) (interface{}, error)
 	//GetProductVariantsByExternalProductExternalId(externalProductExternalId interface{}) (interface{}, error)
-	CreateExternalVariants(externalProductExternalId interface{}) error
-	GetExternalProductByVariantIds(variantIds []int64) (interface{}, error)
+	//CreateExternalVariants(externalProductExternalId interface{}) error
 }
 
 func ProvideEcommerceServices(shopifyService IShopifyService) map[int16]IEcommerceService {

@@ -12,16 +12,15 @@ const initialState = {
   title: string;
   description: string;
   livestreamExternalVariants: {
-    idProduct: number;
-    idVariant: number;
+    productId: number;
+    variantId: number;
     name: string;
-    option: Record<string, string>;
+    imageUrl: string;
+    option: { [key: string]: string };
     externalVariants: {
-      idVariant: number;
-      idExternalVariant: number;
-      idEcommerce: number;
+      externalVariantId: number;
+      ecommerceId: number;
       price: number;
-      stock: number;
       quantity: number;
     }[];
   }[];

@@ -1,12 +1,14 @@
 package shopify
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/constants"
 
 	"golang.org/x/oauth2"
@@ -16,7 +18,11 @@ import (
 type IShopifyClient interface {
 	GetAuthorizePath(oauth2Config *oauth2.Config) string
 	GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error)
+
 	GetProducts() (*GetProductsResponse, error)
+	GetProductsByProductIds(productIds []string) (*GetProductsResponse, error)
+	CreateOrder(*model.CreateOrderRequest) (*model.CreateOrderResponse, error)
+	//GetProductVariantsByProductId(productId int64) (*GetProductVariantsResponse, error)
 }
 
 type ShopifyClientParam struct {
@@ -58,12 +64,9 @@ func (c *ShopifyClient) GetAccessToken(oauth2Config *oauth2.Config, code string)
 	return res, err
 }
 
-func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyGetProductsPath), nil)
-	if err != nil {
-		return nil, err
-	}
+func (c *ShopifyClient) getResponse(req *http.Request) ([]byte, error) {
 	req.Header.Set(constants.ShopifyTokenKey, c.Param.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.Client.Do(req)
 	if err != nil {
@@ -76,10 +79,102 @@ func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
 		return nil, err
 	}
 
+	return resData, nil
+}
+
+func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyGetProductsPath), nil)
+	if err != nil {
+		return nil, err
+	}
+	resData, err := c.getResponse(req)
+	if err != nil {
+		return nil, err
+	}
+
 	var products *GetProductsResponse
 	if err := json.Unmarshal(resData, &products); err != nil {
 		return nil, err
 	}
 
 	return products, nil
+}
+
+func (c *ShopifyClient) GetProductsByProductIds(productIds []string) (*GetProductsResponse, error) {
+	queryParams := "?ids="
+	for i, productId := range productIds {
+		if i == 0 {
+			queryParams += productId
+		} else {
+			queryParams += fmt.Sprintf(",%s", productId)
+		}
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyGetProductsPath+queryParams), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	/*
+		q := req.URL.Query()
+		for _, productId := range productIds {
+			q.Add("ids", fmt.Sprintf("%d", productId))
+		}
+		req.URL.RawQuery = q.Encode()*/
+
+	resData, err := c.getResponse(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var products *GetProductsResponse
+	if err := json.Unmarshal(resData, &products); err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (c *ShopifyClient) GetProductVariantsByProductId(productId int64) (*GetProductVariantsResponse, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), fmt.Sprintf(constants.ShopifyGetProductVariantsPath, productId)), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resData, err := c.getResponse(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var variants *GetProductVariantsResponse
+	if err := json.Unmarshal(resData, &variants); err != nil {
+		return nil, err
+	}
+
+	return variants, nil
+}
+
+func (c *ShopifyClient) CreateOrder(request *model.CreateOrderRequest) (*model.CreateOrderResponse, error) {
+	reqBody, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewReader(reqBody)
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyCreateOrderPath), body)
+	if err != nil {
+		return nil, err
+	}
+
+	resData, err := c.getResponse(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var order *model.CreateOrderResponse
+	if err := json.Unmarshal(resData, &order); err != nil {
+		return nil, err
+	}
+
+	return order, nil
 }

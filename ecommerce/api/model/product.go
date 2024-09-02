@@ -2,8 +2,8 @@ package model
 
 import "time"
 
-type CreateProductsVariantsRequest []struct {
-	IDExternalProduct string `json:"id_external_product"`
+type CreateProductWithVariants []struct {
+	ExternalProductIdMapping string `json:"external_product_id_mapping"`
 }
 
 type GetProductsByShopIdParam struct {

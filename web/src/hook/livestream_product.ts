@@ -1,14 +1,11 @@
 import { getLivestreamProduct } from "@/api/livestream_product";
 import useSWR from "swr";
 
-export const useGetLivestreamProduct = (livestreamProductId: number | null) => {
-  if (!livestreamProductId) return { data: null, error: null };
+export const useGetLivestreamProduct = (livestreamProductId: number) => {
   return useSWR(
-    [`/api/livestreams/${livestreamProductId}`, livestreamProductId],
-    async ([_, livestreamProductId]) =>
-      await getLivestreamProduct(livestreamProductId),
+    `/api/livestream_products/${livestreamProductId}`,
+    () => getLivestreamProduct(livestreamProductId),
     {
-      //shouldRetryOnError: false,
       revalidateOnFocus: false,
     },
   );

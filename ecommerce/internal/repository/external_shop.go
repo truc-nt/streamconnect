@@ -2,9 +2,8 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/table"
-
-	"ecommerce/internal/model"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -14,6 +13,8 @@ type IExternalShopRepository interface {
 	IBaseRepository[model.ExternalShop]
 
 	GetByShopId(db qrm.Queryable, shopId int64, limit int64, offset int64) (interface{}, error)
+
+	CreateOneV1(columnList postgres.ColumnList, data model.ExternalShop) func(db qrm.Queryable) (*model.ExternalShop, error)
 }
 
 type ExternalShopRepository struct {
@@ -45,6 +46,13 @@ func (r *ExternalShopRepository) GetById(db qrm.Queryable, id int64) (*model.Ext
 func (r *ExternalShopRepository) CreateOne(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalShop) (*model.ExternalShop, error) {
 	stmt := table.ExternalShop.INSERT(columnList).MODEL(data).RETURNING(table.ExternalShop.AllColumns)
 	return r.insertOne(db, stmt)
+}
+
+func (r *ExternalShopRepository) CreateOneV1(columnList postgres.ColumnList, data model.ExternalShop) func(db qrm.Queryable) (*model.ExternalShop, error) {
+	stmt := table.ExternalShop.INSERT(columnList).MODEL(data).RETURNING(table.ExternalShop.AllColumns)
+	return func(db qrm.Queryable) (*model.ExternalShop, error) {
+		return r.insertOne(db, stmt)
+	}
 }
 
 func (r *ExternalShopRepository) CreateMany(db qrm.Queryable, columnList postgres.ColumnList, data []*model.ExternalShop) ([]*model.ExternalShop, error) {

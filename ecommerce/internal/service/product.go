@@ -2,87 +2,66 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/model"
+	"ecommerce/internal/constants"
+	internalModel "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
-	"ecommerce/internal/table"
 	"encoding/json"
 	"fmt"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgtype"
 )
 
 type IProductService interface {
 	GetProductById(productId int64) (*internalModel.Product, error)
 	GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
-	CreateProductVariantsFromExternalProducts(productsVariantsList *model.CreateProductsVariantsRequest) error
+	CreateProductsWithVariants(shopId int64, createProductsWithVariantsRequest *model.CreateProductWithVariants) error
 }
 
 type ProductService struct {
 	ProductRepository         repository.IProductRepository
 	VariantRepository         repository.IVariantRepository
 	ExternalVariantRepository repository.IExternalVariantRepository
+	ImageVariantRepository    repository.IImageVariantRepository
 
 	EcommerceService map[int16]IEcommerceService
 }
 
-func NewProductService(productRepository repository.IProductRepository, variantRepository repository.IVariantRepository, externalVariantRepository repository.IExternalVariantRepository, ecommerceService map[int16]IEcommerceService) IProductService {
+func NewProductService(
+	productRepository repository.IProductRepository,
+	variantRepository repository.IVariantRepository,
+	externalVariantRepository repository.IExternalVariantRepository,
+	imageVariantRepository repository.IImageVariantRepository,
+	ecommerceService map[int16]IEcommerceService) IProductService {
 	return &ProductService{
 		ProductRepository:         productRepository,
 		VariantRepository:         variantRepository,
 		ExternalVariantRepository: externalVariantRepository,
+		ImageVariantRepository:    imageVariantRepository,
 		EcommerceService:          ecommerceService,
 	}
 }
 
 func (s *ProductService) GetProductById(productId int64) (*internalModel.Product, error) {
-	return s.ProductRepository.GetById(s.ProductRepository.GetDefaultDatabase().Db, productId)
+	return s.ProductRepository.GetById(s.ProductRepository.GetDatabase().Db, productId)
 }
 
 func (s *ProductService) GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error) {
-	return s.ProductRepository.GetByShopId(s.ProductRepository.GetDefaultDatabase().Db, shopId, limit, offset)
+	return s.ProductRepository.GetByShopId(s.ProductRepository.GetDatabase().Db, shopId, limit, offset)
 
 }
 
-func (s *ProductService) CreateProductVariantsFromExternalProducts(productsVariantsList *model.CreateProductsVariantsRequest) error {
-	/*externalProducts := make(map[int16][]string)
-	for _, productsVariant := range *productsVariantsList {
-		externalProducts[productsVariant.EcommerceID] = append(externalProducts[productsVariant.EcommerceID], productsVariant.ExternalProductExternalID)
-	}
-
-	for ecommerceID, externalProductsList := range externalProducts {
-		ecommerceService, ok := s.EcommerceService[ecommerceID]
-		if !ok {
-			return errors.New("ecommerce service not found")
-		}
-
-		if err := ecommerceService.CreateExternalVariants(externalProductsList); err != nil {
-			return err
-		}
-	}
-
-	return nil*/
-	idExternalProductList := make([]string, 0)
-	for _, productsVariant := range *productsVariantsList {
-		idExternalProductList = append(idExternalProductList, productsVariant.IDExternalProduct)
-	}
-
+func (s *ProductService) CreateProductsWithVariants(shopId int64, createProductsWithVariantsRequest *model.CreateProductWithVariants) error {
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
 
-		for _, externalProductId := range idExternalProductList {
-			externalVariants, err := s.ExternalVariantRepository.GetByExternalProductId(s.ExternalVariantRepository.GetDefaultDatabase().Db, externalProductId)
+		for _, createProductsWithVariants := range *createProductsWithVariantsRequest {
+			externalVariants, err := s.ExternalVariantRepository.GetByExternalProductId(s.ExternalVariantRepository.GetDatabase().Db, createProductsWithVariants.ExternalProductIdMapping)
 			if err != nil {
 				return nil, err
 			}
 			if len(externalVariants) == 0 {
-				fmt.Printf("external product id %s not found", externalProductId)
-				continue
-			}
-
-			if externalVariants[0].FkVariant != nil {
-				fmt.Printf("shopify priduct id %s already been created", externalProductId)
-				continue
+				return nil, fmt.Errorf("external product id %s not found", createProductsWithVariants.ExternalProductIdMapping)
 			}
 
 			newProduct, err := s.ProductRepository.CreateOne(
@@ -93,67 +72,74 @@ func (s *ProductService) CreateProductVariantsFromExternalProducts(productsVaria
 				},
 				internalModel.Product{
 					Name:   externalVariants[0].Name,
-					FkShop: 1,
+					FkShop: shopId,
 				},
 			)
 			if err != nil {
 				return nil, err
 			}
 
-			var options = make(map[string][]string)
-
-			for _, externalProduct := range externalVariants {
+			isInactive := false
+			for _, externalVariant := range externalVariants {
 				newVariant, err := s.VariantRepository.CreateOne(
 					db,
 					postgres.ColumnList{
 						table.Variant.FkProduct,
 						table.Variant.Sku,
 						table.Variant.Option,
+						table.Variant.Status,
 					},
 					internalModel.Variant{
 						FkProduct: newProduct.IDProduct,
-						Sku:       externalProduct.Sku,
-						Option:    externalProduct.Option,
+						Sku:       externalVariant.Sku,
+						Option:    externalVariant.Option,
+						Status:    externalVariant.Status,
 					},
 				)
+
+				if externalVariant.Status == constants.INACTIVE {
+					isInactive = true
+				}
 
 				if err != nil {
 					return nil, err
 				}
 
 				var variantOption map[string]string
-				if err := json.Unmarshal(externalProduct.Option.Bytes, &variantOption); err != nil {
+				if err := json.Unmarshal(externalVariant.Option.Bytes, &variantOption); err != nil {
 					return nil, err
 				}
 
-				for key, value := range variantOption {
-					options[key] = append(options[key], value)
+				if err := s.ExternalVariantRepository.UpdateExternalVariant(db, newVariant.IDVariant, externalVariant.ExternalIDMapping); err != nil {
+					return nil, err
 				}
 
-				//updateProductVariantList = append(updateProductVariantList, []int64{newProduct.IDProduct, newVariant.IDVariant, externalProduct.ShopifyVariantID})
-
-				if err := s.ExternalVariantRepository.UpdateExternalVariant(db, newVariant.IDVariant, externalProduct.IDExternal); err != nil {
+				if _, err := s.ImageVariantRepository.CreateOne(db, postgres.ColumnList{
+					table.ImageVariant.FkVariant,
+					table.ImageVariant.URL,
+				}, internalModel.ImageVariant{
+					FkVariant: newVariant.IDVariant,
+					URL:       *externalVariant.ImageURL,
+				}); err != nil {
 					return nil, err
 				}
 			}
 
-			marshalOptions, err := json.Marshal(options)
-			if err != nil {
-				return nil, err
+			if !isInactive {
+				continue
 			}
 
-			s.ProductRepository.UpdateById(
+			if _, err := s.ProductRepository.UpdateById(
 				db,
-				postgres.ColumnList{table.Product.Option},
+				postgres.ColumnList{
+					table.Product.Status,
+				},
 				internalModel.Product{
 					IDProduct: newProduct.IDProduct,
-					Option: pgtype.JSON{
-						Bytes:  marshalOptions,
-						Status: pgtype.Present,
-					},
-				},
-			)
-
+					Status:    constants.INACTIVE,
+				}); err != nil {
+				return nil, err
+			}
 		}
 
 		return nil, nil

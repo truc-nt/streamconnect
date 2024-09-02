@@ -9,7 +9,7 @@ import (
 
 type IProductHandler interface {
 	GetProductsByShopId(ctx *gin.Context)
-	CreateProductsVariants(ctx *gin.Context)
+	CreateProductsWithVariants(ctx *gin.Context)
 }
 
 type ProductHandler struct {
@@ -41,31 +41,23 @@ func (h *ProductHandler) GetProductsByShopId(ctx *gin.Context) {
 		return
 	}
 
-	/*var res []*model.GetProductsByShopIdData
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Result: &res,
-	})
+	h.handleSuccessGet(ctx, products)
+}
+
+func (h *ProductHandler) CreateProductsWithVariants(ctx *gin.Context) {
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	if err := decoder.Decode(products); err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}*/
-
-	h.handleSuccessGet(ctx, products)
-}
-
-func (h *ProductHandler) CreateProductsVariants(ctx *gin.Context) {
-	var createProductsRequest *model.CreateProductsVariantsRequest
-	if err := ctx.ShouldBindJSON(&createProductsRequest); err != nil {
+	var createProductsWithVariantsRequest *model.CreateProductWithVariants
+	if err := ctx.ShouldBindJSON(&createProductsWithVariantsRequest); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	if err := h.Service.CreateProductVariantsFromExternalProducts(createProductsRequest); err != nil {
+	if err := h.Service.CreateProductsWithVariants(shopId, createProductsWithVariantsRequest); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

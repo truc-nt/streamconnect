@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ecommerce/internal/model"
+	"ecommerce/internal/database/gen/model"
 	"ecommerce/internal/repository"
 )
 
@@ -20,7 +20,7 @@ func NewExternalShopAuthService(repo repository.IExternalShopShopifyAuthReposito
 }
 
 func (s *ExternalShopAuthService) GetShopifyAuthByExternalShopId(externalShopId int64) (*model.ExternalShopShopifyAuth, error) {
-	auth, err := s.ExternalShopShopifyAuthRepository.GetByExternalShopId(s.ExternalShopShopifyAuthRepository.GetDefaultDatabase().Db, externalShopId)
+	auth, err := s.ExternalShopShopifyAuthRepository.GetByExternalShopId(s.ExternalShopShopifyAuthRepository.GetDatabase().Db, externalShopId)
 	if err != nil {
 		return nil, err
 	}

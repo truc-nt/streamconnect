@@ -1,15 +1,22 @@
 import axios from "./axios";
 
+export interface ILivestreamExternalVariant {
+  id_external_variant: number;
+  quantity: number;
+}
+
 interface ILivestream {
   title: string;
   description: string;
-  startTime: string;
-  livestream_external_variants: {
+  start_time: string;
+  livestream_products: {
     id_product: number;
-    id_variant: number;
-    id_external_variant: number;
-    quantity: number;
-  }[];
+    priority: number;
+    livestream_variants: {
+      id_variant: number;
+      livestream_external_variants: ILivestreamExternalVariant[];
+    };
+  };
 }
 
 export const createLivestream = async (shopId: number, data: ILivestream) => {
@@ -22,29 +29,12 @@ export interface ILivestreamProduct {
   name: string;
   min_price: number;
   max_price: number;
+  image_url: string;
   priority: number;
 }
 
 export const getLivestreamProducts = async (livestreamId: number) => {
   return axios.get<ILivestreamProduct[]>(
-    `livestreams/${livestreamId}/products`,
+    `livestreams/${livestreamId}/livestream_products`,
   );
-};
-
-export interface ILivestreamExternalVariant {
-  option: Record<string, string>;
-  variants: {
-    option: Record<string, string>;
-    livestream_external_variants: {
-      id_external_variant: number;
-      ecommerce: string;
-      quantity: number;
-      price: number;
-    }[];
-  }[];
-}
-export const getLivstreamExternalVariants = async (
-  idLivestreamProduct: number,
-) => {
-  return axios.get(`livestream_products/${idLivestreamProduct}`);
 };

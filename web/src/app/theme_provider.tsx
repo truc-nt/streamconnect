@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider, theme, App } from "antd";
 
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => (
   <ConfigProvider
@@ -13,7 +13,7 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => (
     }}
     //componentSize="large"
   >
-    {children}
+    <App>{children}</App>
   </ConfigProvider>
 );
 

@@ -19,3 +19,8 @@ type GetVariantsByProductIdData struct {
 		Price     float64     `json:"price"`
 	}
 }
+
+type ConnectVariantsRequest []*struct {
+	IDVariant         int64 `json:"id_variant"`
+	IDExternalVariant int64 `json:"id_external_variant"`
+}

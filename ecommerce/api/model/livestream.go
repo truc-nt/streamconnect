@@ -3,16 +3,19 @@ package model
 import "time"
 
 type CreateLivestreamRequest struct {
-	Title                      string                              `json:"title"`
-	Description                string                              `json:"description"`
-	StartTime                  string                              `json:"start_time"`
-	EndTime                    *time.Time                          `json:"end_time"`
-	LivestreamExternalVariants []*CreateLivestreamExternalVariants `json:"livestream_external_variants"`
-}
-
-type CreateLivestreamExternalVariants struct {
-	IDProduct         int64 `json:"id_product"`
-	IDVariant         int64 `json:"id_variant"`
-	IDExternalVariant int64 `json:"id_external_variant"`
-	Quantity          int32 `json:"quantity"`
+	Title              string     `json:"title"`
+	Description        string     `json:"description"`
+	StartTime          string     `json:"start_time"`
+	EndTime            *time.Time `json:"end_time"`
+	LivestreamProducts []*struct {
+		IDProduct          int64 `json:"id_product"`
+		Priority           int32 `json:"priority"`
+		LivestreamVariants []*struct {
+			IDVariant                  int64 `json:"id_variant"`
+			LivestreamExternalVariants []*struct {
+				IDExternalVariant int64 `json:"id_external_variant"`
+				Quantity          int32 `json:"quantity"`
+			} `json:"livestream_external_variants"`
+		} `json:"livestream_variants"`
+	} `json:"livestream_products"`
 }

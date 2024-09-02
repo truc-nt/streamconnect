@@ -9,7 +9,7 @@ import (
 
 type IExternalShopHandler interface {
 	GetExternalShopsByShopId(ctx *gin.Context)
-	SyncExternalShopsByExternalShopId(ctx *gin.Context)
+	SyncExternalVariantsByExternalShopId(ctx *gin.Context)
 }
 
 type ExternalShopHandler struct {
@@ -43,7 +43,7 @@ func (h *ExternalShopHandler) GetExternalShopsByShopId(ctx *gin.Context) {
 	h.handleSuccessGet(ctx, shops)
 }
 
-func (h *ExternalShopHandler) SyncExternalShopsByExternalShopId(ctx *gin.Context) {
+func (h *ExternalShopHandler) SyncExternalVariantsByExternalShopId(ctx *gin.Context) {
 	externalShopId, err := h.parseId(ctx, ctx.Param("external_shop_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)

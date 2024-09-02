@@ -2,12 +2,11 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/model"
-	"ecommerce/internal/table"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgtype"
 )
 
 type ILivestreamProductRepository interface {
@@ -55,9 +54,8 @@ func (r *LivestreamProductRepository) GetById(db qrm.Queryable, id int64) (*mode
 
 type GetInfoById struct {
 	*model.LivestreamProduct
-	Name        string      `alias:"product.name" json:"name"`
-	Description string      `alias:"product.description" json:"description"`
-	Option      pgtype.JSON `alias:"product.option" json:"option"`
+	Name        string `alias:"product.name" json:"name"`
+	Description string `alias:"product.description" json:"description"`
 }
 
 func (r *LivestreamProductRepository) GetInfoById(db qrm.Queryable, id int64) (*GetInfoById, error) {
@@ -65,7 +63,6 @@ func (r *LivestreamProductRepository) GetInfoById(db qrm.Queryable, id int64) (*
 		table.LivestreamProduct.AllColumns,
 		table.Product.Name,
 		table.Product.Description,
-		table.Product.Option,
 	).FROM(
 		table.LivestreamProduct.
 			INNER_JOIN(table.Product, table.Product.IDProduct.EQ(table.LivestreamProduct.FkProduct)),
@@ -80,32 +77,43 @@ func (r *LivestreamProductRepository) GetInfoById(db qrm.Queryable, id int64) (*
 }
 
 type GetByLivestreamId struct {
-	IDLivestreamProduct int64   `alias:"livestream_product.id_livestream_product" json:"id_livestream_product"`
-	IDProduct           int64   `alias:"product.id_product" json:"id_product"`
-	Name                string  `alias:"product.name" json:"name"`
-	MinPrice            float64 `alias:"min_price" json:"min_price"`
-	MaxPrice            float64 `alias:"max_price" json:"max_price"`
+	IDLivestreamProduct int64   `sql:"primary_key" alias:"livestream_product.id_livestream_product" json:"id_livestream_product"`
 	Priority            int64   `alias:"livestream_product.priority" json:"priority"`
+	Name                string  `alias:"product.name" json:"name"`
+	ImageURL            string  `json:"image_url"`
+	MinPrice            float64 `json:"min_price"`
+	MaxPrice            float64 `json:"max_price"`
 }
 
 func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*GetByLivestreamId, error) {
+	innerProductAlias := table.Product.AS("inner_product")
+	imageUrlSubQuery := table.ImageVariant.SELECT(table.ImageVariant.URL).
+		FROM(
+			table.ImageVariant.
+				LEFT_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ImageVariant.FkVariant)).
+				LEFT_JOIN(innerProductAlias, innerProductAlias.IDProduct.EQ(table.Variant.FkProduct)),
+		).WHERE(table.Product.IDProduct.EQ(innerProductAlias.IDProduct)).LIMIT(1)
+
 	stmt := table.LivestreamProduct.SELECT(
 		table.LivestreamProduct.IDLivestreamProduct,
-		table.Product.IDProduct,
-		table.Product.Name,
-		postgres.MIN(table.ExternalVariant.Price).AS("GetByLivestreamId.min_price"),
-		postgres.MAX(table.ExternalVariant.Price).AS("GetByLivestreamId.max_price"),
 		table.LivestreamProduct.Priority,
+		table.Product.Name,
+		imageUrlSubQuery.AS("GetByLivestreamId.ImageURL"),
+		postgres.MIN(table.ExternalVariant.Price).AS("GetByLivestreamId.MinPrice"),
+		postgres.MAX(table.ExternalVariant.Price).AS("GetByLivestreamId.MaxPrice"),
 	).FROM(
 		table.LivestreamProduct.
 			INNER_JOIN(table.Product, table.Product.IDProduct.EQ(table.LivestreamProduct.FkProduct)).
 			INNER_JOIN(table.LivestreamExternalVariant, table.LivestreamExternalVariant.FkLivestreamProduct.EQ(table.LivestreamProduct.IDLivestreamProduct)).
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.IDExternalVariant.EQ(table.LivestreamExternalVariant.FkExternalVariant)),
+			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.IDExternalVariant.EQ(table.LivestreamExternalVariant.FkExternalVariant)).
+			INNER_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExternalVariant.FkVariant)).
+			LEFT_JOIN(table.ImageVariant, table.ImageVariant.FkVariant.EQ(table.Variant.IDVariant)),
 	).WHERE(
 		table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)),
 	).GROUP_BY(
 		table.Product.IDProduct,
 		table.LivestreamProduct.IDLivestreamProduct,
+		table.Variant.IDVariant,
 	)
 
 	var data []*GetByLivestreamId

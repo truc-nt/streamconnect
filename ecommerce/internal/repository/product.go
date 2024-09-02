@@ -2,12 +2,11 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/model"
-	"ecommerce/internal/table"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgtype"
 )
 
 type IProductRepository interface {
@@ -53,33 +52,29 @@ func (r *ProductRepository) UpdateById(db qrm.Queryable, columnList postgres.Col
 }
 
 type GetByShopId struct {
-	IDProduct   int64       `alias:"product.id_product" json:"id_product"`
-	Name        string      `alias:"product.name" json:"name"`
-	Description string      `alias:"product.description" json:"description"`
-	Status      string      `alias:"product.status" json:"status"`
-	MinPrice    float64     `alias:"min_price" json:"min_price"`
-	MaxPrice    float64     `alias:"max_price" json:"max_price"`
-	TotalStock  int32       `alias:"total_stock" json:"total_stock"`
-	Option      pgtype.JSON `alias:"product.option" json:"option"`
-	ImageUrl    string      `alias:"image_url" json:"image_url"`
-	CreatedAt   string      `alias:"product.created_at" json:"created_at"`
-	UpdatedAt   string      `alias:"product.updated_at" json:"updated_at"`
+	model.Product
+	ImageURL string `json:"image_url"`
 }
 
 func (r *ProductRepository) GetByShopId(db qrm.Queryable, shopId int64, limit int64, offset int64) ([]*GetByShopId, error) {
+	innerProductAlias := table.Product.AS("inner_product")
+	imageUrlSubQuery := table.ImageVariant.SELECT(table.ImageVariant.URL).
+		FROM(
+			table.ImageVariant.
+				LEFT_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ImageVariant.FkVariant)).
+				LEFT_JOIN(innerProductAlias, innerProductAlias.IDProduct.EQ(table.Variant.FkProduct)),
+		).WHERE(table.Product.IDProduct.EQ(innerProductAlias.IDProduct)).LIMIT(1)
+
 	stmt := table.Product.SELECT(
 		table.Product.AllColumns,
-		postgres.MIN(table.ExternalVariant.Price).AS("GetByShopId.min_price"),
-		postgres.MAX(table.ExternalVariant.Price).AS("GetByShopId.max_price"),
-		postgres.SUM(table.ExternalVariant.Stock).AS("GetByShopId.total_stock"),
+		imageUrlSubQuery.AS("GetByShopId.ImageURL"),
 	).FROM(
 		table.Product.
-			INNER_JOIN(table.Variant, table.Variant.FkProduct.EQ(table.Product.IDProduct)).
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)),
+			INNER_JOIN(table.Variant, table.Variant.FkProduct.EQ(table.Product.IDProduct)),
 	).GROUP_BY(
 		table.Product.IDProduct,
 	).WHERE(table.Product.FkShop.EQ(postgres.Int(shopId))).LIMIT(limit).OFFSET(offset)
-	var data []*GetByShopId
+	data := make([]*GetByShopId, 0)
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err

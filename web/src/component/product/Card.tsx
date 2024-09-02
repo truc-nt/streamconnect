@@ -9,7 +9,7 @@ interface ICard extends ILivestreamProduct {
   onClick: () => void;
 }
 
-const Card = ({ name, min_price, max_price, onClick }: ICard) => {
+const Card = ({ name, min_price, max_price, image_url, onClick }: ICard) => {
   const { token } = theme.useToken();
 
   return (
@@ -19,12 +19,7 @@ const Card = ({ name, min_price, max_price, onClick }: ICard) => {
       className="w-full h-[160px] p-5 flex items-center"
       cover={
         <div style={{ height: "120px", width: "120px" }} className="relative">
-          <Image
-            src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-            alt={name}
-            layout="fill"
-            objectFit="cover"
-          />
+          <Image src={image_url} alt={name} layout="fill" objectFit="contain" />
         </div>
       }
       styles={{

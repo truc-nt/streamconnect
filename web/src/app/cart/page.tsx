@@ -1,63 +1,61 @@
 "use client";
-import { Space, Flex, Table, Button, InputNumber, Input } from "antd";
-import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
+import {
+  Space,
+  Flex,
+  Table,
+  Button,
+  InputNumber,
+  Input,
+  Card,
+  Row,
+  Col,
+} from "antd";
+import { useGetCart } from "@/hook/cart";
+import CartItemList from "./component/CartItemList";
+import SummaryCard from "./component/Summary";
+import AddressCard from "./component/AddressCard";
+import { useAppSelector, useAppDispatch } from "@/store/store";
+import useLoading from "@/hook/loading";
+import { setCartItemIds } from "@/store/checkout";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
-  const columns = [
-    {
-      title: () => <span>Shop Name</span>,
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "",
-      dataIndex: "price",
-      key: "price",
-    },
-    {
-      title: "",
-      dataIndex: "quantity",
-      key: "quantity",
-      render: () => (
-        <Space.Compact block>
-          <Button icon={<MinusOutlined />} size="small" />
-          <Input size="small" defaultValue={1} style={{ width: "30px" }} />
-          <Button icon={<PlusOutlined />} size="small" />
-        </Space.Compact>
-      ),
-    },
-    {
-      title: "",
-      dataIndex: "total",
-      key: "total",
-    },
-    {
-      title: "",
-      dataIndex: "action",
-      key: "action",
-    },
-  ];
-  const data = [
-    {
-      key: "1",
-      name: "John Brown",
-      price: 32,
-      quantity: 2,
-      action: "Edit",
-    },
-  ];
+  const { data: cart, error } = useGetCart(1);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const { cartItems } = useAppSelector((state) => state.cartItemIdsSelection);
+  const subTotal =
+    cartItems.reduce(
+      (total, cartItem) => total + cartItem.price * cartItem.quantity,
+      0,
+    ) || 0;
+
+  const handleCheckout = () => {
+    dispatch(setCartItemIds(cartItems.map((cartItem) => cartItem.cartItemId)));
+    router.push("/checkout");
+  };
+
   return (
-    <Space.Compact direction="vertical" style={{ display: "flex" }}>
-      <div></div>
-      <Flex vertical>
-        <Table
-          //showHeader={false}
-          columns={columns}
-          dataSource={data}
-          rowSelection={{}}
-        />
-      </Flex>
-    </Space.Compact>
+    <Row gutter={[24, 24]}>
+      <Col span={16}>
+        <CartItemList cart={cart || []} />
+      </Col>
+      <Col span={8}>
+        <Flex vertical gap="large">
+          <AddressCard />
+          <SummaryCard subTotal={subTotal} discountTotal={0} />
+          <Button
+            type="primary"
+            size="large"
+            disabled={!cartItems.length}
+            onClick={handleCheckout}
+          >
+            Đặt hàng ({cartItems.length})
+          </Button>
+        </Flex>
+      </Col>
+    </Row>
   );
 };
 
