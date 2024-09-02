@@ -1,19 +1,18 @@
 CREATE TABLE IF NOT EXISTS "user" (
-  id_user                BIGSERIAL PRIMARY KEY,
-  username               varchar(100) not null unique,
-  hashed_password        varchar(200) not null,
-  full_name              varchar(100),
-  email                  varchar(100) not null unique,
-  is_enabled             boolean,
-  created_date_time      TIMESTAMP,
-  last_updated_date_time TIMESTAMP
+  id_user BIGSERIAL PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  hashed_password VARCHAR(200) NOT NULL,
+  email VARCHAR(100) NOT NULL unique,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT check_status check (status in ('active', 'inactive'))
 );
 
-create table if not exists user_roles
-(
-  user_role_id SERIAL PRIMARY KEY,
-  username     varchar(100) NOT NULL,
-  role         varchar(20)  NOT NULL,
+CREATE TABLE IF NOT EXISTS user_role (
+  id_user_role SERIAL PRIMARY KEY,
+  username varchar(100) NOT NULL,
+  role varchar(20) NOT NULL,
   UNIQUE (username, role),
   FOREIGN KEY (username) REFERENCES "user"(username)
 );

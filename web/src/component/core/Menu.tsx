@@ -50,7 +50,7 @@ const userNavigator: MenuItem[] = [
     key: "/user/address",
     label: <Link href="/user/address">Địa chỉ</Link>,
     icon: <EnvironmentFilled />,
-  }
+  },
 ];
 
 const sellerNavigator: MenuItem[] = [

@@ -15,8 +15,9 @@ const useLoading = (
     async (...params: any[]) => {
       dispatch(setOpen());
       try {
-        await loadingFetch(...params);
+        const res = await loadingFetch(...params);
         message.success(successMessage);
+        return res;
       } catch (error) {
         message.error(errorMessage);
         throw error;
