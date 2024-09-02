@@ -2,9 +2,8 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/database/table"
-
-	"ecommerce/internal/database/model"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -27,7 +26,7 @@ func NewCartItemLivestreamExternalVariantRepository(database *database.Postgresq
 }
 
 func (r *CartItemLivestreamExternalVariantRepository) GetById(db qrm.Queryable, id int64) (*model.CartItemLivestreamExternalVariant, error) {
-	stmt := table.CartItemLivestreamExternalVariant.SELECT(table.CartItemLivestreamExternalVariant.AllColumns).WHERE(table.CartItemLivestreamExternalVariant.IDCartItemLivestreamExternalVariant.EQ(postgres.Int(int64(id))))
+	stmt := table.CartItemLivestreamExternalVariant.SELECT(table.CartItemLivestreamExternalVariant.AllColumns).WHERE(table.CartItemLivestreamExternalVariant.ID.EQ(postgres.Int(int64(id))))
 
 	var data model.CartItemLivestreamExternalVariant
 	err := stmt.Query(db, &data)
@@ -48,7 +47,7 @@ func (r *CartItemLivestreamExternalVariantRepository) CreateMany(db qrm.Queryabl
 }
 
 func (r *CartItemLivestreamExternalVariantRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.CartItemLivestreamExternalVariant) (*model.CartItemLivestreamExternalVariant, error) {
-	stmt := table.CartItemLivestreamExternalVariant.UPDATE(columnList).MODEL(data).WHERE(table.CartItemLivestreamExternalVariant.IDCartItemLivestreamExternalVariant.EQ(postgres.Int(data.IDCartItemLivestreamExternalVariant))).RETURNING(table.CartItemLivestreamExternalVariant.AllColumns)
+	stmt := table.CartItemLivestreamExternalVariant.UPDATE(columnList).MODEL(data).WHERE(table.CartItemLivestreamExternalVariant.ID.EQ(postgres.Int(data.ID))).RETURNING(table.CartItemLivestreamExternalVariant.AllColumns)
 	return r.update(db, stmt)
 }
 
@@ -57,7 +56,7 @@ func (r *CartItemLivestreamExternalVariantRepository) GetByLivestreamExternalVar
 		FROM(
 			table.CartItemLivestreamExternalVariant.
 				INNER_JOIN(table.CartItem, table.CartItemLivestreamExternalVariant.FkCartItem.EQ(table.CartItem.IDCartItem)),
-		).WHERE(table.CartItemLivestreamExternalVariant.FkLivestreamExternalVariant.EQ(postgres.Int(int64(livestreamExternalVariantId))).AND(table.CartItem.FkCart.EQ(postgres.Int(int64(cartId)))))
+		).WHERE(table.CartItemLivestreamExternalVariant.Fk.EQ(postgres.Int(int64(livestreamExternalVariantId))).AND(table.CartItem.FkCart.EQ(postgres.Int(int64(cartId)))))
 
 	var data model.CartItemLivestreamExternalVariant
 	err := stmt.Query(db, &data)

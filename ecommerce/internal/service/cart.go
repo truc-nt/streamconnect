@@ -2,8 +2,8 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	internalModel "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
 	"errors"
 
@@ -11,11 +11,15 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx"
+	"github.com/samber/lo"
 )
 
 type ICartService interface {
 	AddToCart(cartId int64, CartItemList []*model.AddToCartRequest) error
 	Get(cartId int64) (interface{}, error)
+	Update(cartItemId int64, updateRequest *model.UpdateRequest) error
+
+	GetCartItemsByIdsRequest(getCartItemsByIdsRequest []*model.GetCartItemsByIdsRequest) (interface{}, error)
 }
 
 type CartService struct {
@@ -94,11 +98,11 @@ func (s *CartService) AddToCart(cartId int64, addToCartRequest []*model.AddToCar
 				db,
 				postgres.ColumnList{
 					table.CartItemLivestreamExternalVariant.FkCartItem,
-					table.CartItemLivestreamExternalVariant.FkLivestreamExternalVariant,
+					table.CartItemLivestreamExternalVariant.Fk,
 				},
 				internalModel.CartItemLivestreamExternalVariant{
-					FkCartItem:                  newCartItem.IDCartItem,
-					FkLivestreamExternalVariant: cartItem.IDLivestreamExternalVariant,
+					FkCartItem: newCartItem.IDCartItem,
+					Fk:         cartItem.IDLivestreamExternalVariant,
 				},
 			)
 
@@ -116,4 +120,25 @@ func (s *CartService) AddToCart(cartId int64, addToCartRequest []*model.AddToCar
 	}
 
 	return nil
+}
+
+func (s *CartService) Update(cartItemId int64, updateRequest *model.UpdateRequest) error {
+	_, err := s.CartItemRepository.UpdateById(
+		s.CartItemRepository.GetDatabase().Db,
+		postgres.ColumnList{
+			table.CartItem.Quantity,
+		},
+		internalModel.CartItem{
+			IDCartItem: cartItemId,
+			Quantity:   updateRequest.Quantity,
+		})
+	return err
+}
+
+func (s *CartService) GetCartItemsByIdsRequest(getCartItemsByIdsRequest []*model.GetCartItemsByIdsRequest) (interface{}, error) {
+	cartItemIds := lo.Map(getCartItemsByIdsRequest, func(request *model.GetCartItemsByIdsRequest, _ int) int64 {
+		return request.IDCartItem
+	})
+
+	return s.CartItemRepository.GetCartItemsByIds(s.CartItemRepository.GetDatabase().Db, cartItemIds)
 }

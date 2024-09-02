@@ -4,8 +4,8 @@ import useSWR from "swr";
 
 export const useGetProductsByShopId = (shopId: number) => {
   return useSWR(
-    [`/api/shops/${shopId}/products`, shopId],
-    async ([_, shopId]) => await getProductsByShopId(shopId),
+    `/api/shops/${shopId}/products`,
+    () => getProductsByShopId(shopId),
     {
       revalidateOnFocus: false,
     },

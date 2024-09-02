@@ -22,6 +22,9 @@ import (
 func initServer() server.IServer {
 	config := configs.NewConfig()
 	postgresqlDatabase := database.NewPostgresDatabase(config)
+	iUserAddressRepository := repository.NewUserAddressRepository(postgresqlDatabase)
+	iUserService := service.NewUserService(iUserAddressRepository)
+	iUserHandler := handler.NewUserHandler(iUserService)
 	iProductRepository := repository.NewProductRepository(postgresqlDatabase)
 	iVariantRepository := repository.NewVariantRepository(postgresqlDatabase)
 	iExternalVariantRepository := repository.NewExternalVariantRepository(postgresqlDatabase)
@@ -38,7 +41,7 @@ func initServer() server.IServer {
 	iShopifyHandler := handler.NewShopifyHandler(iShopifyService)
 	iExternalShopService := service.NewExternalShopService(iExternalShopRepository, v)
 	iExternalShopHandler := handler.NewExternalShopHandler(iExternalShopService)
-	iExternalVariantService := service.NewExternalVariantService(iExternalVariantRepository)
+	iExternalVariantService := service.NewExternalVariantService(iExternalVariantRepository, iVariantRepository)
 	iExternalVariantHandler := handler.NewExternalVariantHandler(iExternalVariantService)
 	iLivestreamRepository := repository.NewLivestreamRepository(postgresqlDatabase)
 	iLivestreamProductRepository := repository.NewLivestreamProductRepository(postgresqlDatabase)
@@ -51,7 +54,13 @@ func initServer() server.IServer {
 	iCartItemLivestreamExternalVariantRepository := repository.NewCartItemLivestreamExternalVariantRepository(postgresqlDatabase)
 	iCartService := service.NewCartService(iCartItemRepository, iLivestreamExternalVariantRepository, iCartItemLivestreamExternalVariantRepository)
 	iCartHandler := handler.NewCartHandler(iCartService)
-	handlers := handler.ProvideHandlers(iProductHandler, iVariantHandler, iShopifyHandler, iExternalShopHandler, iExternalVariantHandler, iLivestreamHandler, iLivestreamProductHandler, iCartHandler)
+	iOrderRepository := repository.NewOrderRepository(postgresqlDatabase)
+	iOrderItemRepository := repository.NewOrderItemRepository(postgresqlDatabase)
+	iOrderItemLivestreamExternalVariantRepository := repository.NewOrderItemLivestreamExternalVariantRepository(postgresqlDatabase)
+	iExternalOrderRepository := repository.NewExternalOrderRepository(postgresqlDatabase)
+	iOrderService := service.NewOrderService(iOrderRepository, iOrderItemRepository, iOrderItemLivestreamExternalVariantRepository, iCartItemRepository, iExternalOrderRepository, v)
+	iOrderHandler := handler.NewOrderHandler(iOrderService)
+	handlers := handler.ProvideHandlers(iUserHandler, iProductHandler, iVariantHandler, iShopifyHandler, iExternalShopHandler, iExternalVariantHandler, iLivestreamHandler, iLivestreamProductHandler, iCartHandler, iOrderHandler)
 	iServer := server.NewServer(config, handlers)
 	return iServer
 }

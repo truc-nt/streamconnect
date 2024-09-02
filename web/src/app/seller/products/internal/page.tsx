@@ -37,7 +37,7 @@ const Page = () => {
     {
       dataIndex: "action",
       key: "action",
-      render: (_, { external_product_id_mapping }) => {
+      render: (_, {}) => {
         return (
           <Flex gap="small">
             <EditOutlined
@@ -56,7 +56,7 @@ const Page = () => {
     <>
       <Table
         columns={columns}
-        dataSource={products?.data || []}
+        dataSource={products || []}
         rowKey={(row) => row.id_product}
         rowSelection={{}}
       />

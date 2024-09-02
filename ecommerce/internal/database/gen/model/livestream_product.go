@@ -8,8 +8,8 @@
 package model
 
 type LivestreamProduct struct {
-	IDLivestreamProduct int64  `sql:"primary_key" json:"id_livestream_product" xml:"id_livestream_product"`
-	FkLivestream        int64  `json:"fk_livestream" xml:"fk_livestream"`
-	FkProduct           int64  `json:"fk_product" xml:"fk_product"`
+	IDLivestreamProduct int64 `sql:"primary_key" json:"id_livestream_product" xml:"id_livestream_product"`
+	FkLivestream        int64 `json:"fk_livestream" xml:"fk_livestream"`
+	FkProduct           int64 `json:"fk_product" xml:"fk_product"`
 	Priority            int32 `json:"priority" xml:"priority"`
 }

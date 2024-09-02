@@ -22,7 +22,7 @@ type ExternalVariant struct {
 	Name                     string      `json:"name" xml:"name"`
 	Status                   string      `json:"status" xml:"status"`
 	Option                   pgtype.JSON `json:"option" xml:"option"`
-	Price                    float64    `json:"price" xml:"price"`
+	Price                    float64     `json:"price" xml:"price"`
 	ImageURL                 *string     `json:"image_url" xml:"image_url"`
 	CreatedAt                time.Time   `json:"created_at" xml:"created_at"`
 	UpdatedAt                time.Time   `json:"updated_at" xml:"updated_at"`

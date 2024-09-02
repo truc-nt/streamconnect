@@ -14,7 +14,7 @@ const Sider = () => {
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
-      className="overflow-auto h-screen fixed inset-0 scrollbar-thin scrollbar-color-transparent"
+      style={{ minHeight: "100vh" }}
     >
       <div className="relative w-full h-16 p-2">
         <div className="relative w-full h-full">

@@ -7,9 +7,15 @@ import (
 )
 
 func LoadExternalProductRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
-	externalVariantRouter := apiRouter.Group("/external_products")
+	externalProductRouter := apiRouter.Group("/external_products")
 	{
-		externalVariantRouter.GET("/", h.ExternalProductHandler.GetExternalVariantsGroupByProduct)
-		externalVariantRouter.GET("/:external_product_id_mapping", h.ExternalProductHandler.GetExternalVariantsByExternalProductIdMapping)
+		externalProductRouter.GET("/", h.ExternalVariantHandler.GetExternalVariantsGroupByProduct)
+		externalProductRouter.GET("/:external_product_id_mapping", h.ExternalVariantHandler.GetExternalVariantsByExternalProductIdMapping)
+		externalProductRouter.GET("/:external_product_id_mapping/variants", h.VariantHandler.GetVariantsByExternalProductIdMapping)
+	}
+
+	externalVariantRouter := apiRouter.Group("/external_variants")
+	{
+		externalVariantRouter.POST("/connect", h.ExternalVariantHandler.ConnectVariants)
 	}
 }

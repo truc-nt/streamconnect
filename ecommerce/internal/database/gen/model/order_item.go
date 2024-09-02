@@ -7,9 +7,9 @@
 
 package model
 
-type CartItem struct {
-	IDCartItem        int64 `sql:"primary_key" json:"id_cart_item" xml:"id_cart_item"`
-	FkCart            int64 `json:"fk_cart" xml:"fk_cart"`
+type OrderItem struct {
+	IDOrderItem       int64 `sql:"primary_key" json:"id_order_item" xml:"id_order_item"`
+	FkOrder           int64 `json:"fk_order" xml:"fk_order"`
 	FkExternalVariant int64 `json:"fk_external_variant" xml:"fk_external_variant"`
 	Quantity          int32 `json:"quantity" xml:"quantity"`
 }

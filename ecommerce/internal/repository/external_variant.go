@@ -2,8 +2,8 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -20,6 +20,7 @@ type IExternalVariantRepository interface {
 
 	GetExternalVariantsGroupByProduct(db qrm.Queryable, limit int64, offset int64) (interface{}, error)
 	GetExternalVariantsByExternalProductIdMapping(db qrm.Queryable, externalProductIdMapping string) ([]*model.ExternalVariant, error)
+	GetExternalVariantInfoById(db qrm.Queryable, id int64) (*GetExternalVariantInfoById, error)
 }
 
 type ExternalVariantRepository struct {
@@ -56,7 +57,7 @@ func (r *ExternalVariantRepository) CreateMany(db qrm.Queryable, columnList post
 }
 
 func (r *ExternalVariantRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalVariant) (*model.ExternalVariant, error) {
-	stmt := table.ExternalVariant.UPDATE(columnList).MODEL(data).RETURNING(table.ExternalVariant.AllColumns)
+	stmt := table.ExternalVariant.UPDATE(columnList).MODEL(data).WHERE(table.ExternalVariant.IDExternalVariant.EQ(postgres.Int(data.IDExternalVariant))).RETURNING(table.ExternalVariant.AllColumns)
 	return r.update(db, stmt)
 }
 
@@ -135,7 +136,7 @@ func (r *ExternalVariantRepository) GetExternalVariantsGroupByProduct(db qrm.Que
 			LEFT_JOIN(table.ExternalShop, table.ExternalShop.IDExternalShop.EQ(table.ExternalVariant.FkExternalShop)).
 			LEFT_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExternalVariant.FkVariant)).
 			LEFT_JOIN(table.Product, table.Product.IDProduct.EQ(table.Variant.FkProduct)),
-	).LIMIT(limit).OFFSET(offset)
+	).LIMIT(limit).OFFSET(offset).ORDER_BY(table.ExternalVariant.ExternalProductIDMapping)
 
 	var data []*GetExternalVariantsGroupByProduct
 	err := stmt.Query(r.GetDatabase().Db, &data)
@@ -171,4 +172,28 @@ func (r *ExternalVariantRepository) GetByVariantIds(db qrm.Queryable, variantIds
 		return nil, err
 	}
 	return data, nil
+}
+
+type GetExternalVariantInfoById struct {
+	model.ExternalVariant
+	IDShop int64 `alias:"external_shop.fk_shop" json:"id_shop"`
+}
+
+func (r *ExternalVariantRepository) GetExternalVariantInfoById(db qrm.Queryable, id int64) (*GetExternalVariantInfoById, error) {
+	stmt := table.ExternalVariant.SELECT(
+		table.ExternalVariant.AllColumns,
+		table.ExternalShop.FkShop,
+	).FROM(
+		table.ExternalVariant.
+			INNER_JOIN(table.ExternalShop, table.ExternalShop.IDExternalShop.EQ(table.ExternalVariant.FkExternalShop)),
+	).WHERE(
+		table.ExternalVariant.IDExternalVariant.EQ(postgres.Int(id)),
+	)
+
+	var data GetExternalVariantInfoById
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

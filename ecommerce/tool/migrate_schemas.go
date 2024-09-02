@@ -36,7 +36,7 @@ var tagsMapping = map[string]interface{}{
 func main() {
 	c := configs.NewConfig()
 	err := postgres.Generate(
-		"./tools",
+		"./internal/database/gen",
 		postgres.DBConnection{
 			Host:       c.Postgres.Host,
 			Port:       c.Postgres.Port,

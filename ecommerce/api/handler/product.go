@@ -9,7 +9,7 @@ import (
 
 type IProductHandler interface {
 	GetProductsByShopId(ctx *gin.Context)
-	CreateProductWithVariants(ctx *gin.Context)
+	CreateProductsWithVariants(ctx *gin.Context)
 }
 
 type ProductHandler struct {
@@ -44,7 +44,7 @@ func (h *ProductHandler) GetProductsByShopId(ctx *gin.Context) {
 	h.handleSuccessGet(ctx, products)
 }
 
-func (h *ProductHandler) CreateProductWithVariants(ctx *gin.Context) {
+func (h *ProductHandler) CreateProductsWithVariants(ctx *gin.Context) {
 	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
@@ -57,7 +57,7 @@ func (h *ProductHandler) CreateProductWithVariants(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Service.CreateProductWithVariants(shopId, createProductsWithVariantsRequest); err != nil {
+	if err := h.Service.CreateProductsWithVariants(shopId, createProductsWithVariantsRequest); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

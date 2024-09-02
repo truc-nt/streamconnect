@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS external_variant (
   name TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active',
   option JSON,
-  price DECIMAL(10, 2),
+  price DECIMAL(10, 2) NOT NULL,
   image_url TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -2,8 +2,8 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	internalModel "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
 	"time"
 

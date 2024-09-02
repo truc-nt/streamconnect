@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ecommerce/internal/database/model"
+	"ecommerce/internal/database/gen/model"
 	"ecommerce/internal/repository"
 )
 

@@ -1,7 +1,8 @@
 import { Menu as AntdMenu } from "antd";
 import type { MenuProps } from "antd";
 import {
-  UserOutlined,
+  ContactsFilled,
+  EnvironmentFilled,
   CompassFilled,
   FireFilled,
   TeamOutlined,
@@ -38,20 +39,30 @@ const userNavigator: MenuItem[] = [
   {
     key: "/user/profile",
     label: <Link href="/user/profile">Thông tin tài khoản</Link>,
-    icon: <UserOutlined />,
+    icon: <ContactsFilled />,
   },
   {
     key: "/user/orders",
-    label: <Link href="/user/orders">Quản lý đơn hàng</Link>,
+    label: <Link href="/user/orders">Đơn hàng</Link>,
     icon: <CarryOutFilled />,
   },
+  {
+    key: "/user/address",
+    label: <Link href="/user/address">Địa chỉ</Link>,
+    icon: <EnvironmentFilled />,
+  }
 ];
 
 const sellerNavigator: MenuItem[] = [
   {
-    key: "/seller/dashboard",
+    key: "/seller",
     label: <Link href="/seller/dashboard">Kênh bán hàng</Link>,
     icon: <SignalFilled />,
+  },
+  {
+    key: "/seller/orders",
+    label: <Link href="/user/orders">Đơn hàng</Link>,
+    icon: <CarryOutFilled />,
   },
   {
     key: "/seller/livestreams",

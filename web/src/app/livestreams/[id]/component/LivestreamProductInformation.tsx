@@ -44,17 +44,20 @@ const LivestreamProductInformation = ({
     ),
   );
 
-  const ecommerceIds: number[] = livestreamProduct.livestream_variants.reduce(
-    (acc: number[], livestream_variant) => {
-      livestream_variant.livestream_external_variants.forEach(
-        (livestream_external_variant) => {
-          acc.push(livestream_external_variant.id_ecommerce);
-        },
-      );
-      return acc;
-    },
-    [],
-  );
+  const ecommerceIds: number[] = [];
+  const seenIds = new Set<number>();
+
+  livestreamProduct.livestream_variants.forEach((livestream_variant) => {
+    livestream_variant.livestream_external_variants.forEach(
+      (livestream_external_variant) => {
+        const id_ecommerce = livestream_external_variant.id_ecommerce;
+        if (!seenIds.has(id_ecommerce)) {
+          seenIds.add(id_ecommerce);
+          ecommerceIds.push(id_ecommerce);
+        }
+      },
+    );
+  });
 
   const livestreamVariant = livestreamProduct?.livestream_variants.find(
     (variant) =>

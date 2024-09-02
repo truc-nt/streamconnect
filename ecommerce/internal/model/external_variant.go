@@ -20,3 +20,8 @@ type ExternalVariantStock struct {
 	ExternalIdMapping        string  `shopify:"-"`
 	Stock                    int64   `shopify:"InventoryQuantity"`
 }
+
+type ExternalOrderItem struct {
+	ExternalIdMapping string `shopify:"-"`
+	Quantity          int64  `shopify:"-"`
+}

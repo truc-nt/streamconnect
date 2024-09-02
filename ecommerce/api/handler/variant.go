@@ -9,6 +9,7 @@ import (
 
 type IVariantHandler interface {
 	GetVariantsByProductId(ctx *gin.Context)
+	GetVariantsByExternalProductIdMapping(ctx *gin.Context)
 }
 
 type VariantHandler struct {
@@ -37,37 +38,20 @@ func (h *VariantHandler) GetVariantsByProductId(ctx *gin.Context) {
 		return
 	}
 
-	/*product, err := h.ProductService.GetProductById(productId)
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}*/
-
 	variants, err := h.VariantService.GetVariantsByProductId(productId, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
+	h.handleSuccessGet(ctx, variants)
+}
 
-	/*res := &model.GetVariantsByProductIdData{
-		Name:   product.Name,
-		Status: product.Status,
-		Option: product.OptionTitles,
-	}
-
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Result: &res.Variants,
-	})
-
+func (h *VariantHandler) GetVariantsByExternalProductIdMapping(ctx *gin.Context) {
+	externalProductIdMapping := ctx.Param("external_product_id_mapping")
+	variants, err := h.VariantService.GetVariantsByExternalProductIdMapping(externalProductIdMapping)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-
-	if err := decoder.Decode(variants); err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}*/
-
 	h.handleSuccessGet(ctx, variants)
 }

@@ -17,9 +17,9 @@ type cartItemLivestreamExternalVariantTable struct {
 	postgres.Table
 
 	// Columns
-	IDCartItemLivestreamExternalVariant postgres.ColumnInteger
-	FkCartItem                          postgres.ColumnInteger
-	FkLivestreamExternalVariant         postgres.ColumnInteger
+	ID         postgres.ColumnInteger
+	FkCartItem postgres.ColumnInteger
+	Fk         postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -60,20 +60,20 @@ func newCartItemLivestreamExternalVariantTable(schemaName, tableName, alias stri
 
 func newCartItemLivestreamExternalVariantTableImpl(schemaName, tableName, alias string) cartItemLivestreamExternalVariantTable {
 	var (
-		IDCartItemLivestreamExternalVariantColumn = postgres.IntegerColumn("id_cart_item_livestream_external_variant")
-		FkCartItemColumn                          = postgres.IntegerColumn("fk_cart_item")
-		FkLivestreamExternalVariantColumn         = postgres.IntegerColumn("fk_livestream_external_variant")
-		allColumns                                = postgres.ColumnList{IDCartItemLivestreamExternalVariantColumn, FkCartItemColumn, FkLivestreamExternalVariantColumn}
-		mutableColumns                            = postgres.ColumnList{FkCartItemColumn, FkLivestreamExternalVariantColumn}
+		IDColumn         = postgres.IntegerColumn("id")
+		FkCartItemColumn = postgres.IntegerColumn("fk_cart_item")
+		FkColumn         = postgres.IntegerColumn("fk")
+		allColumns       = postgres.ColumnList{IDColumn, FkCartItemColumn, FkColumn}
+		mutableColumns   = postgres.ColumnList{FkCartItemColumn, FkColumn}
 	)
 
 	return cartItemLivestreamExternalVariantTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDCartItemLivestreamExternalVariant: IDCartItemLivestreamExternalVariantColumn,
-		FkCartItem:                          FkCartItemColumn,
-		FkLivestreamExternalVariant:         FkLivestreamExternalVariantColumn,
+		ID:         IDColumn,
+		FkCartItem: FkCartItemColumn,
+		Fk:         FkColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

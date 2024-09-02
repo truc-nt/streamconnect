@@ -47,9 +47,7 @@ const AddLivestreamVariant = ({
   const handleOnChange = async (value: number) => {
     try {
       const res = await getVariantsByProductId(value);
-      const product = products?.data.find(
-        (product) => product.id_product === value,
-      );
+      const product = products?.find((product) => product.id_product === value);
       if (!product) return;
       setSelectedProduct({
         productId: product.id_product,
@@ -189,7 +187,7 @@ const AddLivestreamVariant = ({
           onChange={handleOnChange}
           //onSearch={onSearch}
           options={
-            products?.data.map((product) => ({
+            products?.map((product) => ({
               label: product.name,
               value: product.id_product,
               image_url: product.image_url,

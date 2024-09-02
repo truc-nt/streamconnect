@@ -8,4 +8,5 @@ const (
 	ShopifyAccessTokenPath        = "/admin/oauth/access_token"
 	ShopifyGetProductsPath        = "/admin/api/2024-07/products.json"
 	ShopifyGetProductVariantsPath = "/admin/api/2024-07/products/%d/variants.json"
+	ShopifyCreateOrderPath        = "/admin/api/2024-07/orders.json"
 )

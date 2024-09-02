@@ -21,6 +21,7 @@ type cartItemTable struct {
 	FkCart            postgres.ColumnInteger
 	FkExternalVariant postgres.ColumnInteger
 	Quantity          postgres.ColumnInteger
+	Status            postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,8 +66,9 @@ func newCartItemTableImpl(schemaName, tableName, alias string) cartItemTable {
 		FkCartColumn            = postgres.IntegerColumn("fk_cart")
 		FkExternalVariantColumn = postgres.IntegerColumn("fk_external_variant")
 		QuantityColumn          = postgres.IntegerColumn("quantity")
-		allColumns              = postgres.ColumnList{IDCartItemColumn, FkCartColumn, FkExternalVariantColumn, QuantityColumn}
-		mutableColumns          = postgres.ColumnList{FkCartColumn, FkExternalVariantColumn, QuantityColumn}
+		StatusColumn            = postgres.StringColumn("status")
+		allColumns              = postgres.ColumnList{IDCartItemColumn, FkCartColumn, FkExternalVariantColumn, QuantityColumn, StatusColumn}
+		mutableColumns          = postgres.ColumnList{FkCartColumn, FkExternalVariantColumn, QuantityColumn, StatusColumn}
 	)
 
 	return cartItemTable{
@@ -77,6 +79,7 @@ func newCartItemTableImpl(schemaName, tableName, alias string) cartItemTable {
 		FkCart:            FkCartColumn,
 		FkExternalVariant: FkExternalVariantColumn,
 		Quantity:          QuantityColumn,
+		Status:            StatusColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

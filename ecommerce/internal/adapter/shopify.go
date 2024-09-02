@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"ecommerce/internal/client/shopify"
+	clientModel "ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/constants"
 	"ecommerce/internal/model"
@@ -33,6 +34,8 @@ type IShopifyAdapter interface {
 	GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error)
 	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error)
 	GetExternalVariantStockByproductIds(param *shopify.ShopifyClientParam, productIds []string) ([]*model.ExternalVariantStock, error)
+
+	CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error)
 }
 
 type ShopifyAdapterConfig struct {
@@ -179,4 +182,29 @@ func (a *ShopifyAdapter) GetExternalVariantStockByproductIds(param *shopify.Shop
 		}
 	}
 	return externalVariantStocks, nil
+}
+
+func (a *ShopifyAdapter) CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error) {
+	createOrderRequest := &clientModel.CreateOrderRequest{
+		Order: &clientModel.OrderRequest{
+			LineItems: make([]*clientModel.LineItemRequest, 0),
+		},
+	}
+	for _, externalOrderItem := range externalOrderItems {
+		variantId, err := strconv.Atoi(externalOrderItem.ExternalIdMapping)
+		if err != nil {
+			return "", err
+		}
+		createOrderRequest.Order.LineItems = append(createOrderRequest.Order.LineItems, &clientModel.LineItemRequest{
+			VariantID: variantId,
+			Quantity:  externalOrderItem.Quantity,
+		})
+
+	}
+
+	newExternalOrder, err := a.getShopifyClient(param).CreateOrder(createOrderRequest)
+	if err != nil {
+		return "", err
+	}
+	return string(newExternalOrder.Order.ID), nil
 }

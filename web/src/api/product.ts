@@ -11,14 +11,19 @@ export interface IProduct {
 }
 
 export const getProductsByShopId = async (shopId: number) => {
-  return axios.get<IProduct[]>(`/shops/${shopId}/products`);
+  const res = await axios.get<IProduct[]>(`/shops/${shopId}/products`);
+  return res.data;
 };
 
 export interface IVariant {
   id_variant: number;
+  fk_product: number;
   sku: string;
   status: string;
   option: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
+  image_url: string;
   external_variants: {
     id_external_variant: number;
     id_ecommerce: number;

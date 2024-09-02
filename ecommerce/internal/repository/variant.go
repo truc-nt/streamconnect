@@ -2,18 +2,19 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
-	"github.com/jackc/pgtype"
 )
 
 type IVariantRepository interface {
 	IBaseRepository[model.Variant]
 
 	GetVariantsByProductId(db qrm.Queryable, shopId int64, limit int64, offset int64) ([]*GetVariantsByProductId, error)
+	GetVariantsByExternalProductIdMapping(db qrm.Queryable, externalProductIdMapping string) ([]*GetVariantsByExternalProductIdMapping, error)
+	GetVariantInfoById(db qrm.Queryable, id int64) (*GetVariantInfoById, error)
 }
 
 type VariantRepository struct {
@@ -53,10 +54,8 @@ func (r *VariantRepository) UpdateById(db qrm.Queryable, columnList postgres.Col
 }
 
 type GetVariantsByProductId struct {
-	IDVariant        int64       `sql:"primary_key" alias:"variant.id_variant" json:"id_variant"`
-	Sku              string      `alias:"variant.sku" json:"sku"`
-	Option           pgtype.JSON `alias:"variant.option" json:"option"`
-	Status           string      `alias:"variant.status" json:"status"`
+	model.Variant
+	ImageURL         string `alias:"image_variant.url" json:"image_url"`
 	ExternalVariants []*struct {
 		IDExternalVariant        int64   `alias:"external_variant.id_external_variant" json:"id_external_variant"`
 		ExternalProductIdMapping string  `alias:"external_variant.external_product_id_mapping" json:"-"`
@@ -70,10 +69,18 @@ type GetVariantsByProductId struct {
 }
 
 func (r *VariantRepository) GetVariantsByProductId(db qrm.Queryable, productId int64, limit int64, offset int64) ([]*GetVariantsByProductId, error) {
+	innerVariantAlias := table.Variant.AS("inner_variant")
+	imageUrlSubQuery := table.ImageVariant.SELECT(table.ImageVariant.URL).
+		FROM(
+			table.ImageVariant.
+				LEFT_JOIN(innerVariantAlias, innerVariantAlias.IDVariant.EQ(table.ImageVariant.FkVariant)),
+		).WHERE(table.Variant.IDVariant.EQ(innerVariantAlias.IDVariant)).LIMIT(1)
+
 	stmt := table.Variant.SELECT(
 		table.Variant.AllColumns,
 		table.ExternalVariant.AllColumns,
 		table.ExternalShop.AllColumns,
+		imageUrlSubQuery,
 	).FROM(
 		table.Variant.
 			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)).
@@ -88,4 +95,59 @@ func (r *VariantRepository) GetVariantsByProductId(db qrm.Queryable, productId i
 		return nil, err
 	}
 	return data, nil
+}
+
+type GetVariantsByExternalProductIdMapping struct {
+	model.Variant
+	ImageUrl string `alias:"image_variant.url" json:"image_url"`
+}
+
+func (r *VariantRepository) GetVariantsByExternalProductIdMapping(db qrm.Queryable, externalProductIdMapping string) ([]*GetVariantsByExternalProductIdMapping, error) {
+	innerVariantAlias := table.Variant.AS("inner_variant")
+	imageUrlSubQuery := table.ImageVariant.SELECT(table.ImageVariant.URL).
+		FROM(
+			table.ImageVariant.
+				LEFT_JOIN(innerVariantAlias, innerVariantAlias.IDVariant.EQ(table.ImageVariant.FkVariant)),
+		).WHERE(table.Variant.IDVariant.EQ(innerVariantAlias.IDVariant)).LIMIT(1)
+
+	stmt := table.Variant.SELECT(
+		table.Variant.AllColumns,
+		imageUrlSubQuery,
+	).FROM(
+		table.Variant.
+			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)),
+	).WHERE(
+		table.ExternalVariant.ExternalProductIDMapping.EQ(postgres.String(externalProductIdMapping)),
+	)
+
+	data := make([]*GetVariantsByExternalProductIdMapping, 0)
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+type GetVariantInfoById struct {
+	model.Variant
+	IDShop int64 `alias:"product.fk_shop" json:"id_shop"`
+}
+
+func (r *VariantRepository) GetVariantInfoById(db qrm.Queryable, id int64) (*GetVariantInfoById, error) {
+	stmt := table.Variant.SELECT(
+		table.Variant.AllColumns,
+		table.Product.FkShop,
+	).FROM(
+		table.Variant.
+			INNER_JOIN(table.Product, table.Product.IDProduct.EQ(table.Variant.FkProduct)),
+	).WHERE(
+		table.Variant.IDVariant.EQ(postgres.Int(int64(id))),
+	)
+
+	var data GetVariantInfoById
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

@@ -10,6 +10,8 @@ import (
 type ICartHandler interface {
 	Get(ctx *gin.Context)
 	AddToCart(ctx *gin.Context)
+	Update(ctx *gin.Context)
+	GetCartItemsByIds(ctx *gin.Context)
 }
 
 type CartHandler struct {
@@ -57,4 +59,41 @@ func (h *CartHandler) AddToCart(ctx *gin.Context) {
 	}
 
 	h.handleSuccessUpdate(ctx)
+}
+
+func (h *CartHandler) Update(ctx *gin.Context) {
+	cartItemId, err := h.parseId(ctx, ctx.Param("cart_item_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	var updateRequest *model.UpdateRequest
+	if err := ctx.ShouldBindJSON(&updateRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.Update(cartItemId, updateRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessUpdate(ctx)
+}
+
+func (h *CartHandler) GetCartItemsByIds(ctx *gin.Context) {
+	var getCartItemsByIdsRequest []*model.GetCartItemsByIdsRequest
+	if err := ctx.ShouldBindJSON(&getCartItemsByIdsRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	getCartItemsByIds, err := h.Service.GetCartItemsByIdsRequest(getCartItemsByIdsRequest)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, getCartItemsByIds)
 }

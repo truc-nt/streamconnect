@@ -10,6 +10,8 @@ import (
 type IExternalVariantHandler interface {
 	GetExternalVariantsGroupByProduct(ctx *gin.Context)
 	GetExternalVariantsByExternalProductIdMapping(ctx *gin.Context)
+
+	ConnectVariants(ctx *gin.Context)
 }
 
 type ExternalVariantHandler struct {
@@ -46,11 +48,26 @@ func (h *ExternalVariantHandler) GetExternalVariantsGroupByProduct(ctx *gin.Cont
 }
 
 func (h *ExternalVariantHandler) GetExternalVariantsByExternalProductIdMapping(ctx *gin.Context) {
-	products, err := h.Service.GetExternalVariantsByExternalProductIdMapping(ctx.Param("external_product_id_mapping"))
+	externalVariants, err := h.Service.GetExternalVariantsByExternalProductIdMapping(ctx.Param("external_product_id_mapping"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	h.handleSuccessGet(ctx, products)
+	h.handleSuccessGet(ctx, externalVariants)
+}
+
+func (h *ExternalVariantHandler) ConnectVariants(ctx *gin.Context) {
+	var connectVariantsRequest *model.ConnectVariantsRequest
+	if err := ctx.ShouldBindJSON(&connectVariantsRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.ConnectVariants(connectVariantsRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessUpdate(ctx)
 }

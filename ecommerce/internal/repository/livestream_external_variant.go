@@ -2,8 +2,8 @@ package repository
 
 import (
 	"ecommerce/internal/database"
-	"ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	"ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -60,6 +60,7 @@ type GetByLivestreamProductId struct {
 	Description         string `alias:"product.description" json:"description"`
 	ImageURL            string `json:"image_url"`
 	LivestreamVariants  []*struct {
+		IDLivestreamVariant        int64       `sql:"primary_key" alias:"variant.id_variant" json:"id_variant"`
 		Option                     pgtype.JSON `alias:"variant.option" json:"option"`
 		LivestreamExternalVariants []*struct {
 			IDLivestreamExternalVariant int64   `alias:"livestream_external_variant.id_livestream_external_variant" json:"id_livestream_external_variant"`
@@ -80,6 +81,7 @@ func (r *LivestreamExternalVariantRepository) GetByLivestreamProductId(db qrm.Qu
 		).WHERE(table.Variant.IDVariant.EQ(innerVariantAlias.IDVariant)).LIMIT(1)
 
 	stmt := table.LivestreamExternalVariant.SELECT(
+		table.LivestreamProduct.IDLivestreamProduct,
 		table.LivestreamExternalVariant.IDLivestreamExternalVariant,
 		table.ExternalShop.FkEcommerce,
 		table.LivestreamExternalVariant.Quantity,
@@ -88,6 +90,7 @@ func (r *LivestreamExternalVariantRepository) GetByLivestreamProductId(db qrm.Qu
 		table.Product.Description,
 		table.ExternalVariant.Price,
 		table.ImageVariant.URL,
+		table.Variant.IDVariant,
 		imageUrlSubQuery.AS("GetByLivestreamProductId.ImageURL"),
 	).FROM(
 		table.LivestreamExternalVariant.

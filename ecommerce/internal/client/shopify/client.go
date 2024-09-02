@@ -1,12 +1,14 @@
 package shopify
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/constants"
 
 	"golang.org/x/oauth2"
@@ -19,6 +21,7 @@ type IShopifyClient interface {
 
 	GetProducts() (*GetProductsResponse, error)
 	GetProductsByProductIds(productIds []string) (*GetProductsResponse, error)
+	CreateOrder(*model.CreateOrderRequest) (*model.CreateOrderResponse, error)
 	//GetProductVariantsByProductId(productId int64) (*GetProductVariantsResponse, error)
 }
 
@@ -63,6 +66,7 @@ func (c *ShopifyClient) GetAccessToken(oauth2Config *oauth2.Config, code string)
 
 func (c *ShopifyClient) getResponse(req *http.Request) ([]byte, error) {
 	req.Header.Set(constants.ShopifyTokenKey, c.Param.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.Client.Do(req)
 	if err != nil {
@@ -148,4 +152,29 @@ func (c *ShopifyClient) GetProductVariantsByProductId(productId int64) (*GetProd
 	}
 
 	return variants, nil
+}
+
+func (c *ShopifyClient) CreateOrder(request *model.CreateOrderRequest) (*model.CreateOrderResponse, error) {
+	reqBody, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	body := bytes.NewReader(reqBody)
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyCreateOrderPath), body)
+	if err != nil {
+		return nil, err
+	}
+
+	resData, err := c.getResponse(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var order *model.CreateOrderResponse
+	if err := json.Unmarshal(resData, &order); err != nil {
+		return nil, err
+	}
+
+	return order, nil
 }

@@ -8,6 +8,8 @@ import (
 
 type IVariantService interface {
 	GetVariantsByProductId(productId int64, limit int64, offset int64) ([]*repository.GetVariantsByProductId, error)
+
+	GetVariantsByExternalProductIdMapping(externalProductIdMapping string) (interface{}, error)
 }
 
 type VariantService struct {
@@ -70,4 +72,8 @@ func (s *VariantService) GetVariantsByProductId(shopId int64, limit int64, offse
 	//externalVariantStocks, err := s.EcommerceService[constants.SHOPIFY_ID].GetStockByExternalProductExternalId(shopId, externalProductExternalId)
 
 	return variants, err
+}
+
+func (s *VariantService) GetVariantsByExternalProductIdMapping(externalProductIdMapping string) (interface{}, error) {
+	return s.VariantRepository.GetVariantsByExternalProductIdMapping(s.VariantRepository.GetDatabase().Db, externalProductIdMapping)
 }

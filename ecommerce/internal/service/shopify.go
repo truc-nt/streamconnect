@@ -9,8 +9,8 @@ import (
 	"ecommerce/internal/client/shopify"
 	"ecommerce/internal/constants"
 	"ecommerce/internal/database"
-	entity "ecommerce/internal/database/model"
-	"ecommerce/internal/database/table"
+	entity "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/model"
 	"ecommerce/internal/repository"
 
@@ -26,14 +26,9 @@ const (
 )
 
 type IShopifyService interface {
-	GetEcommerceId() int16
+	IEcommerceService
 	GetAuthorizePath(shopDomain string) string
-	//CreateExternalVariants(shopifyProductIdList interface{}) error
-
 	ConnectNewExternalShopShopify(shopDomain string, authorizeCode string) error
-
-	SyncVariants(externalShopId int64) error
-	GetStockByExternalProductExternalId(externalShopId int64, externalProductIdMappings []string) ([]*model.ExternalVariantStock, error)
 }
 
 type ShopifyService struct {
@@ -215,4 +210,21 @@ func (s *ShopifyService) GetStockByExternalProductExternalId(externalShopId int6
 		return nil, err
 	}
 	return stocks, nil
+}
+
+func (s *ShopifyService) CreateOrder(externalShopId int64, externalOrderItems []*model.ExternalOrderItem) (string, error) {
+	externalShopAuth, err := s.ExternalShopAuthRepository.GetByExternalShopId(s.ExternalShopRepository.GetDatabase().Db, externalShopId)
+	if err != nil {
+		return "", err
+	}
+
+	newExternalOrderIdMapping, err := s.ShopifyAdapter.CreateOrder(&shopify.ShopifyClientParam{
+		ShopName:    externalShopAuth.Name,
+		AccessToken: *externalShopAuth.AccessToken,
+	}, externalOrderItems)
+	if err != nil {
+		return "", err
+	}
+
+	return newExternalOrderIdMapping, nil
 }

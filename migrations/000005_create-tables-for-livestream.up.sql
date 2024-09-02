@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS livestream_product (
     id_livestream_product BIGSERIAL PRIMARY KEY,
     fk_livestream BIGSERIAL REFERENCES livestream(id_livestream) NOT NULL,
     fk_product BIGSERIAL REFERENCES product(id_product) NOT NULL,
-    priority INTEGER 
+    priority INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS livestream_external_variant (
