@@ -1,54 +1,54 @@
 "use client";
+import dynamic from "next/dynamic";
+import React, { memo } from "react";
 
-import { MeetingProvider as VideoSdkMeetingProvider } from "@videosdk.live/react-sdk";
-import { sdkToken } from "@/api/axios";
-import ReactPlayer from "react-player";
+const VideoSdkMeetingProvider = dynamic(
+  () => import("@videosdk.live/react-sdk").then((mod) => mod.MeetingProvider),
+  { ssr: false },
+);
 
-interface IMeetingProviderProps {
+interface IViewerProviderProps {
   meetingId: string;
+  mode: "VIEWER" | "CONFERENCE";
   name?: string;
-  mode?: "CONFERENCE" | "VIEWER";
+  children?: React.ReactNode;
 }
 
 const MeetingProvider = ({
   meetingId,
+  mode,
   name = "TestUser",
-  mode = "VIEWER",
-}: IMeetingProviderProps) => {
+  children,
+}: IViewerProviderProps) => {
   return (
     <VideoSdkMeetingProvider
       config={{
         meetingId: meetingId,
-        micEnabled: true,
-        webcamEnabled: true,
+        micEnabled: mode === "VIEWER" ? false : true,
+        webcamEnabled: mode === "VIEWER" ? false : true,
         name: name,
         mode: mode,
         multiStream: false,
         debugMode: true,
       }}
-      token={sdkToken}
+      token={process.env.NEXT_PUBLIC_VIDEOSDK_TOKEN ?? ""}
       reinitialiseMeetingOnConfigChange={true}
       joinWithoutUserInteraction={true}
     >
-        <ReactPlayer
-          //
-          playsinline // extremely crucial prop
-          pip={false}
-          light={false}
-          controls={false}
-          muted={true}
-          playing={true}
-          //
-          url={videoStream}
-          //
-          height={"200px"}
-          width={"300px"}
-          onError={(err) => {
-            console.log(err, "participant video error");
-          }}
-        />
+      {children}
     </VideoSdkMeetingProvider>
   );
 };
 
-export default MeetingProvider;
+const MemoizedMeetingProvider = memo(
+  MeetingProvider,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.meetingId === nextProps.meetingId &&
+      prevProps.name === nextProps.name &&
+      prevProps.mode === nextProps.mode
+    );
+  },
+);
+
+export default MemoizedMeetingProvider;

@@ -61,7 +61,7 @@ const sellerNavigator: MenuItem[] = [
   },
   {
     key: "/seller/orders",
-    label: <Link href="/user/orders">Đơn hàng</Link>,
+    label: <Link href="/seller/orders">Đơn hàng</Link>,
     icon: <CarryOutFilled />,
   },
   {

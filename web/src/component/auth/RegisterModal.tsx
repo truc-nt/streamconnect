@@ -8,7 +8,7 @@ export interface AuthModalProps {
   setOpenModal: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function SignUpModal({
+export default function RegisterModal({
   openModal,
   setOpenModal,
 }: AuthModalProps) {

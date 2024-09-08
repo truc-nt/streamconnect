@@ -19,8 +19,8 @@ type IShopifyClient interface {
 	GetAuthorizePath(oauth2Config *oauth2.Config) string
 	GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error)
 
-	GetProducts() (*GetProductsResponse, error)
-	GetProductsByProductIds(productIds []string) (*GetProductsResponse, error)
+	GetProducts() (*model.GetProductsResponse, error)
+	GetProductsByProductIds(productIds []string) (*model.GetProductsResponse, error)
 	CreateOrder(*model.CreateOrderRequest) (*model.CreateOrderResponse, error)
 	//GetProductVariantsByProductId(productId int64) (*GetProductVariantsResponse, error)
 }
@@ -46,24 +46,6 @@ func NewShopifyClient(param *ShopifyClientParam) IShopifyClient {
 	return c
 }
 
-func (c *ShopifyClient) GetAuthorizePath(oauth2Config *oauth2.Config) string {
-	oauth2Config.Endpoint = oauth2.Endpoint{
-		AuthURL:  fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAuthorizePath,
-		TokenURL: fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAccessTokenPath,
-	}
-	return oauth2Config.AuthCodeURL("state")
-}
-
-func (c *ShopifyClient) GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error) {
-	oauth2Config.Endpoint = oauth2.Endpoint{
-		AuthURL:  fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAuthorizePath,
-		TokenURL: fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAccessTokenPath,
-	}
-
-	res, err := oauth2Config.Exchange(context.Background(), code)
-	return res, err
-}
-
 func (c *ShopifyClient) getResponse(req *http.Request) ([]byte, error) {
 	req.Header.Set(constants.ShopifyTokenKey, c.Param.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
@@ -82,7 +64,25 @@ func (c *ShopifyClient) getResponse(req *http.Request) ([]byte, error) {
 	return resData, nil
 }
 
-func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
+func (c *ShopifyClient) GetAuthorizePath(oauth2Config *oauth2.Config) string {
+	oauth2Config.Endpoint = oauth2.Endpoint{
+		AuthURL:  fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAuthorizePath,
+		TokenURL: fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAccessTokenPath,
+	}
+	return oauth2Config.AuthCodeURL("state")
+}
+
+func (c *ShopifyClient) GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error) {
+	oauth2Config.Endpoint = oauth2.Endpoint{
+		AuthURL:  fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAuthorizePath,
+		TokenURL: fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAccessTokenPath,
+	}
+
+	res, err := oauth2Config.Exchange(context.Background(), code)
+	return res, err
+}
+
+func (c *ShopifyClient) GetProducts() (*model.GetProductsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), constants.ShopifyGetProductsPath), nil)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
 		return nil, err
 	}
 
-	var products *GetProductsResponse
+	var products *model.GetProductsResponse
 	if err := json.Unmarshal(resData, &products); err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (c *ShopifyClient) GetProducts() (*GetProductsResponse, error) {
 	return products, nil
 }
 
-func (c *ShopifyClient) GetProductsByProductIds(productIds []string) (*GetProductsResponse, error) {
+func (c *ShopifyClient) GetProductsByProductIds(productIds []string) (*model.GetProductsResponse, error) {
 	queryParams := "?ids="
 	for i, productId := range productIds {
 		if i == 0 {
@@ -127,7 +127,7 @@ func (c *ShopifyClient) GetProductsByProductIds(productIds []string) (*GetProduc
 		return nil, err
 	}
 
-	var products *GetProductsResponse
+	var products *model.GetProductsResponse
 	if err := json.Unmarshal(resData, &products); err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (c *ShopifyClient) GetProductsByProductIds(productIds []string) (*GetProduc
 	return products, nil
 }
 
-func (c *ShopifyClient) GetProductVariantsByProductId(productId int64) (*GetProductVariantsResponse, error) {
+func (c *ShopifyClient) GetProductVariantsByProductId(productId int64) (*model.GetProductVariantsResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName), fmt.Sprintf(constants.ShopifyGetProductVariantsPath, productId)), nil)
 	if err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ func (c *ShopifyClient) GetProductVariantsByProductId(productId int64) (*GetProd
 		return nil, err
 	}
 
-	var variants *GetProductVariantsResponse
+	var variants *model.GetProductVariantsResponse
 	if err := json.Unmarshal(resData, &variants); err != nil {
 		return nil, err
 	}

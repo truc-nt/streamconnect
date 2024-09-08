@@ -1,20 +1,17 @@
 package service
 
 import (
-	"bytes"
 	"database/sql"
 	"ecommerce/api/model"
+	"ecommerce/internal/adapter"
 	"ecommerce/internal/constants"
 	internalModel "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
-	"encoding/json"
-	"fmt"
+
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/samber/lo"
-	"io"
-	"net/http"
 )
 
 type ILivestreamService interface {
@@ -28,61 +25,26 @@ type LivestreamService struct {
 	LivestreamRepository                repository.ILivestreamRepository
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
+
+	VideoSdkAdapter adapter.IVideoSdkAdapter
 }
 
-func NewLivestreamService(livestreamService repository.ILivestreamRepository, livestreamProductRepository repository.ILivestreamProductRepository, livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository) ILivestreamService {
+func NewLivestreamService(
+	livestreamService repository.ILivestreamRepository,
+	livestreamProductRepository repository.ILivestreamProductRepository,
+	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
+	videoSdkAdapter adapter.IVideoSdkAdapter,
+) ILivestreamService {
 	return &LivestreamService{
 		LivestreamRepository:                livestreamService,
 		LivestreamProductRepository:         livestreamProductRepository,
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
+		VideoSdkAdapter:                     videoSdkAdapter,
 	}
-}
-
-const videoSdkBaseUrl = "https://api.videosdk.live/v2"
-const videoSdkToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiJjN2MwOTgwMy05OWUzLTRmMGUtOTg3Ny0zYjU1MTdiNThkY2IiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcyMzMyOTgyOSwiZXhwIjoxNzI1OTIxODI5fQ.5x11sT5M7jzIM9EslqanSiMpnLeLTImr-zlzDKUuntc"
-
-func createVideoSdkRoom() (string, error) {
-	client := &http.Client{}
-
-	reqBody := []byte(`{}`)
-	req, err := http.NewRequest("POST", videoSdkBaseUrl+"/rooms", bytes.NewBuffer(reqBody))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", videoSdkToken)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("failed to parse response body: %w", err)
-	}
-
-	roomId, ok := result["roomId"].(string)
-	if !ok {
-		return "", fmt.Errorf("roomId not found in response")
-	}
-
-	return roomId, nil
 }
 
 func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) error {
-	roomId, err := createVideoSdkRoom()
+	roomId, err := s.VideoSdkAdapter.CreateRoom()
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,7 @@ import (
 
 	"ecommerce/internal/client/shopify"
 	clientModel "ecommerce/internal/client/shopify/model"
+	shopifyModel "ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/constants"
 	"ecommerce/internal/model"
@@ -16,14 +17,6 @@ import (
 	"github.com/jackc/pgtype"
 	"github.com/samber/lo"
 	"golang.org/x/oauth2"
-)
-
-const (
-	ShopifyBaseURL         = "https://%s.myshopify.com"
-	ShopifyTokenKey        = "X-Shopify-Access-Token"
-	ShopifyAuthorizePath   = "/admin/oauth/authorize"
-	ShopifyRedirectPath    = "/api/shopify/redirect"
-	ShopifyAccessTokenPath = "/admin/oauth/access_token"
 )
 
 type IShopifyAdapter interface {
@@ -114,7 +107,7 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 			externalVariant.ExternalIdMapping = strconv.FormatInt(variant.ID, 10)
 			externalVariant.ExternalProductIdMapping = &externalProductIdMapping
 
-			if foundImage, ok := lo.Find(product.Images, func(image *shopify.Image) bool {
+			if foundImage, ok := lo.Find(product.Images, func(image *shopifyModel.Image) bool {
 				if variant.ImageID == nil {
 					return false
 				}

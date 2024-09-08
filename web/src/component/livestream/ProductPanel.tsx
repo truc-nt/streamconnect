@@ -1,16 +1,16 @@
 import { useGetLivestreamProducts } from "@/hook/livestream";
 import ProductCard from "@/component/product/Card";
 import { List } from "antd";
-import LivestreamProductInformation from "./LivestreamProductInformation";
-import LivestreamProductModal from "./LivestreamProductModal";
+import LivestreamProductInformation from "../../app/livestreams/[id]/component/LivestreamProductInformation";
+import LivestreamProductModal from "../../app/livestreams/[id]/component/LivestreamProductModal";
 import { useState } from "react";
+import { useParams } from "next/navigation";
 
-const LivestreamProductSegmented = ({
-  livestreamId,
-}: {
-  livestreamId: number;
-}) => {
-  const { data } = useGetLivestreamProducts(livestreamId);
+const ProductPanel = () => {
+  const { id } = useParams();
+
+  const { data } = useGetLivestreamProducts(Number(id));
+
   const [livestreamProductId, setLivestreamProductId] = useState<number | null>(
     null,
   );
@@ -42,4 +42,4 @@ const LivestreamProductSegmented = ({
   );
 };
 
-export default LivestreamProductSegmented;
+export default ProductPanel;

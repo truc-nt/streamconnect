@@ -1,4 +1,4 @@
-package shopify
+package model
 
 type GetProductsResponse struct {
 	Products []*Product `json:"products"`

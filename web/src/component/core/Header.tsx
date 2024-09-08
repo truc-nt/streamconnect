@@ -18,9 +18,13 @@ import Link from "next/link";
 import { Layout, MenuProps } from "antd";
 import { useEffect, useState } from "react";
 import LoginModal from "@/component/auth/LoginModal";
-import SignUpModal from "@/component/auth/SignUpModal";
+import RegisterModal from "@/component/auth/RegisterModal";
 
 const Header = () => {
+  const [isSignInModalVisible, setIsSignInModalVisible] = useState(false);
+  const [isSignUpModalVisible, setIsSignUpModalVisible] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -33,16 +37,18 @@ const Header = () => {
     {
       key: "3",
       label: (
-        <Button onClick={() => localStorage.removeItem("token")}>
+        <Button
+          onClick={() => {
+            localStorage.removeItem("token");
+            setIsAuthorized(false);
+          }}
+        >
           Đăng xuất
         </Button>
       ),
     },
   ];
 
-  const [isSignInModalVisible, setIsSignInModalVisible] = useState(false);
-  const [isSignUpModalVisible, setIsSignUpModalVisible] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const onClickSignIn = () => {
     setIsSignInModalVisible(true);
   };
@@ -52,7 +58,7 @@ const Header = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!!token) setIsAuthorized(true);
-  });
+  }, [isSignInModalVisible, isSignUpModalVisible, isAuthorized]);
   return (
     <Layout.Header className="bg-white">
       <Flex className="justify-between items-center" gap="large">
@@ -60,7 +66,7 @@ const Header = () => {
         {!isAuthorized ? (
           <Space>
             <Button onClick={onClickSignUp}>Đăng ký</Button>
-            <SignUpModal
+            <RegisterModal
               openModal={isSignUpModalVisible}
               setOpenModal={setIsSignUpModalVisible}
             />

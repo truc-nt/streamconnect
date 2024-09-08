@@ -1,11 +1,7 @@
 import { Form, Input, Button, Checkbox, Flex, DatePicker } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useAppSelector, useAppDispatch } from "@/store/store";
-import {
-  setPrevStep,
-  setLivestreamInformation,
-  reset,
-} from "@/store/livestream_create";
+import { setLivestreamInformation, reset } from "@/store/livestream_create";
 import { ILivestreamExternalVariant, createLivestream } from "@/api/livestream";
 import useLoading from "@/hook/loading";
 
@@ -117,7 +113,7 @@ const LivestreamInformation = () => {
       </Form.Item>
       <Flex justify="end" gap="middle">
         <Form.Item>
-          <Button onClick={() => dispatch(setPrevStep())}>Quay lại</Button>
+          <Button>Quay lại</Button>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">

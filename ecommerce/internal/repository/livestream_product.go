@@ -116,7 +116,7 @@ func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livest
 		table.Variant.IDVariant,
 	)
 
-	var data []*GetByLivestreamId
+	data := make([]*GetByLivestreamId, 0)
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err
