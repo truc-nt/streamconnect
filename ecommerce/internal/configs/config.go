@@ -24,9 +24,10 @@ type ShopifyAppConfig struct {
 }
 
 type Config struct {
-	Postgres   PostgresConfig
-	Server     ServerConfig
-	ShopifyApp ShopifyAppConfig
+	Postgres      PostgresConfig
+	Server        ServerConfig
+	ShopifyApp    ShopifyAppConfig
+	VideoSdkToken string `env:"VIDEO_SDK_TOKEN"`
 }
 
 func NewConfig() *Config {

@@ -3,7 +3,10 @@ CREATE TABLE IF NOT EXISTS livestream (
     fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL,
     title varchar NOT NULL,
     description varchar,
-    start_time TIMESTAMP NOT NULL,
+    status varchar not null,
+    meeting_id varchar not null,
+    hls_url varchar,
+    start_time TIMESTAMP,
     end_time TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

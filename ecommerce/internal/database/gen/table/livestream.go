@@ -18,13 +18,16 @@ type livestreamTable struct {
 
 	// Columns
 	IDLivestream postgres.ColumnInteger
-	FkShop       postgres.ColumnInteger
 	Title        postgres.ColumnString
 	Description  postgres.ColumnString
+	Status       postgres.ColumnString
+	MeetingID    postgres.ColumnString
+	HlsURL       postgres.ColumnString
 	StartTime    postgres.ColumnTimestamp
 	EndTime      postgres.ColumnTimestamp
 	CreatedAt    postgres.ColumnTimestamp
 	UpdatedAt    postgres.ColumnTimestamp
+	FkShop       postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -66,15 +69,18 @@ func newLivestreamTable(schemaName, tableName, alias string) *LivestreamTable {
 func newLivestreamTableImpl(schemaName, tableName, alias string) livestreamTable {
 	var (
 		IDLivestreamColumn = postgres.IntegerColumn("id_livestream")
-		FkShopColumn       = postgres.IntegerColumn("fk_shop")
 		TitleColumn        = postgres.StringColumn("title")
 		DescriptionColumn  = postgres.StringColumn("description")
+		StatusColumn       = postgres.StringColumn("status")
+		MeetingIDColumn    = postgres.StringColumn("meeting_id")
+		HlsURLColumn       = postgres.StringColumn("hls_url")
 		StartTimeColumn    = postgres.TimestampColumn("start_time")
 		EndTimeColumn      = postgres.TimestampColumn("end_time")
 		CreatedAtColumn    = postgres.TimestampColumn("created_at")
 		UpdatedAtColumn    = postgres.TimestampColumn("updated_at")
-		allColumns         = postgres.ColumnList{IDLivestreamColumn, FkShopColumn, TitleColumn, DescriptionColumn, StartTimeColumn, EndTimeColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns     = postgres.ColumnList{FkShopColumn, TitleColumn, DescriptionColumn, StartTimeColumn, EndTimeColumn, CreatedAtColumn, UpdatedAtColumn}
+		FkShopColumn       = postgres.IntegerColumn("fk_shop")
+		allColumns         = postgres.ColumnList{IDLivestreamColumn, TitleColumn, DescriptionColumn, StatusColumn, MeetingIDColumn, HlsURLColumn, StartTimeColumn, EndTimeColumn, CreatedAtColumn, UpdatedAtColumn, FkShopColumn}
+		mutableColumns     = postgres.ColumnList{TitleColumn, DescriptionColumn, StatusColumn, MeetingIDColumn, HlsURLColumn, StartTimeColumn, EndTimeColumn, CreatedAtColumn, UpdatedAtColumn, FkShopColumn}
 	)
 
 	return livestreamTable{
@@ -82,13 +88,16 @@ func newLivestreamTableImpl(schemaName, tableName, alias string) livestreamTable
 
 		//Columns
 		IDLivestream: IDLivestreamColumn,
-		FkShop:       FkShopColumn,
 		Title:        TitleColumn,
 		Description:  DescriptionColumn,
+		Status:       StatusColumn,
+		MeetingID:    MeetingIDColumn,
+		HlsURL:       HlsURLColumn,
 		StartTime:    StartTimeColumn,
 		EndTime:      EndTimeColumn,
 		CreatedAt:    CreatedAtColumn,
 		UpdatedAt:    UpdatedAtColumn,
+		FkShop:       FkShopColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

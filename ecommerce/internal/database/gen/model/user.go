@@ -7,6 +7,17 @@
 
 package model
 
+import (
+	"time"
+)
+
 type User struct {
-	IDUser int64 `sql:"primary_key" json:"id_user" xml:"id_user"`
+	IDUser              int64      `sql:"primary_key" json:"id_user" xml:"id_user"`
+	Username            string     `json:"username" xml:"username"`
+	HashedPassword      string     `json:"hashed_password" xml:"hashed_password"`
+	FullName            *string    `json:"full_name" xml:"full_name"`
+	Email               string     `json:"email" xml:"email"`
+	IsEnabled           *bool      `json:"is_enabled" xml:"is_enabled"`
+	CreatedDateTime     *time.Time `json:"created_date_time" xml:"created_date_time"`
+	LastUpdatedDateTime *time.Time `json:"last_updated_date_time" xml:"last_updated_date_time"`
 }
