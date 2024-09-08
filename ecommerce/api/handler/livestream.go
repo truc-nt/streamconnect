@@ -1,14 +1,18 @@
 package handler
 
 import (
+	"database/sql"
 	"ecommerce/api/model"
 	"ecommerce/internal/service"
-
+	"errors"
 	"github.com/gin-gonic/gin"
 )
 
 type ILivestreamHandler interface {
 	CreateLivestream(ctx *gin.Context)
+	FetchLivestreams(ctx *gin.Context)
+	GetLivestream(ctx *gin.Context)
+	SetLivestreamHls(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -41,4 +45,62 @@ func (h *LivestreamHandler) CreateLivestream(ctx *gin.Context) {
 	}
 
 	h.handleSuccessCreate(ctx)
+}
+
+func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
+	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	livestream, err := h.Service.GetLivestream(id)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessGet(ctx, livestream)
+}
+
+func (h *LivestreamHandler) FetchLivestreams(ctx *gin.Context) {
+	status := ctx.Query("status")
+	nillAbleStatus := sql.NullString{
+		String: status,
+		Valid:  status != "",
+	}
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	nillAbleShopId := sql.NullInt64{
+		Int64: shopId,
+		Valid: err == nil,
+	}
+
+	livestreams, err := h.Service.FetchLivestreams(nillAbleStatus, nillAbleShopId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, livestreams)
+}
+
+func (h *LivestreamHandler) SetLivestreamHls(ctx *gin.Context) {
+	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	var request *model.SetLivestreamHlsRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	if request.IDLivestream != id {
+		h.handleFailed(ctx, errors.New("bad request"))
+	}
+	if err := h.Service.SetLivestreamHls(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
 }

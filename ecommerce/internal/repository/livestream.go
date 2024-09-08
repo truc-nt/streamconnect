@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"ecommerce/internal/database"
 	"ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
@@ -11,6 +12,7 @@ import (
 
 type ILivestreamRepository interface {
 	IBaseRepository[model.Livestream]
+	GetByStatusAndOwnerId(db qrm.Queryable, status sql.NullString, id sql.NullInt64) ([]model.Livestream, error)
 }
 
 type LivestreamRepository struct {
@@ -47,4 +49,21 @@ func (r *LivestreamRepository) GetById(db qrm.Queryable, id int64) (*model.Lives
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (r *LivestreamRepository) GetByStatusAndOwnerId(db qrm.Queryable, status sql.NullString, id sql.NullInt64) ([]model.Livestream, error) {
+	stmt := table.Livestream.SELECT(table.Livestream.AllColumns)
+	if status.Valid {
+		stmt = stmt.WHERE(table.Livestream.Status.EQ(postgres.String(status.String)))
+	}
+	if id.Valid {
+		stmt = stmt.WHERE(table.Livestream.FkShop.EQ(postgres.Int(int64(id.Int64))))
+	}
+
+	var data []model.Livestream
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

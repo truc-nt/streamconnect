@@ -5,7 +5,7 @@ import "time"
 type CreateLivestreamRequest struct {
 	Title              string     `json:"title"`
 	Description        string     `json:"description"`
-	StartTime          string     `json:"start_time"`
+	StartTime          *time.Time `json:"start_time"`
 	EndTime            *time.Time `json:"end_time"`
 	LivestreamProducts []*struct {
 		IDProduct          int64 `json:"id_product"`
@@ -18,4 +18,9 @@ type CreateLivestreamRequest struct {
 			} `json:"livestream_external_variants"`
 		} `json:"livestream_variants"`
 	} `json:"livestream_products"`
+}
+
+type SetLivestreamHlsRequest struct {
+	HlsUrl       string `json:"hls_url"`
+	IDLivestream int64  `json:"id_livestream"`
 }

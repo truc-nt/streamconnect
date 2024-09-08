@@ -13,11 +13,14 @@ import (
 
 type Livestream struct {
 	IDLivestream int64      `sql:"primary_key" json:"id_livestream" xml:"id_livestream"`
-	FkShop       int64      `json:"fk_shop" xml:"fk_shop"`
 	Title        string     `json:"title" xml:"title"`
 	Description  *string    `json:"description" xml:"description"`
-	StartTime    time.Time  `json:"start_time" xml:"start_time"`
+	Status       string     `json:"status" xml:"status"`
+	MeetingID    string     `json:"meeting_id" xml:"meeting_id"`
+	HlsURL       *string    `json:"hls_url" xml:"hls_url"`
+	StartTime    *time.Time `json:"start_time" xml:"start_time"`
 	EndTime      *time.Time `json:"end_time" xml:"end_time"`
 	CreatedAt    time.Time  `json:"created_at" xml:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at" xml:"updated_at"`
+	FkShop       int64      `json:"fk_shop" xml:"fk_shop"`
 }
