@@ -23,9 +23,6 @@ public class User implements Serializable {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @JsonIgnore
     @Column(name = "hashed_password")
     private String hashedPassword;
@@ -37,13 +34,13 @@ public class User implements Serializable {
     @JsonIgnore
     @Column(name = "role")
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"))
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "username", referencedColumnName = "username"))
     private List<String> roles;
 
-    @Column(name = "created_date_time")
+    @Column(name = "created_at")
     private LocalDateTime createdDateTime;
 
-    @Column(name = "last_updated_date_time")
+    @Column(name = "updated_at")
     private LocalDateTime lastUpdatedDateTime;
 
     public Long getId() {
@@ -68,14 +65,6 @@ public class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     public String getHashedPassword() {

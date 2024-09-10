@@ -11,7 +11,11 @@ func LoadLivestreamRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 	{
 		livestream.GET("/", h.LivestreamHandler.FetchLivestreams)
 		livestream.GET("/:livestream_id", h.LivestreamHandler.GetLivestream)
-		livestream.GET("/:livestream_id/livestream_products", h.LivestreamProductHandler.GetLivestreamProductsByLivestreamId)
-		livestream.POST("/:livestream_id/startHls", h.LivestreamHandler.SetLivestreamHls)
+
+		livestream.Use(AuthorizationMiddleware())
+		{
+			livestream.GET("/:livestream_id/livestream_products", h.LivestreamProductHandler.GetLivestreamProductsByLivestreamId)
+			livestream.POST("/:livestream_id/startHls", h.LivestreamHandler.SetLivestreamHls)
+		}
 	}
 }

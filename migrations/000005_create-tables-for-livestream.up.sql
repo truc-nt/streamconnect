@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS livestream (
     id_livestream BIGSERIAL PRIMARY KEY,
     fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL,
-    title varchar NOT NULL,
-    description varchar,
-    status varchar not null,
-    meeting_id varchar not null,
-    hls_url varchar,
-    start_time TIMESTAMP,
+    title VARCHAR NOT NULL,
+    description VARCHAR,
+    status VARCHAR NOT NULL,
+    meeting_id VARCHAR NOT NULL,
+    hls_url VARCHAR,
+    start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

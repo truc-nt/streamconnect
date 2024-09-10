@@ -8,7 +8,9 @@ import {
   TableColumnType,
   ModalProps,
   Tag,
+  Space,
 } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { useGetProductsByShopId } from "@/hook/product";
 import { getVariantsByProductId } from "@/api/product";
@@ -255,7 +257,7 @@ const ChosenLivestreamVariant = () => {
       key: "name",
     },
     {
-      title: "Option",
+      title: "Định dạng",
       dataIndex: "option",
       key: "option",
       render: (_, { option }) =>
@@ -288,6 +290,16 @@ const ChosenLivestreamVariant = () => {
             {externalVariant.quantity}
           </Tag>
         )),
+    },
+    {
+      dataIndex: "action",
+      key: "action",
+      render: () => (
+        <Space>
+          <EditOutlined />
+          <DeleteOutlined />
+        </Space>
+      ),
     },
   ];
 

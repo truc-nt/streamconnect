@@ -34,16 +34,16 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-        return buildToken(new HashMap<>(), user.getUsername(), jwtExpiration);
+        return buildToken(new HashMap<>(), user.getId(), jwtExpiration);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    /*public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails.getUsername(), jwtExpiration);
-    }
+    }*/
 
     public long getExpirationTime() {
         return jwtExpiration;
@@ -51,13 +51,13 @@ public class JwtService {
 
     private String buildToken(
             Map<String, Object> extraClaims,
-            String username,
+            long userId,
             long expiration
     ) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(username)
+                .setSubject(Long.toString(userId))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

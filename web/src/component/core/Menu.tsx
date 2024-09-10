@@ -50,7 +50,7 @@ const userNavigator: MenuItem[] = [
     key: "/user/address",
     label: <Link href="/user/address">Địa chỉ</Link>,
     icon: <EnvironmentFilled />,
-  }
+  },
 ];
 
 const sellerNavigator: MenuItem[] = [
@@ -61,7 +61,7 @@ const sellerNavigator: MenuItem[] = [
   },
   {
     key: "/seller/orders",
-    label: <Link href="/user/orders">Đơn hàng</Link>,
+    label: <Link href="/seller/orders">Đơn hàng</Link>,
     icon: <CarryOutFilled />,
   },
   {

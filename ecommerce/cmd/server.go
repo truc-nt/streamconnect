@@ -67,6 +67,7 @@ var RepositoriesSet = wire.NewSet(
 
 var AdapterSet = wire.NewSet(
 	adapter.NewShopifyAdapter,
+	adapter.NewVideoSdkAdapter,
 )
 
 func runServer() {

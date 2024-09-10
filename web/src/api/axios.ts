@@ -1,12 +1,17 @@
 import axios from "axios";
 
 export default axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL_GO,
+  headers: { "Content-Type": "application/json" },
+});
+
+export const axiosJava = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL_JAVA,
   headers: { "Content-Type": "application/json" },
 });
 
 export const axiosPrivate = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL_GO,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
