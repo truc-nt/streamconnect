@@ -1,5 +1,8 @@
 package com.hcmut.gateway.configuration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hcmut.shared_lib.model.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,8 +27,24 @@ public class JwtService {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        JwtUserInfo userInfo = extractUserInfo(token);
+        return userInfo.getUsername();
+    }
+
+    public Long extractUserId(String token) {
+        JwtUserInfo userInfo = extractUserInfo(token);
+        return userInfo.getUserId();
+    }
+
+    private JwtUserInfo extractUserInfo(String token) {
+        try {
+            return objectMapper.readValue(extractClaim(token, Claims::getSubject), JwtUserInfo.class);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException("Cannot deserialize user info from JSON", ex);
+        }
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -34,7 +53,7 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-        return buildToken(new HashMap<>(), user.getId(), jwtExpiration);
+        return buildToken(new HashMap<>(), user.getId(), user.getUsername(), jwtExpiration);
     }
 
     /*public String generateToken(UserDetails userDetails) {
@@ -49,21 +68,20 @@ public class JwtService {
         return jwtExpiration;
     }
 
-    private String buildToken(
-            Map<String, Object> extraClaims,
-            long userId,
-            long expiration
-    ) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(Long.toString(userId))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
+    private String buildToken(Map<String, Object> extraClaims, long userId, String userName, long expiration)
+    {
+        JwtUserInfo userInfo = new JwtUserInfo(userId, userName);
+        try {
+            return Jwts.builder().setClaims(extraClaims)
+                    .setSubject(objectMapper.writeValueAsString(userInfo))
+                    .setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                    .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException("Cannot serialize user info to JSON", ex);
+        }
     }
-
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
@@ -79,16 +97,42 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
     }
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public static class JwtUserInfo {
+        @JsonProperty("userId")
+        private long userId;
+
+        @JsonProperty("username")
+        private String username;
+
+        public JwtUserInfo() {}
+
+        public JwtUserInfo(long userId, String username) {
+            this.userId = userId;
+            this.username = username;
+        }
+
+        public long getUserId() {
+            return userId;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUserId(long userId) {
+            this.userId = userId;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
     }
 }

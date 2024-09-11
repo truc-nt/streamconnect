@@ -46,8 +46,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalArgumentException("Username already exists");
         }
         account.setHashedPassword(passwordEncoder.encode(account.getPassword()));
-        account.setCreatedDateTime(LocalDateTime.now());
-        account.setLastUpdatedDateTime(LocalDateTime.now());
+        account.setCreatedAt(LocalDateTime.now());
+        account.setUpdatedAt(LocalDateTime.now());
         return userRepository.save(account);
     }
 }

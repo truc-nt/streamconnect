@@ -38,10 +38,10 @@ public class User implements Serializable {
     private List<String> roles;
 
     @Column(name = "created_at")
-    private LocalDateTime createdDateTime;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime lastUpdatedDateTime;
+    private LocalDateTime updatedAt;
 
     public Long getId() {
         return id;
@@ -93,19 +93,19 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
-    public LocalDateTime getCreatedDateTime() {
-        return createdDateTime;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedDateTime(LocalDateTime createdDateTime) {
-        this.createdDateTime = createdDateTime;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public LocalDateTime getLastUpdatedDateTime() {
-        return lastUpdatedDateTime;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setLastUpdatedDateTime(LocalDateTime lastUpdatedDateTime) {
-        this.lastUpdatedDateTime = lastUpdatedDateTime;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
