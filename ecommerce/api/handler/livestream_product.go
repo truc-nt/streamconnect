@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"ecommerce/api/model"
 	"ecommerce/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 type ILivestreamProductHandler interface {
 	GetLivestreamProductsByLivestreamId(ctx *gin.Context)
 	GetLivestreamProductInfoByLivestreamProductId(ctx *gin.Context)
+	PinLivestreamProduct(ctx *gin.Context)
 }
 
 type LivestreamProductHandler struct {
@@ -52,4 +54,18 @@ func (h *LivestreamProductHandler) GetLivestreamProductInfoByLivestreamProductId
 	}
 
 	h.handleSuccessGet(ctx, product)
+}
+
+func (h *LivestreamProductHandler) PinLivestreamProduct(ctx *gin.Context) {
+	var request *model.PinLivestreamProductRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.PinLivestreamProduct(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
 }

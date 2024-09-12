@@ -7,10 +7,12 @@ import { useGetExternalShops } from "@/hook/external_shop";
 import { SyncOutlined, DeleteOutlined } from "@ant-design/icons";
 import { syncExternalVariants } from "@/api/external_product";
 import useLoading from "@/hook/loading";
+import { useAppSelector } from "@/store/store";
 
 const Page = () => {
+  const { userId } = useAppSelector((state) => state.authReducer);
   const handleSyncExternalVariants = useLoading(
-    () => syncExternalVariants(1),
+    () => syncExternalVariants(userId!),
     "Đồng bộ sản phẩm thành công",
     "Đồng bộ sản phẩm thất bại",
   );
@@ -74,7 +76,7 @@ const Page = () => {
     },
   ];
 
-  const { data: externalShops } = useGetExternalShops(1);
+  const { data: externalShops } = useGetExternalShops(userId!);
   return (
     <>
       <Table

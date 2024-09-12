@@ -3,6 +3,7 @@ package main
 import (
 	"ecommerce/internal/configs"
 	"fmt"
+	"strings"
 
 	_ "github.com/lib/pq"
 
@@ -82,7 +83,7 @@ func main() {
 							return template.DefaultTableModel(table).
 								UseField(func(columnMetaData metadata.Column) template.TableModelField {
 									defaultTableModelField := template.DefaultTableModelField(columnMetaData).UseTags(
-										fmt.Sprintf(`json:"%s"`, columnMetaData.Name),
+										fmt.Sprintf(`json:"%s"`, strings.ReplaceAll(columnMetaData.Name, "ext", "external")),
 										fmt.Sprintf(`xml:"%s"`, columnMetaData.Name),
 									)
 

@@ -6,7 +6,7 @@ const ParticipantPanel = () => {
   console.log(participants.keys());
 
   return (
-    <div className="flex-1 overflow-y-scroll">
+    <div className="flex-1 overflow-y-scroll p-2">
       <List
         dataSource={Array.from(participants.keys())}
         renderItem={(participantId, index) => {

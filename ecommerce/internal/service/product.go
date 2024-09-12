@@ -110,7 +110,7 @@ func (s *ProductService) CreateProductsWithVariants(shopId int64, createProducts
 					return nil, err
 				}
 
-				if err := s.ExternalVariantRepository.UpdateExternalVariant(db, newVariant.IDVariant, externalVariant.ExternalIDMapping); err != nil {
+				if err := s.ExternalVariantRepository.UpdateExternalVariant(db, newVariant.IDVariant, externalVariant.ExtIDMapping); err != nil {
 					return nil, err
 				}
 

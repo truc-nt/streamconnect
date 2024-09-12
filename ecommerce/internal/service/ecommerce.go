@@ -1,12 +1,15 @@
 package service
 
-import "ecommerce/internal/model"
+import (
+	entity "ecommerce/internal/database/gen/model"
+	"ecommerce/internal/model"
+)
 
 type IEcommerceService interface {
 	GetEcommerceId() int16
 	SyncVariants(externalShopId int64) error
 	GetStockByExternalProductExternalId(externalShopId int64, externalProductIdMappings []string) ([]*model.ExternalVariantStock, error)
-	CreateOrder(externalShopId int64, externalOrderItems []*model.ExternalOrderItem) (string, error)
+	CreateOrder(user *entity.User, address *entity.UserAddress, externalShopId int64, externalOrderItems []*model.ExternalOrderItem, internalDiscount float64) (string, error)
 
 	//GetProductVariantsByExternalProductExternalId(externalProductExternalId interface{}) (interface{}, error)
 	//CreateExternalVariants(externalProductExternalId interface{}) error

@@ -17,9 +17,12 @@ import {
   PauseCircleOutlined,
   BorderOutlined,
   SkinFilled,
+  WalletOutlined,
 } from "@ant-design/icons";
 import { useIsHls } from "@/hook/hls";
 import { useIsRecording } from "@/hook/recording";
+import { saveHls } from "@/api/livestream";
+import { useParams } from "next/navigation";
 
 const EndButton = () => {
   const { end } = useMeeting();
@@ -37,8 +40,8 @@ const EndButton = () => {
   );
 };
 
-const HLSButton = () => {
-  const { startHls, stopHls, hlsState } = useMeeting({});
+const HlsButton = ({ livestreamId }: { livestreamId: number }) => {
+  const { startHls, stopHls, hlsState, hlsUrls } = useMeeting({});
 
   const isHls = useIsHls();
 
@@ -47,6 +50,17 @@ const HLSButton = () => {
   useEffect(() => {
     isHlsRef.current = isHls;
   }, [isHls]);
+
+  useEffect(() => {
+    const startHls = async () => {
+      if (hlsUrls.playbackHlsUrl) {
+        try {
+          await saveHls(livestreamId, hlsUrls.playbackHlsUrl);
+        } catch (e) {}
+      }
+    };
+    startHls();
+  }, [hlsUrls]);
 
   const handleClick = () => {
     const isHls = isHlsRef.current;
@@ -265,6 +279,10 @@ const ProductButton = (props: ButtonProps) => {
   return <Button size="large" icon={<SkinFilled />} {...props} />;
 };
 
+const VoucherButton = (props: ButtonProps) => {
+  return <Button size="large" icon={<WalletOutlined />} {...props} />;
+};
+
 const BottomBar = ({
   activePanel,
   setActivePanel,
@@ -273,6 +291,8 @@ const BottomBar = ({
   setActivePanel: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { localParticipant } = useMeeting();
+
+  const { id: livestreamId } = useParams();
 
   return (
     <Flex
@@ -287,7 +307,7 @@ const BottomBar = ({
       {localParticipant.mode === Constants.modes.CONFERENCE && (
         <Flex gap="small" justify="center" align="center">
           <RecordingButton />
-          <HLSButton />
+          <HlsButton livestreamId={Number(livestreamId)} />
         </Flex>
       )}
       {localParticipant.mode === Constants.modes.CONFERENCE && (
@@ -298,6 +318,14 @@ const BottomBar = ({
         </Flex>
       )}
       <Flex gap="small" justify="center" align="center">
+        <VoucherButton
+          type={activePanel === "voucher" ? "primary" : "default"}
+          onClick={() =>
+            setActivePanel((prevState) =>
+              prevState === "voucher" ? "" : "voucher",
+            )
+          }
+        />
         <ProductButton
           type={activePanel === "product" ? "primary" : "default"}
           onClick={() =>

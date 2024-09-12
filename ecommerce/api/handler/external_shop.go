@@ -24,7 +24,8 @@ func NewExternalShopHandler(s service.IExternalShopService) IExternalShopHandler
 }
 
 func (h *ExternalShopHandler) GetExternalShopsByShopId(ctx *gin.Context) {
-	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	//shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	shopId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return

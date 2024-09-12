@@ -2,8 +2,8 @@ import { getCart, getCartItemsByIds } from "@/api/cart";
 
 import useSWR from "swr";
 
-export const useGetCart = (cartId: number) => {
-  return useSWR(`/api/carts/${cartId}`, () => getCart(cartId), {
+export const useGetCart = () => {
+  return useSWR(`/api/carts/`, () => getCart(), {
     revalidateOnFocus: false,
   });
 };

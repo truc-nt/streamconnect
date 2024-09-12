@@ -19,6 +19,7 @@ type orderTable struct {
 	// Columns
 	IDOrder   postgres.ColumnInteger
 	FkUser    postgres.ColumnInteger
+	FkShop    postgres.ColumnInteger
 	CreatedAt postgres.ColumnTimestamp
 	UpdatedAt postgres.ColumnTimestamp
 
@@ -63,10 +64,11 @@ func newOrderTableImpl(schemaName, tableName, alias string) orderTable {
 	var (
 		IDOrderColumn   = postgres.IntegerColumn("id_order")
 		FkUserColumn    = postgres.IntegerColumn("fk_user")
+		FkShopColumn    = postgres.IntegerColumn("fk_shop")
 		CreatedAtColumn = postgres.TimestampColumn("created_at")
 		UpdatedAtColumn = postgres.TimestampColumn("updated_at")
-		allColumns      = postgres.ColumnList{IDOrderColumn, FkUserColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = postgres.ColumnList{FkUserColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns      = postgres.ColumnList{IDOrderColumn, FkUserColumn, FkShopColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns  = postgres.ColumnList{FkUserColumn, FkShopColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return orderTable{
@@ -75,6 +77,7 @@ func newOrderTableImpl(schemaName, tableName, alias string) orderTable {
 		//Columns
 		IDOrder:   IDOrderColumn,
 		FkUser:    FkUserColumn,
+		FkShop:    FkShopColumn,
 		CreatedAt: CreatedAtColumn,
 		UpdatedAt: UpdatedAtColumn,
 

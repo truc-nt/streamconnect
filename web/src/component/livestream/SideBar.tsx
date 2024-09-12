@@ -3,7 +3,7 @@ import { useState } from "react";
 import ParticipantPanel from "./ParticipantPanel";
 import ChatPanel from "./ChatPanel";
 import ProductPanel from "./ProductPanel";
-import { useMeeting } from "@videosdk.live/react-sdk";
+import VoucherPanel from "./VoucherPanel";
 
 const SideBar = ({ activePanel }: { activePanel: string }) => {
   const panels = [
@@ -22,6 +22,11 @@ const SideBar = ({ activePanel }: { activePanel: string }) => {
       title: "Sản phẩm",
       component: <ProductPanel />,
     },
+    {
+      value: "voucher",
+      title: "Voucher",
+      component: <VoucherPanel />,
+    },
   ];
   return (
     <div className="relative h-full w-full">
@@ -34,9 +39,11 @@ const SideBar = ({ activePanel }: { activePanel: string }) => {
               flex: "1 1 0%",
               display: "flex",
               flexDirection: "column",
-              height: "calc(100vh - 56px)",
-              maxHeight: "calc(100vh - 64px)",
-              gap: "1rem",
+              //height: "calc(100vh - 250px)",
+              maxWidth: "100%",
+              maxHeight: "calc(100% - 56px)",
+              gap: "0.25rem",
+              padding: "1rem",
             },
           }}
         >

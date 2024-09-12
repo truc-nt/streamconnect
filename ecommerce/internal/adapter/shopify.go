@@ -8,9 +8,9 @@ import (
 
 	"ecommerce/internal/client/shopify"
 	clientModel "ecommerce/internal/client/shopify/model"
-	shopifyModel "ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/configs"
 	"ecommerce/internal/constants"
+	entity "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/model"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -28,7 +28,7 @@ type IShopifyAdapter interface {
 	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error)
 	GetExternalVariantStockByproductIds(param *shopify.ShopifyClientParam, productIds []string) ([]*model.ExternalVariantStock, error)
 
-	CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error)
+	CreateOrder(user *entity.User, userAddress *entity.UserAddress, param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem, internalDiscount float64) (string, error)
 }
 
 type ShopifyAdapterConfig struct {
@@ -107,7 +107,7 @@ func (a *ShopifyAdapter) GetProducts(param *shopify.ShopifyClientParam) ([]*mode
 			externalVariant.ExternalIdMapping = strconv.FormatInt(variant.ID, 10)
 			externalVariant.ExternalProductIdMapping = &externalProductIdMapping
 
-			if foundImage, ok := lo.Find(product.Images, func(image *shopifyModel.Image) bool {
+			if foundImage, ok := lo.Find(product.Images, func(image *clientModel.Image) bool {
 				if variant.ImageID == nil {
 					return false
 				}
@@ -177,10 +177,37 @@ func (a *ShopifyAdapter) GetExternalVariantStockByproductIds(param *shopify.Shop
 	return externalVariantStocks, nil
 }
 
-func (a *ShopifyAdapter) CreateOrder(param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem) (string, error) {
+func (a *ShopifyAdapter) CreateOrder(user *entity.User, userAddress *entity.UserAddress, param *shopify.ShopifyClientParam, externalOrderItems []*model.ExternalOrderItem, internalDiscount float64) (string, error) {
 	createOrderRequest := &clientModel.CreateOrderRequest{
 		Order: &clientModel.OrderRequest{
-			LineItems: make([]*clientModel.LineItemRequest, 0),
+			LineItems:       make([]*clientModel.LineItemRequest, 0),
+			FinancialStatus: "pending",
+			Email:           user.Email,
+			Customer: &clientModel.CustomerRequest{
+				FirstName: userAddress.Name,
+				Email:     user.Email,
+			},
+			ShippingAddress: &clientModel.ShippingAddress{
+				FirstName: userAddress.Name,
+				Address1:  userAddress.Address,
+				Phone:     userAddress.Phone,
+				City:      userAddress.City,
+				Country:   "Việt Nam",
+			},
+			BillingAddress: &clientModel.BillingAddress{
+				FirstName: userAddress.Name,
+				Address1:  userAddress.Address,
+				Phone:     userAddress.Phone,
+				City:      userAddress.City,
+				Country:   "Việt Nam",
+			},
+			DiscountCodes: []*clientModel.DiscountCode{
+				{
+					Code:   "STREAMCONNECT_CODE",
+					Amount: fmt.Sprintf("%.2f", internalDiscount),
+					Type:   "fixed_amount",
+				},
+			},
 		},
 	}
 	for _, externalOrderItem := range externalOrderItems {
@@ -199,5 +226,5 @@ func (a *ShopifyAdapter) CreateOrder(param *shopify.ShopifyClientParam, external
 	if err != nil {
 		return "", err
 	}
-	return string(newExternalOrder.Order.ID), nil
+	return strconv.FormatInt(newExternalOrder.Order.ID, 10), nil
 }

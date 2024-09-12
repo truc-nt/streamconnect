@@ -37,13 +37,14 @@ func (h *ShopifyHandler) Connect(ctx *gin.Context) {
 }
 
 func (h *ShopifyHandler) Redirect(ctx *gin.Context) {
+	shopId := int64(1)
 	var queryParams *model.ShopifyRedirectParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	if err := h.Service.ConnectNewExternalShopShopify(queryParams.Shop, queryParams.Code); err != nil {
+	if err := h.Service.ConnectNewExternalShopShopify(shopId, queryParams.Shop, queryParams.Code); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

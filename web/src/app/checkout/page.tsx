@@ -1,31 +1,32 @@
 "use client";
 import { Flex, Steps } from "antd";
-import CartItemsReviewStep from "./component/CartItemsReviewStep";
+import FirstStep from "@/component/checkout/FirstStep";
 import { useAppSelector, useAppDispatch } from "@/store/store";
-import CheckoutStep from "./component/CheckoutStep";
+import SecondStep from "@/component/checkout/SecondStep";
 
 const steps = [
   {
     title: "Kiểm tra sản phẩm đặt hàng",
-    component: <CartItemsReviewStep />,
+    component: <FirstStep />,
   },
   {
     title: "Thanh toán",
-    component: <CheckoutStep />,
+    component: <SecondStep />,
   },
 ];
 
 const Page = () => {
   const { currentStep } = useAppSelector((state) => state.checkoutReducer);
   return (
-    <Flex vertical gap="large" align="center" className="w-full">
+    <Flex gap="small" className="w-full">
       <Steps
-        labelPlacement="vertical"
+        direction="vertical"
+        progressDot
         current={currentStep}
         items={steps.map((item) => ({ key: item.title, title: item.title }))}
-        className="w-[800px]"
+        className="w-[200px]"
       />
-      {steps[currentStep].component}
+      <div className="flex-1">{steps[currentStep].component}</div>
     </Flex>
   );
 };

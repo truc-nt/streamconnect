@@ -12,27 +12,26 @@ import {
 } from "antd";
 import { useGetCart } from "@/hook/cart";
 import CartItemList from "./component/CartItemList";
-import SummaryCard from "./component/Summary";
+import PriceSummaryCard from "@/component/checkout/PriceSummaryCard";
 import AddressCard from "./component/AddressCard";
 import { useAppSelector, useAppDispatch } from "@/store/store";
-import useLoading from "@/hook/loading";
-import { setCartItemIds } from "@/store/checkout";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
-  const { data: cart, error } = useGetCart(1);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const { cartItems } = useAppSelector((state) => state.cartItemIdsSelection);
-  const subTotal =
-    cartItems.reduce(
-      (total, cartItem) => total + cartItem.price * cartItem.quantity,
-      0,
-    ) || 0;
+  const { groupByShop } = useAppSelector((state) => state.checkoutReducer);
 
+  const subTotal = groupByShop.reduce((total, shop) => {
+    const shopSubTotal = shop.groupByEcommerce.reduce((subtotal, ecommerce) => {
+      return subtotal + ecommerce.subTotal;
+    }, 0);
+    return total + shopSubTotal;
+  }, 0);
+
+  const { data: cart, error } = useGetCart();
   const handleCheckout = () => {
-    dispatch(setCartItemIds(cartItems.map((cartItem) => cartItem.cartItemId)));
     router.push("/checkout");
   };
 
@@ -43,15 +42,19 @@ const Page = () => {
       </Col>
       <Col span={8}>
         <Flex vertical gap="large">
-          <AddressCard />
-          <SummaryCard subTotal={subTotal} discountTotal={0} />
+          <PriceSummaryCard
+            subTotal={subTotal}
+            internalDiscountTotal={0}
+            externalDiscountTotal={0}
+            shippingFee={0}
+          />
           <Button
             type="primary"
             size="large"
-            disabled={!cartItems.length}
+            disabled={!groupByShop.length}
             onClick={handleCheckout}
           >
-            Đặt hàng ({cartItems.length})
+            Đặt hàng ({groupByShop.length})
           </Button>
         </Flex>
       </Col>

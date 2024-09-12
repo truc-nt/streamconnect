@@ -1,18 +1,21 @@
 package repository
 
 import (
-	"database/sql"
+	apiModel "ecommerce/api/model"
 	"ecommerce/internal/database"
 	"ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/samber/lo"
 )
 
 type ILivestreamRepository interface {
 	IBaseRepository[model.Livestream]
-	GetByStatusAndOwnerId(db qrm.Queryable, status sql.NullString, id sql.NullInt64) ([]model.Livestream, error)
+	GetByParam(db qrm.Queryable, param *apiModel.GetLivestreamsQueryParam) ([]*model.Livestream, error)
+
+	GetInfoById(db qrm.Queryable, id int64) (*GetInfo, error)
 }
 
 type LivestreamRepository struct {
@@ -51,19 +54,48 @@ func (r *LivestreamRepository) GetById(db qrm.Queryable, id int64) (*model.Lives
 	return &data, nil
 }
 
-func (r *LivestreamRepository) GetByStatusAndOwnerId(db qrm.Queryable, status sql.NullString, id sql.NullInt64) ([]model.Livestream, error) {
-	stmt := table.Livestream.SELECT(table.Livestream.AllColumns)
-	if status.Valid {
-		stmt = stmt.WHERE(table.Livestream.Status.EQ(postgres.String(status.String)))
+func (r *LivestreamRepository) GetByParam(db qrm.Queryable, param *apiModel.GetLivestreamsQueryParam) ([]*model.Livestream, error) {
+	conditions := postgres.Bool(true)
+
+	if len(param.Status) > 0 {
+		statuses := lo.Map(param.Status, func(status string, _ int) postgres.Expression {
+			return postgres.String(status)
+		})
+
+		conditions = conditions.AND(table.Livestream.Status.IN(statuses...))
 	}
-	if id.Valid {
-		stmt = stmt.WHERE(table.Livestream.FkShop.EQ(postgres.Int(int64(id.Int64))))
+	if param.ShopId != 0 {
+		conditions = conditions.AND(table.Livestream.FkShop.EQ(postgres.Int(int64(param.ShopId))))
 	}
 
-	var data []model.Livestream
+	stmt := table.Livestream.SELECT(table.Livestream.AllColumns).WHERE(conditions)
+
+	data := make([]*model.Livestream, 0)
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+
+type GetInfo struct {
+	*model.Livestream
+	ShopName string `alias:"shop.name" json:"shop_name"`
+}
+
+func (r *LivestreamRepository) GetInfoById(db qrm.Queryable, id int64) (*GetInfo, error) {
+	stmt := table.Livestream.SELECT(
+		table.Livestream.AllColumns,
+		table.Shop.Name,
+	).FROM(
+		table.Livestream.
+			LEFT_JOIN(table.Shop, table.Livestream.FkShop.EQ(table.Shop.IDShop)),
+	).WHERE(table.Livestream.IDLivestream.EQ(postgres.Int(int64(id))))
+
+	var data GetInfo
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

@@ -16,14 +16,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { Layout, MenuProps } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import LoginModal from "@/component/auth/LoginModal";
 import RegisterModal from "@/component/auth/RegisterModal";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { setLogin, setLogout } from "@/store/auth";
+
+import { decodeJwt } from "@/util/auth";
+import { toggleLoginModal } from "@/store/auth";
 
 const Header = () => {
-  const [isSignInModalVisible, setIsSignInModalVisible] = useState(false);
+  const dispatch = useAppDispatch();
   const [isSignUpModalVisible, setIsSignUpModalVisible] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { userId } = useAppSelector((state) => state.authReducer);
+  console.log(userId);
 
   const items: MenuProps["items"] = [
     {
@@ -35,35 +41,43 @@ const Header = () => {
       label: <Link href="/seller">Cửa hàng</Link>,
     },
     {
+      key: "divider",
+      type: "divider",
+    },
+    {
       key: "3",
       label: (
-        <Button
+        <div
           onClick={() => {
             localStorage.removeItem("token");
-            setIsAuthorized(false);
+            dispatch(setLogout());
           }}
         >
           Đăng xuất
-        </Button>
+        </div>
       ),
     },
   ];
 
-  const onClickSignIn = () => {
-    setIsSignInModalVisible(true);
-  };
   const onClickSignUp = () => {
     setIsSignUpModalVisible(true);
   };
-  useEffect(() => {
+
+  useLayoutEffect(() => {
     const token = localStorage.getItem("token");
-    if (!!token) setIsAuthorized(true);
-  }, [isSignInModalVisible, isSignUpModalVisible, isAuthorized]);
+    if (token) {
+      const userInfo = decodeJwt(token);
+      dispatch(setLogin(userInfo));
+    } else {
+      dispatch(setLogout());
+    }
+  }, []);
+
   return (
     <Layout.Header className="bg-white">
       <Flex className="justify-between items-center" gap="large">
         <Input.Search enterButton />
-        {!isAuthorized ? (
+        {userId === null ? (
           <Space>
             <Button onClick={onClickSignUp}>Đăng ký</Button>
             <RegisterModal
@@ -71,13 +85,10 @@ const Header = () => {
               setOpenModal={setIsSignUpModalVisible}
             />
 
-            <Button onClick={onClickSignIn} type="primary">
+            <Button onClick={() => dispatch(toggleLoginModal())} type="primary">
               Đăng nhập
             </Button>
-            <LoginModal
-              openModal={isSignInModalVisible}
-              setOpenModal={setIsSignInModalVisible}
-            />
+            <LoginModal />
           </Space>
         ) : (
           <Space>

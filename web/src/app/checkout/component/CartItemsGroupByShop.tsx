@@ -10,7 +10,8 @@ import {
   Typography,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { ICart, ICartItem } from "@/api/cart";
+import { ICart } from "@/api/cart";
+import { IBaseCartItem } from "@/model/cart";
 import Tag from "@/component/core/Tag";
 import Image from "next/image";
 import type { Key } from "react";
@@ -21,7 +22,7 @@ import useLoading from "@/hook/loading";
 import { ECOMMERCE_LOGOS } from "@/constant/ecommerce";
 
 const CartItemsGroupByShop = ({ shop_name, cart_items }: ICart) => {
-  const columns: TableProps<ICartItem>["columns"] = [
+  const columns: TableProps<IBaseCartItem>["columns"] = [
     {
       title: () => <span>{shop_name}</span>,
       dataIndex: "name",

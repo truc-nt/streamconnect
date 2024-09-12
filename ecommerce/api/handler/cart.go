@@ -26,7 +26,8 @@ func NewCartHandler(s service.ICartService) ICartHandler {
 }
 
 func (h *CartHandler) Get(ctx *gin.Context) {
-	cartId, err := h.parseId(ctx, ctx.Param("cart_id"))
+	//cartId, err := h.parseId(ctx, ctx.Param("cart_id"))
+	cartId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
@@ -41,7 +42,8 @@ func (h *CartHandler) Get(ctx *gin.Context) {
 }
 
 func (h *CartHandler) AddToCart(ctx *gin.Context) {
-	cartId, err := h.parseId(ctx, ctx.Param("cart_id"))
+	//cartId, err := h.parseId(ctx, ctx.Param("cart_id"))
+	cartId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return

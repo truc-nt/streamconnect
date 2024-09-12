@@ -57,13 +57,13 @@ type GetVariantsByProductId struct {
 	model.Variant
 	ImageURL         string `alias:"image_variant.url" json:"image_url"`
 	ExternalVariants []*struct {
-		IDExternalVariant        int64   `alias:"external_variant.id_external_variant" json:"id_external_variant"`
-		ExternalProductIdMapping string  `alias:"external_variant.external_product_id_mapping" json:"-"`
-		ExternalIdMapping        string  `alias:"external_variant.external_id_mapping" json:"-"`
-		IDEcommerce              int16   `alias:"external_shop.fk_ecommerce" json:"id_ecommerce"`
-		IDExternalShop           int64   `alias:"external_variant.fk_external_shop"`
-		Sku                      string  `alias:"external_variant.sku" json:"sku"`
-		Price                    float64 `alias:"external_variant.price" json:"price"`
+		IDExternalVariant        int64   `alias:"ext_variant.id_ext_variant" json:"id_external_variant"`
+		ExternalProductIdMapping string  `alias:"ext_variant.ext_product_id_mapping" json:"-"`
+		ExternalIdMapping        string  `alias:"ext_variant.ext_id_mapping" json:"-"`
+		IDEcommerce              int16   `alias:"ext_shop.fk_ecommerce" json:"id_ecommerce"`
+		IDExternalShop           int64   `alias:"ext_variant.fk_ext_shop"`
+		Sku                      string  `alias:"ext_variant.sku" json:"sku"`
+		Price                    float64 `alias:"ext_variant.price" json:"price"`
 		Stock                    int64   `json:"stock"`
 	} `json:"external_variants"`
 }
@@ -78,13 +78,13 @@ func (r *VariantRepository) GetVariantsByProductId(db qrm.Queryable, productId i
 
 	stmt := table.Variant.SELECT(
 		table.Variant.AllColumns,
-		table.ExternalVariant.AllColumns,
-		table.ExternalShop.AllColumns,
+		table.ExtVariant.AllColumns,
+		table.ExtShop.AllColumns,
 		imageUrlSubQuery,
 	).FROM(
 		table.Variant.
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)).
-			INNER_JOIN(table.ExternalShop, table.ExternalShop.IDExternalShop.EQ(table.ExternalVariant.FkExternalShop)),
+			INNER_JOIN(table.ExtVariant, table.ExtVariant.FkVariant.EQ(table.Variant.IDVariant)).
+			INNER_JOIN(table.ExtShop, table.ExtShop.IDExtShop.EQ(table.ExtVariant.FkExtShop)),
 	).WHERE(
 		table.Variant.FkProduct.EQ(postgres.Int(productId)),
 	).LIMIT(limit).OFFSET(offset)
@@ -115,9 +115,9 @@ func (r *VariantRepository) GetVariantsByExternalProductIdMapping(db qrm.Queryab
 		imageUrlSubQuery,
 	).FROM(
 		table.Variant.
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.FkVariant.EQ(table.Variant.IDVariant)),
+			INNER_JOIN(table.ExtVariant, table.ExtVariant.FkVariant.EQ(table.Variant.IDVariant)),
 	).WHERE(
-		table.ExternalVariant.ExternalProductIDMapping.EQ(postgres.String(externalProductIdMapping)),
+		table.ExtVariant.ExtProductIDMapping.EQ(postgres.String(externalProductIdMapping)),
 	)
 
 	data := make([]*GetVariantsByExternalProductIdMapping, 0)

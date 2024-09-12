@@ -1,15 +1,25 @@
 import axios from "./axios";
 
-export interface IUserAddress {
-  id_user_address: number;
-  name: string;
-  phone: string;
-  address: string;
-  city: string;
-  is_default: boolean;
+import { IBaseUserAddress } from "@/model/order";
+
+export interface User {
+  username: string;
+  email: string;
 }
 
-export const getDefaultAddress = async (userId: number) => {
-  const response = await axios.get<IUserAddress>(`users/${userId}/address`);
+export const getUserInfo = async () => {
+  const response = await axios.get<User>(`users/`);
+  return response.data;
+};
+
+export const getDefaultAddress = async () => {
+  const response = await axios.get<IBaseUserAddress>(
+    `addresses/default_address`,
+  );
+  return response.data;
+};
+
+export const getAddresses = async () => {
+  const response = await axios.get<IBaseUserAddress[]>(`addresses/`);
   return response.data;
 };
