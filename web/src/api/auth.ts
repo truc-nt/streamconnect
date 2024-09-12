@@ -1,7 +1,9 @@
 import { axiosJava } from "@/api/axios";
 
 export const login = async (username: string, password: string) => {
-  return axiosJava.post(`auth/login`, { username, password });
+  const response = await axiosJava.post(`auth/login`, { username, password });
+  localStorage.setItem("token", response.data.token);
+  return Promise.resolve();
 };
 
 export interface RegisterRequest {
