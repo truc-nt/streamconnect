@@ -1,5 +1,8 @@
 package com.hcmut.gateway.configuration;
 
+import com.hcmut.gateway.account.CurrentUserDetails;
+import com.hcmut.gateway.util.AccountUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -15,8 +18,13 @@ public class ExternalServiceClient {
         this.port = port;
     }
 
-    public RestClient getRestClient() {
-        return restClient;
+    public RestClient.RequestBodySpec getBodySpec(HttpMethod method, String uri) {
+        var bodySpec = restClient.method(method).uri(uri);
+        CurrentUserDetails currentUserDetails = AccountUtils.getCurrentUserDetails();
+        if (currentUserDetails.getId() != null) {
+            bodySpec = bodySpec.header("user_id", String.valueOf(currentUserDetails.getId()));
+        }
+        return bodySpec;
     }
 
     public UriComponentsBuilder getUriBuilder() {
