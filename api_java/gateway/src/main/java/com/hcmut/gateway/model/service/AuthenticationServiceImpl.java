@@ -17,16 +17,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final EcommerceService ecommerceService;
 
     @Autowired
     public AuthenticationServiceImpl(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            EcommerceService ecommerceService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.ecommerceService = ecommerceService;
     }
 
     public User authenticate(LoginUserDto input) {
@@ -41,13 +44,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    public User register(User account) {
-        if (!userRepository.findByUsernameOrEmail(account.getUsername(), account.getEmail()).isEmpty()) {
+    public User register(User user) {
+        if (!userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail()).isEmpty()) {
             throw new IllegalArgumentException("Username already exists");
         }
-        account.setHashedPassword(passwordEncoder.encode(account.getPassword()));
-        account.setCreatedAt(LocalDateTime.now());
-        account.setUpdatedAt(LocalDateTime.now());
-        return userRepository.save(account);
+        user.setHashedPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        user = userRepository.save(user);
+        try {
+            ecommerceService.createShopForNewUser(user);
+        } catch (IllegalArgumentException exception) {
+            userRepository.delete(user);
+            throw exception;
+        }
+
+        return user;
     }
 }

@@ -18,6 +18,7 @@ type Handlers struct {
 	LivestreamProductHandler ILivestreamProductHandler
 	CartHandler              ICartHandler
 	OrderHandler             IOrderHandler
+	ShopHandler              IShopHandler
 }
 
 func ProvideHandlers(
@@ -31,6 +32,7 @@ func ProvideHandlers(
 	livestreamProductHandler ILivestreamProductHandler,
 	cartHandler ICartHandler,
 	orderHandler IOrderHandler,
+	shopHandler IShopHandler,
 ) *Handlers {
 	return &Handlers{
 		UserHandler:              userHandler,
@@ -43,6 +45,7 @@ func ProvideHandlers(
 		LivestreamProductHandler: livestreamProductHandler,
 		CartHandler:              cartHandler,
 		OrderHandler:             orderHandler,
+		ShopHandler:              shopHandler,
 	}
 }
 

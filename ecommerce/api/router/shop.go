@@ -13,5 +13,6 @@ func LoadShopRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 		shopRouter.POST("/:shop_id/products/", h.ProductHandler.CreateProductsWithVariants)
 		shopRouter.GET("/:shop_id/external_shops", h.ExternalShopHandler.GetExternalShopsByShopId)
 		shopRouter.POST("/:shop_id/livestreams/create", h.LivestreamHandler.CreateLivestream)
+		shopRouter.POST("/forNewUser", h.ShopHandler.CreateShopForNewAccount)
 	}
 }
