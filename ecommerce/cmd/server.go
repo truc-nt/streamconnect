@@ -66,6 +66,7 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewExternalOrderRepository,
 	repository.NewShopRepository,
 	repository.NewCartRepository,
+	repository.NewLivestreamProductFollowerRepository,
 )
 
 var AdapterSet = wire.NewSet(

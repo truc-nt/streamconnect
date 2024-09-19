@@ -8,6 +8,9 @@ import (
 	internalModel "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
+	"errors"
+	"strconv"
+	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
@@ -19,14 +22,15 @@ type ILivestreamService interface {
 	FetchLivestreams(status sql.NullString, ownerId sql.NullInt64) ([]internalModel.Livestream, error)
 	GetLivestream(livestreamId int64) (*internalModel.Livestream, error)
 	SetLivestreamHls(request *model.SetLivestreamHlsRequest) error
+	RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error
 }
 
 type LivestreamService struct {
 	LivestreamRepository                repository.ILivestreamRepository
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
-
-	VideoSdkAdapter adapter.IVideoSdkAdapter
+	LivestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository
+	VideoSdkAdapter                     adapter.IVideoSdkAdapter
 }
 
 func NewLivestreamService(
@@ -34,12 +38,14 @@ func NewLivestreamService(
 	livestreamProductRepository repository.ILivestreamProductRepository,
 	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
 	videoSdkAdapter adapter.IVideoSdkAdapter,
+	livestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository,
 ) ILivestreamService {
 	return &LivestreamService{
 		LivestreamRepository:                livestreamService,
 		LivestreamProductRepository:         livestreamProductRepository,
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
 		VideoSdkAdapter:                     videoSdkAdapter,
+		LivestreamProductFollowerRepository: livestreamProductFollowerRepository,
 	}
 }
 
@@ -176,5 +182,47 @@ func (s *LivestreamService) SetLivestreamHls(request *model.SetLivestreamHlsRequ
 		return err
 	}
 
+	return nil
+}
+
+func (s *LivestreamService) RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error {
+	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
+		//check if livestream product exists
+		livestreamProducts, err := s.LivestreamProductRepository.FindAllLivestreamId(db, request.IDLivestream)
+		if err != nil {
+			return nil, err
+		}
+		livestreamProductIdsSet := make(map[int64]bool)
+		for _, livestreamProduct := range livestreamProducts {
+			livestreamProductIdsSet[livestreamProduct.IDLivestreamProduct] = true
+		}
+		newFollowers := make([]*internalModel.LivestreamProductFollower, len(request.IDLivestreamProducts))
+		//create new followers
+		for idx, livestreamProductId := range request.IDLivestreamProducts {
+			if !livestreamProductIdsSet[livestreamProductId] {
+				return nil, errors.New("livestream product with id " + strconv.FormatInt(livestreamProductId, 10) + " not found")
+			}
+			newLivestreamProductFollower := internalModel.LivestreamProductFollower{
+				FkLivestreamProduct: livestreamProductId,
+				FkUser:              request.IDUser,
+				CreatedAt:           time.Now(),
+			}
+			newFollowers[idx] = &newLivestreamProductFollower
+		}
+		_, err = s.LivestreamProductFollowerRepository.CreateMany(
+			db,
+			postgres.ColumnList{
+				table.LivestreamProductFollower.FkLivestreamProduct,
+				table.LivestreamProductFollower.FkUser,
+				table.LivestreamProductFollower.CreatedAt,
+			},
+			newFollowers,
+		)
+		return nil, nil
+	}
+	_, err := s.LivestreamProductFollowerRepository.ExecWithinTransaction(execWithinTransaction)
+	if err != nil {
+		return err
+	}
 	return nil
 }

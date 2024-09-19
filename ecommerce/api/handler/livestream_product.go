@@ -9,6 +9,7 @@ import (
 type ILivestreamProductHandler interface {
 	GetLivestreamProductsByLivestreamId(ctx *gin.Context)
 	GetLivestreamProductInfoByLivestreamProductId(ctx *gin.Context)
+	FetchLivestreamProductFollowers(ctx *gin.Context)
 }
 
 type LivestreamProductHandler struct {
@@ -52,4 +53,18 @@ func (h *LivestreamProductHandler) GetLivestreamProductInfoByLivestreamProductId
 	}
 
 	h.handleSuccessGet(ctx, product)
+}
+
+func (h *LivestreamProductHandler) FetchLivestreamProductFollowers(ctx *gin.Context) {
+	id, err := h.parseId(ctx, ctx.Param("livestream_product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	followers, err := h.Service.FetchLivestreamProductFollowers(id)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessGet(ctx, followers)
 }

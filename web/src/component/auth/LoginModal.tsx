@@ -18,8 +18,7 @@ export default function LoginModal({
 
   const onSubmit = async (values: any) => {
     try {
-      const res = await handleLogin(values.username, values.password);
-      localStorage.setItem("token", res.data.token);
+      await handleLogin(values.username, values.password);
       setOpenModal(false);
     } catch (err) {}
   };

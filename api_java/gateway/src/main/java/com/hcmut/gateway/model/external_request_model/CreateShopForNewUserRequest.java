@@ -1,4 +1,4 @@
-package com.hcmut.gateway.model.service.external_request_model;
+package com.hcmut.gateway.model.external_request_model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
