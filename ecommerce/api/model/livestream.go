@@ -24,3 +24,9 @@ type SetLivestreamHlsRequest struct {
 	HlsUrl       string `json:"hls_url"`
 	IDLivestream int64  `json:"id_livestream"`
 }
+
+type RegisterLivestreamProductFollowerRequest struct {
+	IDLivestreamProducts []int64 `json:"id_livestream_products"`
+	IDLivestream         int64   `json:"id_livestream"`
+	IDUser               int64   `json:"id_user"`
+}

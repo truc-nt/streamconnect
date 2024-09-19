@@ -1,6 +1,6 @@
 package com.hcmut.gateway;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,20 +39,14 @@ public class GlobalExceptionHandler {
             errorDetail.setProperty("description", "The JWT signature is invalid");
         }
 
-        if (exception instanceof ExpiredJwtException) {
+        if (exception instanceof JwtException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The JWT token has expired");
-        }
-
-        if (exception instanceof IllegalArgumentException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), exception.getMessage());
-            errorDetail.setProperty("description", "Bad request");
+            errorDetail.setProperty("description", "The JWT is invalid");
         }
 
         if (errorDetail == null) {
-            exception.printStackTrace();
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
-            errorDetail.setProperty("description", "Unknown internal server error.");
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), exception.getMessage());
+            errorDetail.setProperty("description", "Bad request");
         }
 
         return errorDetail;

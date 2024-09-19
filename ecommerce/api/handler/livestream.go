@@ -13,6 +13,7 @@ type ILivestreamHandler interface {
 	FetchLivestreams(ctx *gin.Context)
 	GetLivestream(ctx *gin.Context)
 	SetLivestreamHls(ctx *gin.Context)
+	RegisterLivestreamProductFollower(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -103,4 +104,26 @@ func (h *LivestreamHandler) SetLivestreamHls(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) RegisterLivestreamProductFollower(ctx *gin.Context) {
+	idLivestream, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	var request *model.RegisterLivestreamProductFollowerRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	if request.IDLivestream != idLivestream {
+		h.handleFailed(ctx, errors.New("livestream id not match"))
+		return
+	}
+	if err := h.Service.RegisterLivestreamProductFollower(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessCreate(ctx)
 }

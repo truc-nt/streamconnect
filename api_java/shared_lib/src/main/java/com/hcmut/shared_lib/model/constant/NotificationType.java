@@ -1,0 +1,19 @@
+package com.hcmut.shared_lib.model.constant;
+
+public enum NotificationType implements KeyEnum<NotificationType> {
+    MESSAGE("MESSAGE"), ORDER("ORDER");
+    private final String key;
+
+    private NotificationType(String key) {
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public static NotificationType get(String key) {
+        return KeyEnumUtils.get(NotificationType.class, key);
+    }
+
+}

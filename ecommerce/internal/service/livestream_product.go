@@ -1,6 +1,7 @@
 package service
 
 import (
+	internalModel "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/repository"
 
 	"github.com/jackc/pgtype"
@@ -9,17 +10,23 @@ import (
 type ILivestreamProductService interface {
 	GetLivestreamProductsByLivestreamId(livestreamId int64) (interface{}, error)
 	GetLivestreamProductInfoByLivestreamProductId(livestreamProductId int64) (interface{}, error)
+	FetchLivestreamProductFollowers(productId int64) ([]internalModel.LivestreamProductFollower, error)
 }
 
 type LivestreamProductService struct {
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
+	LivestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository
 }
 
-func NewLivestreamProductService(livestreamProductRepository repository.ILivestreamProductRepository, livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository) ILivestreamProductService {
+func NewLivestreamProductService(livestreamProductRepository repository.ILivestreamProductRepository,
+	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
+	livestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository,
+) ILivestreamProductService {
 	return &LivestreamProductService{
 		LivestreamProductRepository:         livestreamProductRepository,
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
+		LivestreamProductFollowerRepository: livestreamProductFollowerRepository,
 	}
 }
 
@@ -51,4 +58,15 @@ func (s *LivestreamProductService) GetLivestreamProductInfoByLivestreamProductId
 	}
 
 	return livestreamExternalVariants, nil
+}
+
+func (s *LivestreamProductService) FetchLivestreamProductFollowers(productId int64) ([]internalModel.LivestreamProductFollower, error) {
+	followers, err := s.LivestreamProductFollowerRepository.FindByProductId(
+		s.LivestreamProductFollowerRepository.GetDatabase().Db,
+		productId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return followers, nil
 }
