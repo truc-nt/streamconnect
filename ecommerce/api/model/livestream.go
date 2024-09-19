@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"ecommerce/internal/database/gen/model"
+	"time"
+)
 
 type CreateLivestreamRequest struct {
 	Title              string     `json:"title"`
@@ -29,4 +32,10 @@ type RegisterLivestreamProductFollowerRequest struct {
 	IDLivestreamProducts []int64 `json:"id_livestream_products"`
 	IDLivestream         int64   `json:"id_livestream"`
 	IDUser               int64   `json:"id_user"`
+}
+
+type LivestreamProductFollowerDTO struct {
+	UserIds    []int64           `json:"user_ids"`
+	Livestream *model.Livestream `json:"livestream"`
+	Product    *model.Product    `json:"livestream_product"`
 }

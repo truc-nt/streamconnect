@@ -43,7 +43,7 @@ func (r *LivestreamProductRepository) UpdateById(db qrm.Queryable, columnList po
 }
 
 func (r *LivestreamProductRepository) GetById(db qrm.Queryable, id int64) (*model.LivestreamProduct, error) {
-	stmt := table.LivestreamProduct.SELECT(table.Livestream.AllColumns).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
+	stmt := table.LivestreamProduct.SELECT(table.LivestreamProduct.AllColumns).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
 
 	var data model.LivestreamProduct
 	err := stmt.Query(db, &data)

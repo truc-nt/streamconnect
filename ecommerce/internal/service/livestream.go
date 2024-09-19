@@ -23,6 +23,7 @@ type ILivestreamService interface {
 	GetLivestream(livestreamId int64) (*internalModel.Livestream, error)
 	SetLivestreamHls(request *model.SetLivestreamHlsRequest) error
 	RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error
+	FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error)
 }
 
 type LivestreamService struct {
@@ -30,6 +31,7 @@ type LivestreamService struct {
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
 	LivestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository
+	ProductRepository                   repository.IProductRepository
 	VideoSdkAdapter                     adapter.IVideoSdkAdapter
 }
 
@@ -39,6 +41,7 @@ func NewLivestreamService(
 	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
 	videoSdkAdapter adapter.IVideoSdkAdapter,
 	livestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository,
+	productRepository repository.IProductRepository,
 ) ILivestreamService {
 	return &LivestreamService{
 		LivestreamRepository:                livestreamService,
@@ -46,6 +49,7 @@ func NewLivestreamService(
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
 		VideoSdkAdapter:                     videoSdkAdapter,
 		LivestreamProductFollowerRepository: livestreamProductFollowerRepository,
+		ProductRepository:                   productRepository,
 	}
 }
 
@@ -225,4 +229,42 @@ func (s *LivestreamService) RegisterLivestreamProductFollower(request *model.Reg
 		return err
 	}
 	return nil
+}
+
+func (s *LivestreamService) FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error) {
+	followers, err := s.LivestreamProductFollowerRepository.FindByProductId(
+		s.LivestreamProductFollowerRepository.GetDatabase().Db,
+		productId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(followers) == 0 {
+		return &model.LivestreamProductFollowerDTO{}, nil
+	}
+	//extract user ids
+	var userIds = make([]int64, len(followers))
+	for idx, follower := range followers {
+		userIds[idx] = follower.FkUser
+	}
+	livestreamProduct, err := s.LivestreamProductRepository.GetById(s.LivestreamProductRepository.GetDatabase().Db, productId)
+	if err != nil {
+		return nil, err
+	}
+	//fetch livestream
+	livestream, err := s.LivestreamRepository.GetById(s.LivestreamRepository.GetDatabase().Db, livestreamProduct.FkLivestream)
+	if err != nil {
+		return nil, err
+	}
+	//fetch product
+	product, err := s.ProductRepository.GetById(s.ProductRepository.GetDatabase().Db, livestreamProduct.FkProduct)
+	if err != nil {
+		return nil, err
+	}
+	var data = model.LivestreamProductFollowerDTO{}
+	data.UserIds = userIds
+	data.Product = product
+	data.Livestream = livestream
+
+	return &data, nil
 }

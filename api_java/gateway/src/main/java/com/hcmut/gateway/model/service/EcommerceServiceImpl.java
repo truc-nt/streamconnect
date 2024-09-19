@@ -1,7 +1,7 @@
 package com.hcmut.gateway.model.service;
 
 import com.hcmut.gateway.configuration.ExternalServiceClient;
-import com.hcmut.gateway.model.DTO.LivestreamProductFollower;
+import com.hcmut.gateway.model.DTO.LivestreamProductFollowerDTO;
 import com.hcmut.gateway.model.DTO.RegisterLivestreamProductFollowerRequest;
 import com.hcmut.gateway.model.external_request_model.CreateShopForNewUserRequest;
 import com.hcmut.shared_lib.common_util.ExternalRequestUtils;
@@ -10,13 +10,11 @@ import com.hcmut.shared_lib.model.entity.Notification;
 import com.hcmut.shared_lib.model.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -61,9 +59,9 @@ public class EcommerceServiceImpl implements EcommerceService {
 
     @Override
     public void notifyLivestreamProductFollower(Long productId) {
-        List<Long> followerIds = getLivestreamProductFollowerIds(productId);
-        List<Notification> notifications = followerIds.stream()
-                .map(userId -> buildProductFollowerNotification(userId, productId))
+        LivestreamProductFollowerDTO livestreamProductFollower = getLivestreamProductFollower(productId);
+        List<Notification> notifications = livestreamProductFollower.getUserIds().stream()
+                .map(userId -> buildProductFollowerNotification(userId, livestreamProductFollower))
                 .toList();
         notifications = notificationService.batchCreateNewNotification(notifications);
         for (Notification notification : notifications) {
@@ -71,24 +69,23 @@ public class EcommerceServiceImpl implements EcommerceService {
         }
     }
 
-    private List<Long> getLivestreamProductFollowerIds(Long productId) {
+    private LivestreamProductFollowerDTO getLivestreamProductFollower(Long productId) {
         final String path = String.format("/api/livestreams/-/livestream_products/%d/followers", productId);
         String uriString = ecommerceServiceClient.getUriBuilder().path(path).toUriString();
-        ResponseEntity<List<LivestreamProductFollower>> response = ecommerceServiceClient.getBodySpec(HttpMethod.GET, uriString).retrieve()
+        ResponseEntity<LivestreamProductFollowerDTO> response = ecommerceServiceClient.getBodySpec(HttpMethod.GET, uriString).retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                         ExternalRequestUtils::handleErrorRequest
-                ).toEntity(new ParameterizedTypeReference<>() {});
-        if (response.getBody() == null) {
-            return Collections.emptyList();
-        }
-        return response.getBody().stream().map(LivestreamProductFollower::getIdUser).toList();
+                ).toEntity(LivestreamProductFollowerDTO.class);
+        return response.getBody();
     }
 
-    private Notification buildProductFollowerNotification(Long userId, Long productId) {
+    private Notification buildProductFollowerNotification(Long userId, LivestreamProductFollowerDTO livestreamProductFollower) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setTitle("Thông báo sản phẩm");
-        notification.setMessage("Sản phẩm bạn theo dõi đang được bày bán " + productId);
+        notification.setMessage(String.format("Sản phẩm %s đang được bán trực tiếp trên livestream %s",
+                livestreamProductFollower.getLivestreamProduct().getName(),
+                livestreamProductFollower.getLivestream().getTitle()));
         notification.setType(NotificationType.ORDER.getKey());
         return notification;
     }

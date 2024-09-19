@@ -48,7 +48,7 @@ func initServer() server.IServer {
 	iLivestreamExternalVariantRepository := repository.NewLivestreamExternalVariantRepository(postgresqlDatabase)
 	iVideoSdkAdapter := adapter.NewVideoSdkAdapter(config)
 	iLivestreamProductFollowerRepository := repository.NewLivestreamProductFollowerRepository(postgresqlDatabase)
-	iLivestreamService := service.NewLivestreamService(iLivestreamRepository, iLivestreamProductRepository, iLivestreamExternalVariantRepository, iVideoSdkAdapter, iLivestreamProductFollowerRepository)
+	iLivestreamService := service.NewLivestreamService(iLivestreamRepository, iLivestreamProductRepository, iLivestreamExternalVariantRepository, iVideoSdkAdapter, iLivestreamProductFollowerRepository, iProductRepository)
 	iLivestreamHandler := handler.NewLivestreamHandler(iLivestreamService)
 	iLivestreamProductService := service.NewLivestreamProductService(iLivestreamProductRepository, iLivestreamExternalVariantRepository, iLivestreamProductFollowerRepository)
 	iLivestreamProductHandler := handler.NewLivestreamProductHandler(iLivestreamProductService)

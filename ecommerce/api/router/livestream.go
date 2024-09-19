@@ -18,7 +18,7 @@ func LoadLivestreamRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 			livestream.POST("/:livestream_id/start_hls", h.LivestreamHandler.SetLivestreamHls)
 			livestream.POST("/:livestream_id/register_product_follower", h.LivestreamHandler.RegisterLivestreamProductFollower)
 			livestream.GET("/-/livestream_products/:livestream_product_id/followers",
-				h.LivestreamProductHandler.FetchLivestreamProductFollowers,
+				h.LivestreamHandler.FetchLivestreamProductFollowers,
 			)
 		}
 	}
