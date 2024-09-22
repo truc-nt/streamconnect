@@ -7,6 +7,8 @@ import (
 	entity "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
+	"strconv"
+	"time"
 	"errors"
 	"fmt"
 
@@ -26,14 +28,17 @@ type ILivestreamService interface {
 	UpdateLivestreamExternalVariantQuantity(updateLivestreamExternalVariantQuantityRequest *model.UpdateLivestreamExternalVariantQuantityRequest) error
 	AddLivestreamProduct(livestreamId int64, livestreamProductCreateRequest []*model.LivestreamProductCreateRequest) error
 	StartLivestream(livestreamId int64) error
+	RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error
+	FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error)
 }
 
 type LivestreamService struct {
 	LivestreamRepository                repository.ILivestreamRepository
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
-
-	VideoSdkAdapter adapter.IVideoSdkAdapter
+	LivestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository
+	ProductRepository                   repository.IProductRepository
+	VideoSdkAdapter                     adapter.IVideoSdkAdapter
 }
 
 func NewLivestreamService(
@@ -41,12 +46,16 @@ func NewLivestreamService(
 	livestreamProductRepository repository.ILivestreamProductRepository,
 	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
 	videoSdkAdapter adapter.IVideoSdkAdapter,
+	livestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository,
+	productRepository repository.IProductRepository,
 ) ILivestreamService {
 	return &LivestreamService{
 		LivestreamRepository:                livestreamService,
 		LivestreamProductRepository:         livestreamProductRepository,
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
 		VideoSdkAdapter:                     videoSdkAdapter,
+		LivestreamProductFollowerRepository: livestreamProductFollowerRepository,
+		ProductRepository:                   productRepository,
 	}
 }
 
@@ -210,6 +219,48 @@ func (s *LivestreamService) SetLivestreamHls(livestreamId int64, hlsUrl string) 
 	return nil
 }
 
+func (s *LivestreamService) RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error {
+	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
+		//check if livestream product exists
+		livestreamProducts, err := s.LivestreamProductRepository.FindAllLivestreamId(db, request.IDLivestream)
+		if err != nil {
+			return nil, err
+		}
+		livestreamProductIdsSet := make(map[int64]bool)
+		for _, livestreamProduct := range livestreamProducts {
+			livestreamProductIdsSet[livestreamProduct.IDLivestreamProduct] = true
+		}
+		newFollowers := make([]*entity.LivestreamProductFollower, len(request.IDLivestreamProducts))
+		//create new followers
+		for idx, livestreamProductId := range request.IDLivestreamProducts {
+			if !livestreamProductIdsSet[livestreamProductId] {
+				return nil, errors.New("livestream product with id " + strconv.FormatInt(livestreamProductId, 10) + " not found")
+			}
+			newLivestreamProductFollower := entity.LivestreamProductFollower{
+				FkLivestreamProduct: livestreamProductId,
+				FkUser:              request.IDUser,
+				CreatedAt:           time.Now(),
+			}
+			newFollowers[idx] = &newLivestreamProductFollower
+		}
+		_, err = s.LivestreamProductFollowerRepository.CreateMany(
+			db,
+			postgres.ColumnList{
+				table.LivestreamProductFollower.FkLivestreamProduct,
+				table.LivestreamProductFollower.FkUser,
+				table.LivestreamProductFollower.CreatedAt,
+			},
+			newFollowers,
+		)
+		return nil, nil
+	}
+	_, err := s.LivestreamProductFollowerRepository.ExecWithinTransaction(execWithinTransaction)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *LivestreamService) UpdateLivestreamExternalVariantQuantity(updateLivestreamExternalVariantQuantityRequest *model.UpdateLivestreamExternalVariantQuantityRequest) error {
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
 		for _, product := range *updateLivestreamExternalVariantQuantityRequest {
@@ -323,4 +374,42 @@ func (s *LivestreamService) StartLivestream(livestreamId int64) error {
 	}
 
 	return nil
+}
+
+func (s *LivestreamService) FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error) {
+	followers, err := s.LivestreamProductFollowerRepository.FindByProductId(
+		s.LivestreamProductFollowerRepository.GetDatabase().Db,
+		productId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(followers) == 0 {
+		return &model.LivestreamProductFollowerDTO{}, nil
+	}
+	//extract user ids
+	var userIds = make([]int64, len(followers))
+	for idx, follower := range followers {
+		userIds[idx] = follower.FkUser
+	}
+	livestreamProduct, err := s.LivestreamProductRepository.GetById(s.LivestreamProductRepository.GetDatabase().Db, productId)
+	if err != nil {
+		return nil, err
+	}
+	//fetch livestream
+	livestream, err := s.LivestreamRepository.GetById(s.LivestreamRepository.GetDatabase().Db, livestreamProduct.FkLivestream)
+	if err != nil {
+		return nil, err
+	}
+	//fetch product
+	product, err := s.ProductRepository.GetById(s.ProductRepository.GetDatabase().Db, livestreamProduct.FkProduct)
+	if err != nil {
+		return nil, err
+	}
+	var data = model.LivestreamProductFollowerDTO{}
+	data.UserIds = userIds
+	data.Product = product
+	data.Livestream = livestream
+
+	return &data, nil
 }

@@ -73,6 +73,7 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewOrderItemLivestreamExternalVariantRepository,
 	repository.NewExternalOrderRepository,
 	repository.NewCartRepository,
+	repository.NewLivestreamProductFollowerRepository,
 	repository.NewVoucherRepository,
 	repository.NewVoucherUserRepository,
 )

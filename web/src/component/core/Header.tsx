@@ -19,6 +19,10 @@ import { Layout, MenuProps } from "antd";
 import { useEffect, useState, useLayoutEffect } from "react";
 import LoginModal from "@/component/auth/LoginModal";
 import RegisterModal from "@/component/auth/RegisterModal";
+import {disconnectSocket} from "@/api/socket";
+import {useWebSocket} from "@/hook/socket";
+import NotificationDropdown from "@/component/core/NotificationMenu";
+import {batchUpdateNotificationStatus, getNotifications, Notification} from "@/api/notification";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { setLogin, setLogout } from "@/store/auth";
 
@@ -30,6 +34,9 @@ const Header = () => {
   const [isSignUpModalVisible, setIsSignUpModalVisible] = useState(false);
   const { userId } = useAppSelector((state) => state.authReducer);
   console.log(userId);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [newNotificationCount, setNewNotificationCount] = useState(0);
 
   const items: MenuProps["items"] = [
     {
@@ -49,6 +56,7 @@ const Header = () => {
       label: (
         <div
           onClick={() => {
+            disconnectSocket();
             localStorage.removeItem("token");
             dispatch(setLogout());
           }}
@@ -63,6 +71,15 @@ const Header = () => {
     setIsSignUpModalVisible(true);
   };
 
+  const onClickOpenNotificationMenu = () => {
+    const ids = notifications.map((notification) => notification.id);
+    setNewNotificationCount(0);
+    batchUpdateNotificationStatus(ids, "SEND");
+  }
+  const onNotificationReceive = (notification: Notification) => {
+    setNotifications((prevNotifications) => [notification, ...prevNotifications]);
+  }
+
   useLayoutEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -72,6 +89,21 @@ const Header = () => {
       dispatch(setLogout());
     }
   }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const notifications = await getNotifications();
+      setNotifications(notifications);
+      // handle the fetched notifications
+    };
+    fetchNotifications();
+  }, []);
+  useEffect(() => {
+    setNewNotificationCount(notifications.filter((notification) => notification.status === "NEW").length);
+  }, [notifications]);
+
+  //use hook section
+  useWebSocket(onNotificationReceive);
 
   return (
     <Layout.Header className="bg-white">
@@ -92,7 +124,9 @@ const Header = () => {
           </Space>
         ) : (
           <Space>
-            <Button type="text" shape="circle" icon={<BellFilled />} />
+            <NotificationDropdown items={notifications} newItemCount={newNotificationCount}>
+              <Button onClick={onClickOpenNotificationMenu} type="text" shape="circle" icon={<BellFilled />} />
+            </NotificationDropdown>
             <Link href="/cart">
               <Button type="text" shape="circle" icon={<ShoppingFilled />} />
             </Link>

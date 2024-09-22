@@ -1,0 +1,18 @@
+.notificationMenuContainer {
+    width: 400px;
+    background-color: white;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    height: 600px;
+    overflow: auto;
+}
+
+.unreadDot {
+    width: 10px;
+    height: 10px;
+    background-color: lightskyblue;
+    border-radius: 50%;
+    display: inline-block
+}

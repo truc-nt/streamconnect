@@ -12,6 +12,7 @@ import (
 type ILivestreamProductRepository interface {
 	IBaseRepository[model.LivestreamProduct]
 
+	FindAllLivestreamId(db qrm.Queryable, livestreamId int64) ([]model.LivestreamProduct, error)
 	GetInfoById(db qrm.Queryable, id int64) (*GetInfoById, error)
 	GetByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*GetByLivestreamId, error)
 	GetByLivestreamIdAndProductId(db qrm.Queryable, livestreamId, productId int64) (*model.LivestreamProduct, error)
@@ -43,7 +44,7 @@ func (r *LivestreamProductRepository) UpdateById(db qrm.Queryable, columnList po
 }
 
 func (r *LivestreamProductRepository) GetById(db qrm.Queryable, id int64) (*model.LivestreamProduct, error) {
-	stmt := table.LivestreamProduct.SELECT(table.Livestream.AllColumns).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
+	stmt := table.LivestreamProduct.SELECT(table.LivestreamProduct.AllColumns).WHERE(table.LivestreamProduct.IDLivestreamProduct.EQ(postgres.Int(int64(id))))
 
 	var data model.LivestreamProduct
 	err := stmt.Query(db, &data)
@@ -139,4 +140,15 @@ func (r *LivestreamProductRepository) GetByLivestreamIdAndProductId(db qrm.Query
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (r *LivestreamProductRepository) FindAllLivestreamId(db qrm.Queryable, livestreamId int64) ([]model.LivestreamProduct, error) {
+	stmt := table.LivestreamProduct.SELECT(table.LivestreamProduct.AllColumns).WHERE(table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)))
+
+	var data []model.LivestreamProduct
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

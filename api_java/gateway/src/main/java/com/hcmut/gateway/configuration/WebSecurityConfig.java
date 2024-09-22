@@ -91,7 +91,7 @@ public class WebSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authorizeRequests -> authorizeRequests
-                                .requestMatchers("/api/v1/auth/**", "/api/v1/test/hello").permitAll()
+                                .requestMatchers("/api/v1/auth/**", "/api/v1/test/public/**", "/ws/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(

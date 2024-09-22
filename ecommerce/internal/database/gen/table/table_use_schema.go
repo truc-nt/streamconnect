@@ -26,6 +26,7 @@ func UseSchema(schema string) {
 	Livestream = Livestream.FromSchema(schema)
 	LivestreamExtVariant = LivestreamExtVariant.FromSchema(schema)
 	LivestreamProduct = LivestreamProduct.FromSchema(schema)
+	LivestreamProductFollower = LivestreamProductFollower.FromSchema(schema)
 	LivestreamSchedule = LivestreamSchedule.FromSchema(schema)
 	Order = Order.FromSchema(schema)
 	OrderItem = OrderItem.FromSchema(schema)

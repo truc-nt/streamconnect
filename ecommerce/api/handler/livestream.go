@@ -18,6 +18,8 @@ type ILivestreamHandler interface {
 	StartLivestream(ctx *gin.Context)
 
 	GetLivestreamInfo(ctx *gin.Context)
+	RegisterLivestreamProductFollower(ctx *gin.Context)
+	FetchLivestreamProductFollowers(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -176,4 +178,40 @@ func (h *LivestreamHandler) StartLivestream(ctx *gin.Context) {
 	}
 
 	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) RegisterLivestreamProductFollower(ctx *gin.Context) {
+	idLivestream, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	var request *model.RegisterLivestreamProductFollowerRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	if request.IDLivestream != idLivestream {
+		h.handleFailed(ctx, errors.New("livestream id not match"))
+		return
+	}
+	if err := h.Service.RegisterLivestreamProductFollower(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessCreate(ctx)
+}
+
+func (h *LivestreamHandler) FetchLivestreamProductFollowers(ctx *gin.Context) {
+	id, err := h.parseId(ctx, ctx.Param("livestream_product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	responseDTO, err := h.Service.FetchLivestreamProductFollowers(id)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessGet(ctx, responseDTO)
 }

@@ -21,6 +21,7 @@ type ILivestreamProductService interface {
 type LivestreamProductService struct {
 	LivestreamProductRepository         repository.ILivestreamProductRepository
 	LivestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository
+	LivestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository
 
 	EcommerceService map[int16]IEcommerceService
 }
@@ -28,11 +29,13 @@ type LivestreamProductService struct {
 func NewLivestreamProductService(
 	livestreamProductRepository repository.ILivestreamProductRepository,
 	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
+	livestreamProductFollowerRepository repository.ILivestreamProductFollowerRepository,
 	ecommerceService map[int16]IEcommerceService,
 ) ILivestreamProductService {
 	return &LivestreamProductService{
 		LivestreamProductRepository:         livestreamProductRepository,
 		LivestreamExternalVariantRepository: livestreamExternalVariantRepository,
+		LivestreamProductFollowerRepository: livestreamProductFollowerRepository,
 		EcommerceService:                    ecommerceService,
 	}
 }
