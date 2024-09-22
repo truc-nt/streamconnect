@@ -1,8 +1,11 @@
 import { Card, Typography, Divider, Flex } from "antd";
 import { useGetDefaultAddress } from "@/hook/user";
+import { useAppDispatch, useAppSelector } from "@/store/store";
 
 const AddressCard = () => {
-  const { data } = useGetDefaultAddress(1);
+  const { userId } = useAppSelector((state) => state.authReducer);
+
+  const { data } = useGetDefaultAddress();
   return (
     <Card
       bordered={false}

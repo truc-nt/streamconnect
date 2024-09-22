@@ -1,0 +1,1 @@
+INSERT INTO ecommerce (name) VALUES ('Shopify');

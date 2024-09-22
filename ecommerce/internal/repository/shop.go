@@ -23,6 +23,17 @@ func NewShopRepository(database *database.PostgresqlDatabase) IShopRepository {
 	return repo
 }
 
+func (r *ShopRepository) GetById(db qrm.Queryable, id int64) (*model.Shop, error) {
+	stmt := table.Shop.SELECT(table.Shop.AllColumns).WHERE(table.Shop.IDShop.EQ(postgres.Int(int64(id))))
+
+	var data model.Shop
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
 func (r *ShopRepository) CreateOne(db qrm.Queryable, columnList postgres.ColumnList, data model.Shop) (*model.Shop, error) {
 	stmt := table.Shop.INSERT(columnList).MODEL(data).RETURNING(table.Shop.AllColumns)
 	return r.insertOne(db, stmt)
@@ -36,15 +47,4 @@ func (r *ShopRepository) CreateMany(db qrm.Queryable, columnList postgres.Column
 func (r *ShopRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.Shop) (*model.Shop, error) {
 	stmt := table.Shop.UPDATE(columnList).MODEL(data).WHERE(table.Shop.IDShop.EQ(postgres.Int(data.IDShop))).RETURNING(table.Shop.AllColumns)
 	return r.update(db, stmt)
-}
-
-func (r *ShopRepository) GetById(db qrm.Queryable, id int64) (*model.Shop, error) {
-	stmt := table.Shop.SELECT(table.Shop.AllColumns).WHERE(table.Shop.IDShop.EQ(postgres.Int(int64(id))))
-
-	var data model.Shop
-	err := stmt.Query(db, &data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
 }

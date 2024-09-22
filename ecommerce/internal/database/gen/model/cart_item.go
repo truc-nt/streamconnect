@@ -8,9 +8,9 @@
 package model
 
 type CartItem struct {
-	IDCartItem        int64  `sql:"primary_key" json:"id_cart_item" xml:"id_cart_item"`
-	FkCart            int64  `json:"fk_cart" xml:"fk_cart"`
-	FkExternalVariant int64  `json:"fk_external_variant" xml:"fk_external_variant"`
-	Quantity          int32  `json:"quantity" xml:"quantity"`
-	Status            string `json:"status" xml:"status"`
+	IDCartItem   int64  `sql:"primary_key" json:"id_cart_item" xml:"id_cart_item"`
+	FkCart       int64  `json:"fk_cart" xml:"fk_cart"`
+	FkExtVariant int64  `json:"fk_external_variant" xml:"fk_ext_variant"`
+	Quantity     int32  `json:"quantity" xml:"quantity"`
+	Status       string `json:"status" xml:"status"`
 }

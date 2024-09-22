@@ -5,19 +5,27 @@ type CreateOrderRequest struct {
 }
 
 type OrderRequest struct {
-	LineItems []*LineItemRequest `json:"line_items"`
-	/*Customer        Customer           `json:"customer"`
-	BillingAddress  BillingAddress     `json:"billing_address"`
-	ShippingAddress ShippingAddress    `json:"shipping_address"`
+	LineItems       []*LineItemRequest `json:"line_items"`
+	Customer        *CustomerRequest   `json:"customer"`
+	BillingAddress  *BillingAddress    `json:"billing_address"`
+	ShippingAddress *ShippingAddress   `json:"shipping_address"`
 	Email           string             `json:"email"`
-	Transactions    []*Transactions    `json:"transactions"`
-	FinancialStatus string             `json:"financial_status"`*/
+	/*Transactions    []*Transactions    `json:"transactions"`*/
+	FinancialStatus string          `json:"financial_status"`
+	DiscountCodes   []*DiscountCode `json:"discount_codes"`
 }
 
 type LineItemRequest struct {
 	VariantID int   `json:"variant_id"`
 	Quantity  int64 `json:"quantity"`
 }
+
+type CustomerRequest struct {
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
 type BillingAddress struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -42,6 +50,12 @@ type Transactions struct {
 	Kind   string  `json:"kind"`
 	Status string  `json:"status"`
 	Amount float64 `json:"amount"`
+}
+
+type DiscountCode struct {
+	Code   string `json:"code"`
+	Amount string `json:"amount"`
+	Type   string `json:"type"`
 }
 
 type CreateOrderResponse struct {

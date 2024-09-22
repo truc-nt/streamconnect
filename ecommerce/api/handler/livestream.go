@@ -1,18 +1,23 @@
 package handler
 
 import (
-	"database/sql"
 	"ecommerce/api/model"
 	"ecommerce/internal/service"
-	"errors"
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
 type ILivestreamHandler interface {
 	CreateLivestream(ctx *gin.Context)
-	FetchLivestreams(ctx *gin.Context)
+	GetLivestreams(ctx *gin.Context)
 	GetLivestream(ctx *gin.Context)
 	SetLivestreamHls(ctx *gin.Context)
+	UpdateLivestreamExternalVariantQuantity(ctx *gin.Context)
+	AddLivestreamProduct(ctx *gin.Context)
+	StartLivestream(ctx *gin.Context)
+
+	GetLivestreamInfo(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -39,16 +44,18 @@ func (h *LivestreamHandler) CreateLivestream(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Service.CreateLivestream(shopId, createLivestreamRequest); err != nil {
+	livestreamId, err := h.Service.CreateLivestream(shopId, createLivestreamRequest)
+	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	h.handleSuccessCreate(ctx)
+	h.handleSuccessCreateWithData(ctx, livestreamId)
 }
 
 func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
 	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	//userId := ctx.Param("user_id")
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
@@ -62,19 +69,14 @@ func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
 	h.handleSuccessGet(ctx, livestream)
 }
 
-func (h *LivestreamHandler) FetchLivestreams(ctx *gin.Context) {
-	status := ctx.Query("status")
-	nillAbleStatus := sql.NullString{
-		String: status,
-		Valid:  status != "",
-	}
-	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
-	nillAbleShopId := sql.NullInt64{
-		Int64: shopId,
-		Valid: err == nil,
+func (h *LivestreamHandler) GetLivestreams(ctx *gin.Context) {
+	var param *model.GetLivestreamsQueryParam
+	if err := ctx.ShouldBindQuery(&param); err != nil {
+		h.handleFailed(ctx, err)
+		return
 	}
 
-	livestreams, err := h.Service.FetchLivestreams(nillAbleStatus, nillAbleShopId)
+	livestreams, err := h.Service.GetLivestreams(param)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
@@ -95,12 +97,83 @@ func (h *LivestreamHandler) SetLivestreamHls(ctx *gin.Context) {
 		h.handleFailed(ctx, err)
 		return
 	}
-	if request.IDLivestream != id {
-		h.handleFailed(ctx, errors.New("bad request"))
-	}
-	if err := h.Service.SetLivestreamHls(request); err != nil {
+
+	if err := h.Service.SetLivestreamHls(id, request.HlsUrl); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
+	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) GetLivestreamInfo(ctx *gin.Context) {
+	userId := ctx.GetHeader("user_id")
+
+	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	livestream, err := h.Service.GetLivestreamInfo(id)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, &model.GetLivestreamInfoResponse{
+		MeetingId: livestream.MeetingID,
+		IDShop:    livestream.FkShop,
+		IsHost:    userId == fmt.Sprintf("%d", livestream.FkShop),
+		ShopName:  livestream.ShopName,
+	})
+}
+
+func (h *LivestreamHandler) UpdateLivestreamExternalVariantQuantity(ctx *gin.Context) {
+	var request *model.UpdateLivestreamExternalVariantQuantityRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.UpdateLivestreamExternalVariantQuantity(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) AddLivestreamProduct(ctx *gin.Context) {
+	var request []*model.LivestreamProductCreateRequest
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.AddLivestreamProduct(livestreamId, request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessCreate(ctx)
+}
+
+func (h *LivestreamHandler) StartLivestream(ctx *gin.Context) {
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.StartLivestream(livestreamId); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
 	h.handleSuccessUpdate(ctx)
 }

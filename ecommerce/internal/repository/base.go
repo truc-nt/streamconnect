@@ -67,11 +67,12 @@ func (r *BaseRepository[T]) update(db qrm.Queryable, stmt postgres.Statement) (*
 	return &data, nil
 }
 
-func (r *BaseRepository[T]) ExecWithinTransaction(fnTx func(db qrm.Queryable) (interface{}, error)) (res interface{}, err error) {
+func (r *BaseRepository[T]) ExecWithinTransaction(fnTx func(db qrm.Queryable) (interface{}, error)) (interface{}, error) {
 	var tx *sql.Tx
+	var err error
 	tx, err = r.Database.Db.Begin()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	defer func() {
@@ -88,8 +89,8 @@ func (r *BaseRepository[T]) ExecWithinTransaction(fnTx func(db qrm.Queryable) (i
 		}
 	}()
 
-	res, err = fnTx(tx)
-	return
+	res, err := fnTx(tx)
+	return res, err
 }
 
 func (r *BaseRepository[T]) GetDatabase() *database.PostgresqlDatabase {

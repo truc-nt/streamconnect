@@ -1,7 +1,7 @@
 import { Flex } from "antd";
 import AddLivestreamVariant from "./AddLivestreamExternalVariantModal";
 import { Button, Table, Tag, Space, TableColumnType } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { ECOMMERCE_PLATFORMS } from "@/constant/ecommerce";
 
@@ -22,15 +22,24 @@ interface IChosenLivestreamVariant {
 interface IChosenLivestreamVariantProps {
   shopId: number;
   initialChosenLivestreamVariants?: IChosenLivestreamVariant[];
+  onChange?: (chosenLivestreamVariants: IChosenLivestreamVariant[]) => void;
+  onSubmit?: (chosenLivestreamVariants: IChosenLivestreamVariant[]) => void;
 }
 const ChosenLivestreamVariant = ({
   shopId,
   initialChosenLivestreamVariants,
+  onChange,
+  onSubmit,
 }: IChosenLivestreamVariantProps) => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [chosenLivestreamVariants, setChosenLivestreamVariants] = useState(
     initialChosenLivestreamVariants ?? [],
   );
+
+  useEffect(() => {
+    onChange?.(chosenLivestreamVariants);
+  }, [chosenLivestreamVariants]);
+
   return (
     <Flex vertical gap="large">
       <Flex>
@@ -39,6 +48,14 @@ const ChosenLivestreamVariant = ({
         </Button>
       </Flex>
       <ChosenLivestreamVariantTable data={chosenLivestreamVariants} />
+      {onSubmit && (
+        <Button
+          type="primary"
+          onClick={() => onSubmit(chosenLivestreamVariants)}
+        >
+          Lưu
+        </Button>
+      )}
       {openAddModal && (
         <AddLivestreamVariant
           shopId={shopId}
@@ -47,15 +64,6 @@ const ChosenLivestreamVariant = ({
           onCancel={() => setOpenAddModal(false)}
         />
       )}
-      <Flex justify="end">
-        <Button
-          type="primary"
-          //disabled={}
-          //onClick={}
-        >
-          Tiếp theo
-        </Button>
-      </Flex>
     </Flex>
   );
 };
@@ -106,16 +114,6 @@ const ChosenLivestreamVariantTable = ({
           </Tag>
         )),
     },
-    {
-      dataIndex: "action",
-      key: "action",
-      render: () => (
-        <Space>
-          <EditOutlined />
-          <DeleteOutlined />
-        </Space>
-      ),
-    },
   ];
 
   return (
@@ -123,6 +121,7 @@ const ChosenLivestreamVariantTable = ({
       columns={columns}
       dataSource={data}
       rowKey={(row) => row.variantId}
+      pagination={false}
     />
   );
 };

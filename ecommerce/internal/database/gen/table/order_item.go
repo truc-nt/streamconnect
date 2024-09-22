@@ -17,10 +17,12 @@ type orderItemTable struct {
 	postgres.Table
 
 	// Columns
-	IDOrderItem       postgres.ColumnInteger
-	FkOrder           postgres.ColumnInteger
-	FkExternalVariant postgres.ColumnInteger
-	Quantity          postgres.ColumnInteger
+	IDOrderItem  postgres.ColumnInteger
+	FkOrder      postgres.ColumnInteger
+	FkExtVariant postgres.ColumnInteger
+	Quantity     postgres.ColumnInteger
+	UnitPrice    postgres.ColumnFloat
+	PaidPrice    postgres.ColumnFloat
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -61,22 +63,26 @@ func newOrderItemTable(schemaName, tableName, alias string) *OrderItemTable {
 
 func newOrderItemTableImpl(schemaName, tableName, alias string) orderItemTable {
 	var (
-		IDOrderItemColumn       = postgres.IntegerColumn("id_order_item")
-		FkOrderColumn           = postgres.IntegerColumn("fk_order")
-		FkExternalVariantColumn = postgres.IntegerColumn("fk_external_variant")
-		QuantityColumn          = postgres.IntegerColumn("quantity")
-		allColumns              = postgres.ColumnList{IDOrderItemColumn, FkOrderColumn, FkExternalVariantColumn, QuantityColumn}
-		mutableColumns          = postgres.ColumnList{FkOrderColumn, FkExternalVariantColumn, QuantityColumn}
+		IDOrderItemColumn  = postgres.IntegerColumn("id_order_item")
+		FkOrderColumn      = postgres.IntegerColumn("fk_order")
+		FkExtVariantColumn = postgres.IntegerColumn("fk_ext_variant")
+		QuantityColumn     = postgres.IntegerColumn("quantity")
+		UnitPriceColumn    = postgres.FloatColumn("unit_price")
+		PaidPriceColumn    = postgres.FloatColumn("paid_price")
+		allColumns         = postgres.ColumnList{IDOrderItemColumn, FkOrderColumn, FkExtVariantColumn, QuantityColumn, UnitPriceColumn, PaidPriceColumn}
+		mutableColumns     = postgres.ColumnList{FkOrderColumn, FkExtVariantColumn, QuantityColumn, UnitPriceColumn, PaidPriceColumn}
 	)
 
 	return orderItemTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDOrderItem:       IDOrderItemColumn,
-		FkOrder:           FkOrderColumn,
-		FkExternalVariant: FkExternalVariantColumn,
-		Quantity:          QuantityColumn,
+		IDOrderItem:  IDOrderItemColumn,
+		FkOrder:      FkOrderColumn,
+		FkExtVariant: FkExtVariantColumn,
+		Quantity:     QuantityColumn,
+		UnitPrice:    UnitPriceColumn,
+		PaidPrice:    PaidPriceColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

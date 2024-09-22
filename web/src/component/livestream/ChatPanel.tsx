@@ -3,17 +3,19 @@ import { useState, useEffect, useRef } from "react";
 import ChatMessage from "@/component/core/ChatMessage";
 import { Flex, List, Space, Input, Button } from "antd";
 import { SendOutlined } from "@ant-design/icons";
+import { useAppSelector } from "@/store/store";
 
 const ChatPanel = () => {
   const { publish, messages } = usePubSub("CHAT");
   const mMeeting = useMeeting();
-  const localParticipantId = mMeeting?.localParticipant?.id;
+  const { username } = useAppSelector((state) => state.authReducer);
 
   const [message, setMessage] = useState("");
 
   const handleSendMessage = () => {
     message.trim();
     publish(message, { persist: true });
+    console.log("why");
     setMessage("");
   };
 
@@ -34,7 +36,7 @@ const ChatPanel = () => {
 
   return (
     <>
-      <div className="flex-1 overflow-y-scroll" ref={chatContainerRef}>
+      <div className="flex-1 overflow-y-scroll p-2" ref={chatContainerRef}>
         <List
           dataSource={messages}
           renderItem={(item, index) => {
@@ -44,13 +46,14 @@ const ChatPanel = () => {
                 <ChatMessage
                   key={index}
                   sender={senderName}
-                  isLocalSender={senderName === "TestUser"}
+                  isLocalSender={senderName === username}
                   message={message}
                   createdAt={timestamp}
                 />
               </List.Item>
             );
           }}
+          className="p-1"
         />
       </div>
       <Space.Compact>

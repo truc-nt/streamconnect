@@ -19,5 +19,6 @@ func LoadApiRouter(e *gin.Engine, h *handler.Handlers) {
 		LoadLivestreamProductRouter(apiRouter, h)
 		LoadCartRouter(apiRouter, h)
 		LoadOrderRouter(apiRouter, h)
+		LoadVoucherRouter(apiRouter, h)
 	}
 }

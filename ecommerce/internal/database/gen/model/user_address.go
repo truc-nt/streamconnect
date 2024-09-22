@@ -8,11 +8,11 @@
 package model
 
 type UserAddress struct {
-	IDUserAddress int64   `sql:"primary_key" json:"id_user_address" xml:"id_user_address"`
-	FkUser        int64   `json:"fk_user" xml:"fk_user"`
-	Name          string  `json:"name" xml:"name"`
-	Phone         string  `json:"phone" xml:"phone"`
-	Address       string  `json:"address" xml:"address"`
-	City          *string `json:"city" xml:"city"`
-	IsDefault     *bool   `json:"is_default" xml:"is_default"`
+	IDUserAddress int64  `sql:"primary_key" json:"id_user_address" xml:"id_user_address"`
+	FkUser        int64  `json:"fk_user" xml:"fk_user"`
+	Name          string `json:"name" xml:"name"`
+	Phone         string `json:"phone" xml:"phone"`
+	Address       string `json:"address" xml:"address"`
+	City          string `json:"city" xml:"city"`
+	IsDefault     bool   `json:"is_default" xml:"is_default"`
 }

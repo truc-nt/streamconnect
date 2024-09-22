@@ -28,7 +28,7 @@ const (
 type IShopifyService interface {
 	IEcommerceService
 	GetAuthorizePath(shopDomain string) string
-	ConnectNewExternalShopShopify(shopDomain string, authorizeCode string) error
+	ConnectNewExternalShopShopify(shopId int64, shopDomain string, authorizeCode string) error
 }
 
 type ShopifyService struct {
@@ -90,24 +90,24 @@ func (s *ShopifyService) getAccessToken(shopDomain string, code string) (string,
 	return accessToken, nil
 }
 
-func (s *ShopifyService) ConnectNewExternalShopShopify(shopDomain string, authorizeCode string) error {
+func (s *ShopifyService) ConnectNewExternalShopShopify(shopId int64, shopDomain string, authorizeCode string) error {
 	accessToken, err := s.getAccessToken(shopDomain, authorizeCode)
 	if err != nil {
 		return fmt.Errorf("failed to get access token: %v", err)
 	}
 
 	shopName := s.getShopOriginFromShopDomain(shopDomain)
-	return s.createExternalShopShopify(shopName, accessToken)
+	return s.createExternalShopShopify(shopId, shopName, accessToken)
 }
 
-func (s *ShopifyService) createExternalShopShopify(shopName string, accessToken string) error {
+func (s *ShopifyService) createExternalShopShopify(shopId int64, shopName string, accessToken string) error {
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
 
 		newExternalShop, err := s.ExternalShopRepository.CreateOne(db,
-			postgres.ColumnList{table.ExternalShop.Name, table.ExternalShop.FkShop, table.ExternalShop.FkEcommerce},
-			entity.ExternalShop{
+			postgres.ColumnList{table.ExtShop.Name, table.ExtShop.FkShop, table.ExtShop.FkEcommerce},
+			entity.ExtShop{
 				Name:        shopName,
-				FkShop:      1,
+				FkShop:      shopId,
 				FkEcommerce: constants.SHOPIFY_ID,
 			})
 		var pgErr pgx.PgError
@@ -125,14 +125,14 @@ func (s *ShopifyService) createExternalShopShopify(shopName string, accessToken 
 
 		if _, err := s.ExternalShopAuthRepository.CreateOne(db,
 			postgres.ColumnList{
-				table.ExternalShopShopifyAuth.FkExternalShop,
-				table.ExternalShopShopifyAuth.Name,
-				table.ExternalShopShopifyAuth.AccessToken,
+				table.ExtShopShopifyAuth.FkExtShop,
+				table.ExtShopShopifyAuth.Name,
+				table.ExtShopShopifyAuth.AccessToken,
 			},
-			entity.ExternalShopShopifyAuth{
-				FkExternalShop: newExternalShop.IDExternalShop,
-				Name:           shopName,
-				AccessToken:    &accessToken,
+			entity.ExtShopShopifyAuth{
+				FkExtShop:   newExternalShop.IDExtShop,
+				Name:        shopName,
+				AccessToken: &accessToken,
 			}); err != nil {
 			return nil, fmt.Errorf("failed to create new Shopify auth: %v", err)
 		}
@@ -160,32 +160,32 @@ func (s *ShopifyService) SyncVariants(externalShopId int64) error {
 		return err
 	}
 
-	entityExternalVariants := lop.Map(externalVariants, func(variant *model.ExternalVariant, _ int) *entity.ExternalVariant {
-		return &entity.ExternalVariant{
-			FkExternalShop:           externalShopId,
-			ExternalProductIDMapping: variant.ExternalProductIdMapping,
-			ExternalIDMapping:        variant.ExternalIdMapping,
-			Sku:                      variant.Sku,
-			Name:                     variant.Name,
-			Option:                   variant.Option,
-			Status:                   variant.Status,
-			Price:                    variant.Price,
-			ImageURL:                 &variant.ImageUrl,
+	entityExternalVariants := lop.Map(externalVariants, func(variant *model.ExternalVariant, _ int) *entity.ExtVariant {
+		return &entity.ExtVariant{
+			FkExtShop:           externalShopId,
+			ExtProductIDMapping: variant.ExternalProductIdMapping,
+			ExtIDMapping:        variant.ExternalIdMapping,
+			Sku:                 variant.Sku,
+			Name:                variant.Name,
+			Option:              variant.Option,
+			Status:              variant.Status,
+			Price:               variant.Price,
+			ImageURL:            &variant.ImageUrl,
 		}
 	})
 
 	_, err = s.ExternalVariantRepository.CreateMany(
 		s.ExternalVariantRepository.GetDatabase().Db,
 		postgres.ColumnList{
-			table.ExternalVariant.FkExternalShop,
-			table.ExternalVariant.ExternalProductIDMapping,
-			table.ExternalVariant.ExternalIDMapping,
-			table.ExternalVariant.Sku,
-			table.ExternalVariant.Name,
-			table.ExternalVariant.Option,
-			table.ExternalVariant.Status,
-			table.ExternalVariant.Price,
-			table.ExternalVariant.ImageURL,
+			table.ExtVariant.FkExtShop,
+			table.ExtVariant.ExtProductIDMapping,
+			table.ExtVariant.ExtIDMapping,
+			table.ExtVariant.Sku,
+			table.ExtVariant.Name,
+			table.ExtVariant.Option,
+			table.ExtVariant.Status,
+			table.ExtVariant.Price,
+			table.ExtVariant.ImageURL,
 		},
 		entityExternalVariants,
 	)
@@ -212,16 +212,16 @@ func (s *ShopifyService) GetStockByExternalProductExternalId(externalShopId int6
 	return stocks, nil
 }
 
-func (s *ShopifyService) CreateOrder(externalShopId int64, externalOrderItems []*model.ExternalOrderItem) (string, error) {
+func (s *ShopifyService) CreateOrder(user *entity.User, userAddress *entity.UserAddress, externalShopId int64, externalOrderItems []*model.ExternalOrderItem, internalDiscount float64) (string, error) {
 	externalShopAuth, err := s.ExternalShopAuthRepository.GetByExternalShopId(s.ExternalShopRepository.GetDatabase().Db, externalShopId)
 	if err != nil {
 		return "", err
 	}
 
-	newExternalOrderIdMapping, err := s.ShopifyAdapter.CreateOrder(&shopify.ShopifyClientParam{
+	newExternalOrderIdMapping, err := s.ShopifyAdapter.CreateOrder(user, userAddress, &shopify.ShopifyClientParam{
 		ShopName:    externalShopAuth.Name,
 		AccessToken: *externalShopAuth.AccessToken,
-	}, externalOrderItems)
+	}, externalOrderItems, internalDiscount)
 	if err != nil {
 		return "", err
 	}

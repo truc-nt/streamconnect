@@ -1,6 +1,6 @@
 import { List } from "antd";
 import CartItemsGroupByShop from "./CartItemsGroupByShop";
-import { ICart, ICartItem } from "@/api/cart";
+import { ICart } from "@/api/cart";
 
 const CartItemList = ({ cart }: { cart: ICart[] }) => {
   return (

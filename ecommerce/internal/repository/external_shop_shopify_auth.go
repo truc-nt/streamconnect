@@ -10,13 +10,13 @@ import (
 )
 
 type IExternalShopShopifyAuthRepository interface {
-	IBaseRepository[model.ExternalShopShopifyAuth]
+	IBaseRepository[model.ExtShopShopifyAuth]
 
-	GetByExternalShopId(db qrm.Queryable, externalShopId int64) (*model.ExternalShopShopifyAuth, error)
+	GetByExternalShopId(db qrm.Queryable, externalShopId int64) (*model.ExtShopShopifyAuth, error)
 }
 
 type ExternalShopShopifyAuthRepository struct {
-	BaseRepository[model.ExternalShopShopifyAuth]
+	BaseRepository[model.ExtShopShopifyAuth]
 }
 
 func NewExternalShopShopifyAuthRepository(database *database.PostgresqlDatabase) IExternalShopShopifyAuthRepository {
@@ -25,24 +25,24 @@ func NewExternalShopShopifyAuthRepository(database *database.PostgresqlDatabase)
 	return repo
 }
 
-func (r *ExternalShopShopifyAuthRepository) CreateOne(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalShopShopifyAuth) (*model.ExternalShopShopifyAuth, error) {
-	stmt := table.ExternalShopShopifyAuth.INSERT(columnList).MODEL(data).RETURNING(table.ExternalShopShopifyAuth.AllColumns)
+func (r *ExternalShopShopifyAuthRepository) CreateOne(db qrm.Queryable, columnList postgres.ColumnList, data model.ExtShopShopifyAuth) (*model.ExtShopShopifyAuth, error) {
+	stmt := table.ExtShopShopifyAuth.INSERT(columnList).MODEL(data).RETURNING(table.ExtShopShopifyAuth.AllColumns)
 	return r.insertOne(db, stmt)
 }
 
-func (r *ExternalShopShopifyAuthRepository) CreateMany(db qrm.Queryable, columnList postgres.ColumnList, data []*model.ExternalShopShopifyAuth) ([]*model.ExternalShopShopifyAuth, error) {
-	stmt := table.ExternalShopShopifyAuth.INSERT(columnList).MODELS(data).RETURNING(table.ExternalShopShopifyAuth.AllColumns)
+func (r *ExternalShopShopifyAuthRepository) CreateMany(db qrm.Queryable, columnList postgres.ColumnList, data []*model.ExtShopShopifyAuth) ([]*model.ExtShopShopifyAuth, error) {
+	stmt := table.ExtShopShopifyAuth.INSERT(columnList).MODELS(data).RETURNING(table.ExtShopShopifyAuth.AllColumns)
 	return r.insertMany(db, stmt)
 }
 
-func (r *ExternalShopShopifyAuthRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.ExternalShopShopifyAuth) (*model.ExternalShopShopifyAuth, error) {
-	stmt := table.ExternalShopShopifyAuth.INSERT(columnList).MODELS(data).RETURNING(table.ExternalShopShopifyAuth.AllColumns)
+func (r *ExternalShopShopifyAuthRepository) UpdateById(db qrm.Queryable, columnList postgres.ColumnList, data model.ExtShopShopifyAuth) (*model.ExtShopShopifyAuth, error) {
+	stmt := table.ExtShopShopifyAuth.INSERT(columnList).MODELS(data).RETURNING(table.ExtShopShopifyAuth.AllColumns)
 	return r.update(db, stmt)
 }
 
-func (r *ExternalShopShopifyAuthRepository) GetById(db qrm.Queryable, id int64) (*model.ExternalShopShopifyAuth, error) {
-	stmt := table.ExternalShopShopifyAuth.SELECT(table.ExternalShopShopifyAuth.AllColumns).WHERE(table.ExternalShopShopifyAuth.IDExternalShopShopifyAuth.EQ(postgres.Int(int64(id))))
-	var data model.ExternalShopShopifyAuth
+func (r *ExternalShopShopifyAuthRepository) GetById(db qrm.Queryable, id int64) (*model.ExtShopShopifyAuth, error) {
+	stmt := table.ExtShopShopifyAuth.SELECT(table.ExtShopShopifyAuth.AllColumns).WHERE(table.ExtShopShopifyAuth.IDExtShopShopifyAuth.EQ(postgres.Int(int64(id))))
+	var data model.ExtShopShopifyAuth
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err
@@ -51,9 +51,9 @@ func (r *ExternalShopShopifyAuthRepository) GetById(db qrm.Queryable, id int64) 
 	return &data, nil
 }
 
-func (r *ExternalShopShopifyAuthRepository) GetByExternalShopId(db qrm.Queryable, externalShopId int64) (*model.ExternalShopShopifyAuth, error) {
-	stmt := table.ExternalShopShopifyAuth.SELECT(table.ExternalShopShopifyAuth.AllColumns).WHERE(table.ExternalShopShopifyAuth.FkExternalShop.EQ(postgres.Int(externalShopId)))
-	var data model.ExternalShopShopifyAuth
+func (r *ExternalShopShopifyAuthRepository) GetByExternalShopId(db qrm.Queryable, externalShopId int64) (*model.ExtShopShopifyAuth, error) {
+	stmt := table.ExtShopShopifyAuth.SELECT(table.ExtShopShopifyAuth.AllColumns).WHERE(table.ExtShopShopifyAuth.FkExtShop.EQ(postgres.Int(externalShopId)))
+	var data model.ExtShopShopifyAuth
 	if err := stmt.Query(db, &data); err != nil {
 		return nil, err
 	}

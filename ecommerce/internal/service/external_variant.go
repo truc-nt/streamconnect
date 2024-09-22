@@ -2,7 +2,7 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/database/gen/model"
+	entity "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
 	"errors"
@@ -13,7 +13,7 @@ import (
 
 type IExternalVariantService interface {
 	GetExternalVariantsGroupByProduct(limit int64, offset int64) (interface{}, error)
-	GetExternalVariantsByExternalProductIdMapping(externalProductIdMapping string) ([]*internalModel.ExternalVariant, error)
+	GetExternalVariantsByExternalProductIdMapping(externalProductIdMapping string) ([]*entity.ExtVariant, error)
 	ConnectVariants(connectVariantsRequest *model.ConnectVariantsRequest) error
 }
 
@@ -38,7 +38,7 @@ func (s *ExternalVariantService) GetExternalVariantsGroupByProduct(limit int64, 
 	return externalProducts, nil
 }
 
-func (s *ExternalVariantService) GetExternalVariantsByExternalProductIdMapping(externalProductIdMapping string) ([]*internalModel.ExternalVariant, error) {
+func (s *ExternalVariantService) GetExternalVariantsByExternalProductIdMapping(externalProductIdMapping string) ([]*entity.ExtVariant, error) {
 	externalProducts, err := s.ExternalVariantRepository.GetExternalVariantsByExternalProductIdMapping(s.ExternalVariantRepository.GetDatabase().Db, externalProductIdMapping)
 	if err != nil {
 		return nil, err
@@ -67,11 +67,11 @@ func (s *ExternalVariantService) ConnectVariants(connectVariantsRequest *model.C
 			if _, err := s.ExternalVariantRepository.UpdateById(
 				db,
 				postgres.ColumnList{
-					table.ExternalVariant.FkVariant,
+					table.ExtVariant.FkVariant,
 				},
-				internalModel.ExternalVariant{
-					IDExternalVariant: connectVariants.IDExternalVariant,
-					FkVariant:         &connectVariants.IDVariant,
+				entity.ExtVariant{
+					IDExtVariant: connectVariants.IDExternalVariant,
+					FkVariant:    &connectVariants.IDVariant,
 				},
 			); err != nil {
 				return nil, err

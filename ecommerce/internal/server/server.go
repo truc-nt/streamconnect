@@ -26,11 +26,29 @@ type Server struct {
 	PostgresDatabase *database.PostgresqlDatabase
 }
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, user_id")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func NewServer(cfg *configs.Config, h *handler.Handlers) IServer {
 	e := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
-	e.Use(cors.New(config))
+	//e.Use(cors.New(config))
+	e.Use(CORSMiddleware())
 
 	return &Server{
 		HttpServer: &http.Server{

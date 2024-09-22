@@ -3,7 +3,7 @@ import { Button, Form, Input, message, Modal } from "antd";
 import { Dispatch, SetStateAction } from "react";
 import useLoading from "@/hook/loading";
 
-export interface AuthModalProps {
+interface AuthModalProps {
   openModal: boolean;
   setOpenModal: Dispatch<SetStateAction<boolean>>;
 }
@@ -42,6 +42,7 @@ export default function RegisterModal({
       footer={null}
       width={400}
       destroyOnClose={true}
+      centered
     >
       <Form name="register" onFinish={onSubmit} layout="vertical">
         <Form.Item

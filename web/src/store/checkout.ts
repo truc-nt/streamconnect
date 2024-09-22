@@ -2,19 +2,21 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState = {
   currentStep: 0,
-  cartItemIds: [],
-  prices: [],
-  address: "",
+  addressId: null,
+  groupByShop: [],
 } as {
   currentStep: number;
-  cartItemIds: number[];
-  prices: {
-    ecommerceId: number;
-    subTotal: number;
-    shippingFee: number;
-    discountTotal: number;
+  addressId: number | null;
+  groupByShop: {
+    shopId: number | null;
+    groupByEcommerce: {
+      cartItemIds: number[];
+      ecommerceId: number;
+      subTotal: number;
+      voucherIds: number[];
+      internalDiscountTotal: number;
+    }[];
   }[];
-  address: string;
 };
 
 export const checkoutReducer = createSlice({
@@ -28,19 +30,17 @@ export const checkoutReducer = createSlice({
     setNextStep: (state) => {
       state.currentStep = Math.min(state.currentStep + 1, 2);
     },
-    setCartItemIds: (state, action: PayloadAction<any>) => {
-      state.cartItemIds = action.payload;
+    setGroupByShop: (state, action: PayloadAction<any>) => {
+      console.log(action.payload);
+      state.groupByShop = action.payload;
     },
-    setPrices: (state, action: PayloadAction<any>) => {
-      state.prices = action.payload;
-    },
-    setAddress: (state, action: PayloadAction<any>) => {
-      state.address = action.payload;
+    setAddressId: (state, action: PayloadAction<any>) => {
+      state.addressId = action.payload;
     },
   },
 });
 
-export const { reset, setPrevStep, setNextStep, setCartItemIds, setPrices } =
+export const { reset, setPrevStep, setNextStep, setGroupByShop, setAddressId } =
   checkoutReducer.actions;
 
 export default checkoutReducer.reducer;

@@ -14,7 +14,7 @@ export interface IExternalVariant {
 interface IVariant {
   id_variant: number;
   option: { [key: string]: string };
-  external_variants: IExternalVariant[];
+  external_variants?: IExternalVariant[];
 }
 
 export interface IProductInformation {

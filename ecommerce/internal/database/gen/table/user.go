@@ -17,14 +17,13 @@ type userTable struct {
 	postgres.Table
 
 	// Columns
-	IDUser              postgres.ColumnInteger
-	Username            postgres.ColumnString
-	HashedPassword      postgres.ColumnString
-	FullName            postgres.ColumnString
-	Email               postgres.ColumnString
-	IsEnabled           postgres.ColumnBool
-	CreatedDateTime     postgres.ColumnTimestamp
-	LastUpdatedDateTime postgres.ColumnTimestamp
+	IDUser         postgres.ColumnInteger
+	Username       postgres.ColumnString
+	HashedPassword postgres.ColumnString
+	Email          postgres.ColumnString
+	Status         postgres.ColumnString
+	CreatedAt      postgres.ColumnTimestamp
+	UpdatedAt      postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,30 +64,28 @@ func newUserTable(schemaName, tableName, alias string) *UserTable {
 
 func newUserTableImpl(schemaName, tableName, alias string) userTable {
 	var (
-		IDUserColumn              = postgres.IntegerColumn("id_user")
-		UsernameColumn            = postgres.StringColumn("username")
-		HashedPasswordColumn      = postgres.StringColumn("hashed_password")
-		FullNameColumn            = postgres.StringColumn("full_name")
-		EmailColumn               = postgres.StringColumn("email")
-		IsEnabledColumn           = postgres.BoolColumn("is_enabled")
-		CreatedDateTimeColumn     = postgres.TimestampColumn("created_date_time")
-		LastUpdatedDateTimeColumn = postgres.TimestampColumn("last_updated_date_time")
-		allColumns                = postgres.ColumnList{IDUserColumn, UsernameColumn, HashedPasswordColumn, FullNameColumn, EmailColumn, IsEnabledColumn, CreatedDateTimeColumn, LastUpdatedDateTimeColumn}
-		mutableColumns            = postgres.ColumnList{UsernameColumn, HashedPasswordColumn, FullNameColumn, EmailColumn, IsEnabledColumn, CreatedDateTimeColumn, LastUpdatedDateTimeColumn}
+		IDUserColumn         = postgres.IntegerColumn("id_user")
+		UsernameColumn       = postgres.StringColumn("username")
+		HashedPasswordColumn = postgres.StringColumn("hashed_password")
+		EmailColumn          = postgres.StringColumn("email")
+		StatusColumn         = postgres.StringColumn("status")
+		CreatedAtColumn      = postgres.TimestampColumn("created_at")
+		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
+		allColumns           = postgres.ColumnList{IDUserColumn, UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return userTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDUser:              IDUserColumn,
-		Username:            UsernameColumn,
-		HashedPassword:      HashedPasswordColumn,
-		FullName:            FullNameColumn,
-		Email:               EmailColumn,
-		IsEnabled:           IsEnabledColumn,
-		CreatedDateTime:     CreatedDateTimeColumn,
-		LastUpdatedDateTime: LastUpdatedDateTimeColumn,
+		IDUser:         IDUserColumn,
+		Username:       UsernameColumn,
+		HashedPassword: HashedPasswordColumn,
+		Email:          EmailColumn,
+		Status:         StatusColumn,
+		CreatedAt:      CreatedAtColumn,
+		UpdatedAt:      UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
