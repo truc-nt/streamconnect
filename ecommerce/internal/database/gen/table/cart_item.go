@@ -17,11 +17,11 @@ type cartItemTable struct {
 	postgres.Table
 
 	// Columns
-	IDCartItem        postgres.ColumnInteger
-	FkCart            postgres.ColumnInteger
-	FkExternalVariant postgres.ColumnInteger
-	Quantity          postgres.ColumnInteger
-	Status            postgres.ColumnString
+	IDCartItem   postgres.ColumnInteger
+	FkCart       postgres.ColumnInteger
+	FkExtVariant postgres.ColumnInteger
+	Quantity     postgres.ColumnInteger
+	Status       postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -62,24 +62,24 @@ func newCartItemTable(schemaName, tableName, alias string) *CartItemTable {
 
 func newCartItemTableImpl(schemaName, tableName, alias string) cartItemTable {
 	var (
-		IDCartItemColumn        = postgres.IntegerColumn("id_cart_item")
-		FkCartColumn            = postgres.IntegerColumn("fk_cart")
-		FkExternalVariantColumn = postgres.IntegerColumn("fk_external_variant")
-		QuantityColumn          = postgres.IntegerColumn("quantity")
-		StatusColumn            = postgres.StringColumn("status")
-		allColumns              = postgres.ColumnList{IDCartItemColumn, FkCartColumn, FkExternalVariantColumn, QuantityColumn, StatusColumn}
-		mutableColumns          = postgres.ColumnList{FkCartColumn, FkExternalVariantColumn, QuantityColumn, StatusColumn}
+		IDCartItemColumn   = postgres.IntegerColumn("id_cart_item")
+		FkCartColumn       = postgres.IntegerColumn("fk_cart")
+		FkExtVariantColumn = postgres.IntegerColumn("fk_ext_variant")
+		QuantityColumn     = postgres.IntegerColumn("quantity")
+		StatusColumn       = postgres.StringColumn("status")
+		allColumns         = postgres.ColumnList{IDCartItemColumn, FkCartColumn, FkExtVariantColumn, QuantityColumn, StatusColumn}
+		mutableColumns     = postgres.ColumnList{FkCartColumn, FkExtVariantColumn, QuantityColumn, StatusColumn}
 	)
 
 	return cartItemTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDCartItem:        IDCartItemColumn,
-		FkCart:            FkCartColumn,
-		FkExternalVariant: FkExternalVariantColumn,
-		Quantity:          QuantityColumn,
-		Status:            StatusColumn,
+		IDCartItem:   IDCartItemColumn,
+		FkCart:       FkCartColumn,
+		FkExtVariant: FkExtVariantColumn,
+		Quantity:     QuantityColumn,
+		Status:       StatusColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

@@ -32,8 +32,8 @@ const ViewerView = () => {
           playerRef={playerRef}
           hlsConfig={{
             maxLoadingDelay: 4,
-            minAutoBitrate: 0,
-            lowLatencyMode: true,
+            //minAutoBitrate: 0,
+            //lowLatencyMode: true,
           }}
           muted={false}
           onError={(e) => console.error("Player error:", e)}
@@ -47,7 +47,7 @@ const ViewerView = () => {
           className="h-full bg-gray-800 rounded-lg"
         >
           <Typography.Title level={3} style={{ color: "white" }}>
-            Người bán tạm thời không phát sóng
+            Người bán tạm thời chưa phát sóng
           </Typography.Title>
         </Flex>
       )}

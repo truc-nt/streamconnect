@@ -1,10 +1,14 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Constants, useMeeting } from "@videosdk.live/react-sdk";
 import dynamic from "next/dynamic";
-import { Flex, Row, Col } from "antd";
+import { Flex, Row, Col, Typography, Button } from "antd";
+
+import ShopInfo from "@/component/info/ShopInfo";
 import BottomBar from "./BottomBar";
 import SideBar from "./SideBar";
+import { useMeetingAppContext } from "./MeetingProvider";
 
 const ConferenceViewGrid = dynamic(
   () => import("@/component/livestream/ConferenceViewGrid"),
@@ -27,8 +31,10 @@ const MeetingContainer = () => {
     },
   });
   const [activePanel, setActivePanel] = useState("");
+  const router = useRouter();
 
   const mMeetingRef = useRef<any>(null);
+  const { shopName, shopId } = useMeetingAppContext();
   useEffect(() => {
     mMeetingRef.current = mMeeting;
   }, [mMeeting]);
@@ -44,7 +50,17 @@ const MeetingContainer = () => {
           {mMeeting.localParticipant.mode == Constants.modes.CONFERENCE ? (
             <ConferenceViewGrid />
           ) : (
-            <ViewerView />
+            <Flex vertical gap="middle" className="h-full">
+              <div className="flex-1">
+                <ViewerView />
+              </div>
+              <ShopInfo
+                id_shop={shopId}
+                name={shopName}
+                is_following={false}
+                description=""
+              />
+            </Flex>
           )}
         </Col>
         <Col span={activePanel === "" ? 0 : 7}>

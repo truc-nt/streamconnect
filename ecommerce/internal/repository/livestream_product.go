@@ -15,6 +15,7 @@ type ILivestreamProductRepository interface {
 	FindAllLivestreamId(db qrm.Queryable, livestreamId int64) ([]model.LivestreamProduct, error)
 	GetInfoById(db qrm.Queryable, id int64) (*GetInfoById, error)
 	GetByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*GetByLivestreamId, error)
+	GetByLivestreamIdAndProductId(db qrm.Queryable, livestreamId, productId int64) (*model.LivestreamProduct, error)
 }
 
 type LivestreamProductRepository struct {
@@ -100,14 +101,14 @@ func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livest
 		table.LivestreamProduct.Priority,
 		table.Product.Name,
 		imageUrlSubQuery.AS("GetByLivestreamId.ImageURL"),
-		postgres.MIN(table.ExternalVariant.Price).AS("GetByLivestreamId.MinPrice"),
-		postgres.MAX(table.ExternalVariant.Price).AS("GetByLivestreamId.MaxPrice"),
+		postgres.MIN(table.ExtVariant.Price).AS("GetByLivestreamId.MinPrice"),
+		postgres.MAX(table.ExtVariant.Price).AS("GetByLivestreamId.MaxPrice"),
 	).FROM(
 		table.LivestreamProduct.
 			INNER_JOIN(table.Product, table.Product.IDProduct.EQ(table.LivestreamProduct.FkProduct)).
-			INNER_JOIN(table.LivestreamExternalVariant, table.LivestreamExternalVariant.FkLivestreamProduct.EQ(table.LivestreamProduct.IDLivestreamProduct)).
-			INNER_JOIN(table.ExternalVariant, table.ExternalVariant.IDExternalVariant.EQ(table.LivestreamExternalVariant.FkExternalVariant)).
-			INNER_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExternalVariant.FkVariant)).
+			INNER_JOIN(table.LivestreamExtVariant, table.LivestreamExtVariant.FkLivestreamProduct.EQ(table.LivestreamProduct.IDLivestreamProduct)).
+			INNER_JOIN(table.ExtVariant, table.ExtVariant.IDExtVariant.EQ(table.LivestreamExtVariant.FkExtVariant)).
+			INNER_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExtVariant.FkVariant)).
 			LEFT_JOIN(table.ImageVariant, table.ImageVariant.FkVariant.EQ(table.Variant.IDVariant)),
 	).WHERE(
 		table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)),
@@ -115,6 +116,8 @@ func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livest
 		table.Product.IDProduct,
 		table.LivestreamProduct.IDLivestreamProduct,
 		table.Variant.IDVariant,
+	).ORDER_BY(
+		table.LivestreamProduct.Priority.ASC(),
 	)
 
 	data := make([]*GetByLivestreamId, 0)
@@ -123,6 +126,20 @@ func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livest
 		return nil, err
 	}
 	return data, nil
+}
+
+func (r *LivestreamProductRepository) GetByLivestreamIdAndProductId(db qrm.Queryable, livestreamId, productId int64) (*model.LivestreamProduct, error) {
+	stmt := table.LivestreamProduct.SELECT(table.LivestreamProduct.AllColumns).WHERE(
+		table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)).AND(
+			table.LivestreamProduct.FkProduct.EQ(postgres.Int(productId))),
+	)
+
+	var data model.LivestreamProduct
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
 
 func (r *LivestreamProductRepository) FindAllLivestreamId(db qrm.Queryable, livestreamId int64) ([]model.LivestreamProduct, error) {

@@ -1,30 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { InputNumber, Table, Space, TableProps, Avatar } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { ICart, ICartItem } from "@/api/cart";
+import { ICart } from "@/api/cart";
+import { IBaseCartItem } from "@/model/cart";
 import Tag from "@/component/core/Tag";
 import Image from "next/image";
 import type { Key } from "react";
-import { setSelectedCartItems } from "@/store/cart_item_ids_selection";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { updateQuantity } from "@/api/cart";
 import useLoading from "@/hook/loading";
 import { ECOMMERCE_LOGOS } from "@/constant/ecommerce";
+import { setGroupByShop } from "@/store/checkout";
 
-const CartItemsGroupByShop = ({ shop_name, cart_items }: ICart) => {
-  const [cartItems, setCartItems] = useState<ICartItem[]>(cart_items);
+const CartItemsGroupByShop = ({ id_shop, shop_name, cart_items }: ICart) => {
+  const [cartItems, setCartItems] = useState<IBaseCartItem[]>(cart_items);
   const handleUpdateQuantity = useLoading(
     updateQuantity,
     "Thay đổi số lượng thành công",
     "Thay đổi số lượng thất bại",
   );
 
-  const { cartItems: selectedCartItems } = useAppSelector(
-    (state) => state.cartItemIdsSelection,
-  );
+  const { groupByShop } = useAppSelector((state) => state.checkoutReducer);
   const dispatch = useAppDispatch();
 
-  const columns: TableProps<ICartItem>["columns"] = [
+  useEffect(() => {
+    const updatedGroupByEcommerce =
+      groupByShop
+        .find((cart) => cart.shopId === id_shop)
+        ?.groupByEcommerce.map((ecommerce) => {
+          const updatedCartItemIds = ecommerce.cartItemIds.filter((id) =>
+            cartItems.some((item) => item.id_cart_item === id),
+          );
+          const subTotal = updatedCartItemIds.reduce((total, cartItemId) => {
+            const item = cartItems.find(
+              (item) => item.id_cart_item === cartItemId,
+            );
+            return total + (item ? item.price * item.quantity : 0);
+          }, 0);
+
+          return { ...ecommerce, cartItemIds: updatedCartItemIds, subTotal };
+        }) || [];
+
+    dispatch(
+      setGroupByShop(
+        groupByShop.map((cart) =>
+          cart.shopId === id_shop
+            ? { ...cart, groupByEcommerce: updatedGroupByEcommerce }
+            : cart,
+        ),
+      ),
+    );
+  }, [cartItems]);
+
+  const columns: TableProps<IBaseCartItem>["columns"] = [
     {
       title: () => <span>{shop_name}</span>,
       dataIndex: "name",
@@ -82,16 +110,6 @@ const CartItemsGroupByShop = ({ shop_name, cart_items }: ICart) => {
                     : item,
                 ),
               );
-
-              dispatch(
-                setSelectedCartItems(
-                  selectedCartItems.map((selectedCartItem) =>
-                    selectedCartItem.cartItemId === id_cart_item
-                      ? { ...selectedCartItem, quantity: newQuantity }
-                      : selectedCartItem,
-                  ),
-                ),
-              );
             } catch (error) {
               console.error("Update quantity failed:", error);
             }
@@ -116,36 +134,84 @@ const CartItemsGroupByShop = ({ shop_name, cart_items }: ICart) => {
   ];
 
   const rowSelection = {
-    selectedRowKeys: selectedCartItems.map((item) => item.cartItemId),
+    selectedRowKeys:
+      groupByShop
+        .find((cart) => cart.shopId === id_shop)
+        ?.groupByEcommerce.flatMap((ecommerce) => ecommerce.cartItemIds) || [],
+
     onChange: (keys: Key[]) => {
       const newCartItemIds: {
-        cartItemId: Key;
+        cartItemId: number;
         price: number;
         quantity: number;
-      }[] = [];
-      keys.forEach((key) => {
-        const cartItem = cart_items.find((item) => item.id_cart_item === key);
-        if (cartItem) {
-          newCartItemIds.push({
-            cartItemId: cartItem.id_cart_item,
-            price: cartItem.price,
-            quantity: cartItem.quantity,
-          });
-        }
-      });
+      }[] = keys
+        .map((key) => {
+          const cartItem = cartItems.find((item) => item.id_cart_item === key);
+          return cartItem
+            ? {
+                cartItemId: cartItem.id_cart_item,
+                price: cartItem.price,
+                quantity: cartItem.quantity,
+              }
+            : null;
+        })
+        .filter(Boolean) as any;
 
-      selectedCartItems.forEach((cartItem) => {
-        if (!keys.includes(cartItem.cartItemId)) {
-          const existingIndex = newCartItemIds.findIndex(
-            (item) => item.cartItemId === cartItem.cartItemId,
+      const existingCartGroup = groupByShop.find(
+        (cart) => cart.shopId === id_shop,
+      );
+
+      const newEcommerceEntries = newCartItemIds.reduce(
+        (acc, item) => {
+          const cartItem = cartItems.find(
+            (cartItem) => cartItem.id_cart_item === item.cartItemId,
           );
-          if (existingIndex > -1) {
-            newCartItemIds.splice(existingIndex, 1);
-          }
-        }
-      });
+          const ecommerceId = cartItem?.id_ecommerce;
 
-      dispatch(setSelectedCartItems(newCartItemIds));
+          if (ecommerceId !== undefined) {
+            if (!acc[ecommerceId]) {
+              acc[ecommerceId] = {
+                cartItemIds: [],
+                ecommerceId,
+                subTotal: 0,
+              };
+            }
+            acc[ecommerceId].cartItemIds.push(item.cartItemId);
+            acc[ecommerceId].subTotal += item.price * item.quantity;
+          }
+          return acc;
+        },
+        {} as Record<
+          number,
+          { cartItemIds: number[]; ecommerceId: number; subTotal: number }
+        >,
+      );
+
+      const updatedGroupByEcommerce = Object.values(newEcommerceEntries);
+      const updatedGroupByShop = existingCartGroup
+        ? groupByShop.map((cart) =>
+            cart.shopId === id_shop
+              ? {
+                  ...cart,
+                  groupByEcommerce: [
+                    ...cart.groupByEcommerce.filter(
+                      (ecommerce) =>
+                        !updatedGroupByEcommerce.some(
+                          (newEntry) =>
+                            newEntry.ecommerceId === ecommerce.ecommerceId,
+                        ),
+                    ),
+                    ...updatedGroupByEcommerce,
+                  ],
+                }
+              : cart,
+          )
+        : [
+            ...groupByShop,
+            { shopId: id_shop, groupByEcommerce: updatedGroupByEcommerce },
+          ];
+
+      dispatch(setGroupByShop(updatedGroupByShop));
     },
   };
 

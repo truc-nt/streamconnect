@@ -29,7 +29,8 @@ import {
   connectVariants,
 } from "@/api/external_product";
 import { useState, useEffect } from "react";
-
+import { useSWRConfig } from "swr";
+import { useAppSelector } from "@/store/store";
 interface ISelectedVariant extends IVariant {
   externalVariantId: number;
 }
@@ -41,11 +42,13 @@ const MappingExternalProduct = ({
   externalProductIdMapping: string | null;
   setExternalProductIdMapping: (value: string | null) => void;
 }) => {
+  const { mutate } = useSWRConfig();
   const { token } = theme.useToken();
+  const { userId } = useAppSelector((state) => state.authReducer);
   const { data: externalVariants } = useGetExternalVariants(
     externalProductIdMapping!,
   );
-  const { data: products } = useGetProductsByShopId(1);
+  const { data: products } = useGetProductsByShopId(userId!);
   const { data: variants } = useGetVariantsByExternalProductIdMapping(
     externalProductIdMapping!,
   );
@@ -56,13 +59,9 @@ const MappingExternalProduct = ({
   const [selectedVariants, setSelectedVariants] = useState<ISelectedVariant[]>(
     [],
   );
-  console.log("selectedVariants", selectedVariants);
 
   const handleCreateProductWithVariants = useLoading(
-    () =>
-      createProductWithVariants(1, [
-        { external_product_id_mapping: externalProductIdMapping ?? "" },
-      ]),
+    createProductWithVariants,
     "Tạo sản phẩm mới thành công",
     "Tạo sản phẩm mới thất bại",
   );
@@ -179,6 +178,7 @@ const MappingExternalProduct = ({
 
   return (
     <Modal
+      title="Liên kết sản phẩm vào hệ thống"
       centered
       open={externalProductIdMapping !== null}
       footer={null}
@@ -214,8 +214,8 @@ const MappingExternalProduct = ({
               }}
             />
             <Button
-              onClick={() =>
-                handleConnectVariants(
+              onClick={async () =>
+                await handleConnectVariants(
                   selectedVariants.map((selectedVariant) => ({
                     id_variant: selectedVariant.id_variant,
                     id_external_variant: selectedVariant.externalVariantId,
@@ -225,7 +225,17 @@ const MappingExternalProduct = ({
             >
               Liên kết
             </Button>
-            <Button type="primary" onClick={handleCreateProductWithVariants}>
+            <Button
+              type="primary"
+              onClick={async () => {
+                await handleCreateProductWithVariants(userId, [
+                  {
+                    external_product_id_mapping: externalProductIdMapping ?? "",
+                  },
+                ]);
+                mutate(`/api/shops/1/products`);
+              }}
+            >
               Tạo mới
             </Button>
           </Flex>

@@ -1,27 +1,33 @@
 package service
 
 import (
-	"database/sql"
 	"ecommerce/api/model"
 	"ecommerce/internal/adapter"
 	"ecommerce/internal/constants"
-	internalModel "ecommerce/internal/database/gen/model"
+	entity "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
-	"errors"
 	"strconv"
 	"time"
+	"errors"
+	"fmt"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx"
 	"github.com/samber/lo"
 )
 
 type ILivestreamService interface {
-	CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) error
-	FetchLivestreams(status sql.NullString, ownerId sql.NullInt64) ([]internalModel.Livestream, error)
-	GetLivestream(livestreamId int64) (*internalModel.Livestream, error)
-	SetLivestreamHls(request *model.SetLivestreamHlsRequest) error
+	CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) (int64, error)
+	GetLivestreams(param *model.GetLivestreamsQueryParam) ([]*entity.Livestream, error)
+	GetLivestream(livestreamId int64) (*entity.Livestream, error)
+	GetLivestreamInfo(livestreamId int64) (*repository.GetInfo, error)
+	SetLivestreamHls(livestreamId int64, hlsUrl string) error
+	UpdateLivestreamExternalVariantQuantity(updateLivestreamExternalVariantQuantityRequest *model.UpdateLivestreamExternalVariantQuantityRequest) error
+	AddLivestreamProduct(livestreamId int64, livestreamProductCreateRequest []*model.LivestreamProductCreateRequest) error
+	StartLivestream(livestreamId int64) error
 	RegisterLivestreamProductFollower(request *model.RegisterLivestreamProductFollowerRequest) error
 	FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error)
 }
@@ -53,29 +59,40 @@ func NewLivestreamService(
 	}
 }
 
-func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) error {
+func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamRequest *model.CreateLivestreamRequest) (int64, error) {
 	roomId, err := s.VideoSdkAdapter.CreateRoom()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
+		status := constants.LIVESTREAM_CREATED
+		if createLivestreamRequest.StartTime == nil {
+			status = constants.LIVESTREAM_STARTED
+		}
 
-		newLivestreamData := internalModel.Livestream{
+		newLivestreamData := entity.Livestream{
 			FkShop:      shopId,
 			Title:       createLivestreamRequest.Title,
 			Description: &createLivestreamRequest.Description,
-			Status:      constants.LIVESTREAM_CREATED,
+			Status:      status,
 			MeetingID:   roomId,
+		}
+
+		columns := postgres.ColumnList{
+			table.Livestream.FkShop,
+			table.Livestream.Title,
+			table.Livestream.Description,
+			table.Livestream.Status,
+			table.Livestream.MeetingID,
+		}
+
+		if createLivestreamRequest.StartTime != nil {
+			newLivestreamData.StartTime = *createLivestreamRequest.StartTime
+			columns = append(columns, table.Livestream.StartTime)
 		}
 		newLivestream, err := s.LivestreamRepository.CreateOne(
 			db,
-			postgres.ColumnList{
-				table.Livestream.FkShop,
-				table.Livestream.Title,
-				table.Livestream.Description,
-				table.Livestream.Status,
-				table.Livestream.MeetingID,
-			},
+			columns,
 			newLivestreamData,
 		)
 		if err != nil {
@@ -83,7 +100,7 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 		}
 
 		for _, livestreamProduct := range createLivestreamRequest.LivestreamProducts {
-			newLivestreamProductData := internalModel.LivestreamProduct{
+			newLivestreamProductData := entity.LivestreamProduct{
 				FkLivestream: newLivestream.IDLivestream,
 				FkProduct:    livestreamProduct.IDProduct,
 				Priority:     livestreamProduct.Priority,
@@ -101,15 +118,15 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 				return nil, err
 			}
 
-			newExternalLivestreamVariantData := make([]*internalModel.LivestreamExternalVariant, 0)
+			newExternalLivestreamVariantData := make([]*entity.LivestreamExtVariant, 0)
 			for _, livestreamVariant := range livestreamProduct.LivestreamVariants {
 				livestreamExternalVariants := lo.Map(livestreamVariant.LivestreamExternalVariants, func(externalVariant *struct {
 					IDExternalVariant int64 `json:"id_external_variant"`
 					Quantity          int32 `json:"quantity"`
-				}, index int) *internalModel.LivestreamExternalVariant {
-					return &internalModel.LivestreamExternalVariant{
+				}, index int) *entity.LivestreamExtVariant {
+					return &entity.LivestreamExtVariant{
 						FkLivestreamProduct: newLivestreamProduct.IDLivestreamProduct,
-						FkExternalVariant:   externalVariant.IDExternalVariant,
+						FkExtVariant:        externalVariant.IDExternalVariant,
 						Quantity:            externalVariant.Quantity,
 					}
 				})
@@ -119,9 +136,9 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 			_, err = s.LivestreamExternalVariantRepository.CreateMany(
 				db,
 				postgres.ColumnList{
-					table.LivestreamExternalVariant.FkLivestreamProduct,
-					table.LivestreamExternalVariant.FkExternalVariant,
-					table.LivestreamExternalVariant.Quantity,
+					table.LivestreamExtVariant.FkLivestreamProduct,
+					table.LivestreamExtVariant.FkExtVariant,
+					table.LivestreamExtVariant.Quantity,
 				},
 				newExternalLivestreamVariantData,
 			)
@@ -130,26 +147,31 @@ func (s *LivestreamService) CreateLivestream(shopId int64, createLivestreamReque
 			}
 		}
 
-		return nil, nil
+		return newLivestream.IDLivestream, nil
 	}
 
-	_, err = s.LivestreamRepository.ExecWithinTransaction(execWithinTransaction)
+	result, err := s.LivestreamRepository.ExecWithinTransaction(execWithinTransaction)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	livestreamId, ok := result.(int64)
+	if !ok {
+		return 0, fmt.Errorf("unexpected type for livestream ID")
+	}
+
+	return livestreamId, nil
 }
 
-func (s *LivestreamService) FetchLivestreams(status sql.NullString, ownerId sql.NullInt64) ([]internalModel.Livestream, error) {
-	livestreams, err := s.LivestreamRepository.GetByStatusAndOwnerId(s.LivestreamRepository.GetDatabase().Db, status, ownerId)
+func (s *LivestreamService) GetLivestreams(param *model.GetLivestreamsQueryParam) ([]*entity.Livestream, error) {
+	livestreams, err := s.LivestreamRepository.GetByParam(s.LivestreamRepository.GetDatabase().Db, param)
 	if err != nil {
 		return nil, err
 	}
 	return livestreams, nil
 }
 
-func (s *LivestreamService) GetLivestream(livestreamId int64) (*internalModel.Livestream, error) {
+func (s *LivestreamService) GetLivestream(livestreamId int64) (*entity.Livestream, error) {
 	livestream, err := s.LivestreamRepository.GetById(s.LivestreamRepository.GetDatabase().Db, livestreamId)
 	if err != nil {
 		return nil, err
@@ -157,15 +179,23 @@ func (s *LivestreamService) GetLivestream(livestreamId int64) (*internalModel.Li
 	return livestream, nil
 }
 
-func (s *LivestreamService) SetLivestreamHls(request *model.SetLivestreamHlsRequest) error {
+func (s *LivestreamService) GetLivestreamInfo(livestreamId int64) (*repository.GetInfo, error) {
+	livestream, err := s.LivestreamRepository.GetInfoById(s.LivestreamRepository.GetDatabase().Db, livestreamId)
+	if err != nil {
+		return nil, err
+	}
+	return livestream, nil
+}
+
+func (s *LivestreamService) SetLivestreamHls(livestreamId int64, hlsUrl string) error {
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
-		livestream, err := s.LivestreamRepository.GetById(db, request.IDLivestream)
+		livestream, err := s.LivestreamRepository.GetById(db, livestreamId)
 		if err != nil {
 			return nil, err
 		}
 
-		livestream.HlsURL = &request.HlsUrl
-		livestream.Status = constants.LIVESTREAM_STREAMING
+		livestream.HlsURL = &hlsUrl
+		livestream.Status = constants.LIVESTREAM_PLAYED
 		_, err = s.LivestreamRepository.UpdateById(
 			db,
 			postgres.ColumnList{
@@ -200,13 +230,13 @@ func (s *LivestreamService) RegisterLivestreamProductFollower(request *model.Reg
 		for _, livestreamProduct := range livestreamProducts {
 			livestreamProductIdsSet[livestreamProduct.IDLivestreamProduct] = true
 		}
-		newFollowers := make([]*internalModel.LivestreamProductFollower, len(request.IDLivestreamProducts))
+		newFollowers := make([]*entity.LivestreamProductFollower, len(request.IDLivestreamProducts))
 		//create new followers
 		for idx, livestreamProductId := range request.IDLivestreamProducts {
 			if !livestreamProductIdsSet[livestreamProductId] {
 				return nil, errors.New("livestream product with id " + strconv.FormatInt(livestreamProductId, 10) + " not found")
 			}
-			newLivestreamProductFollower := internalModel.LivestreamProductFollower{
+			newLivestreamProductFollower := entity.LivestreamProductFollower{
 				FkLivestreamProduct: livestreamProductId,
 				FkUser:              request.IDUser,
 				CreatedAt:           time.Now(),
@@ -228,6 +258,121 @@ func (s *LivestreamService) RegisterLivestreamProductFollower(request *model.Reg
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (s *LivestreamService) UpdateLivestreamExternalVariantQuantity(updateLivestreamExternalVariantQuantityRequest *model.UpdateLivestreamExternalVariantQuantityRequest) error {
+	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
+		for _, product := range *updateLivestreamExternalVariantQuantityRequest {
+			if _, err := s.LivestreamExternalVariantRepository.UpdateById(
+				db,
+				postgres.ColumnList{
+					table.LivestreamExtVariant.Quantity,
+				},
+				entity.LivestreamExtVariant{
+					IDLivestreamExtVariant: product.LivestreamExternalVariantId,
+					Quantity:               product.Quantity,
+				},
+			); err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, nil
+	}
+
+	_, err := s.LivestreamExternalVariantRepository.ExecWithinTransaction(execWithinTransaction)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *LivestreamService) AddLivestreamProduct(livestreamId int64, livestreamProductCreateRequest []*model.LivestreamProductCreateRequest) error {
+	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
+		for _, request := range livestreamProductCreateRequest {
+			livestreamProduct, err := s.LivestreamProductRepository.GetByLivestreamIdAndProductId(db, livestreamId, request.IDProduct)
+			if err != nil {
+				var pgErr pgx.PgError
+				if errors.As(err, &pgErr) {
+					if pgErr.Code != pgerrcode.NoDataFound {
+						return nil, err
+					}
+				}
+
+				livestreamProduct, err = s.LivestreamProductRepository.CreateOne(
+					db,
+					postgres.ColumnList{
+						table.LivestreamProduct.FkLivestream,
+						table.LivestreamProduct.FkProduct,
+						table.LivestreamProduct.Priority,
+					},
+					entity.LivestreamProduct{
+						FkLivestream: livestreamId,
+						FkProduct:    request.IDProduct,
+						Priority:     request.Priority,
+					},
+				)
+
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			newExternalLivestreamVariantData := make([]*entity.LivestreamExtVariant, 0)
+			for _, livestreamVariant := range request.LivestreamVariants {
+				livestreamExternalVariants := lo.Map(livestreamVariant.LivestreamExternalVariants, func(externalVariant *struct {
+					IDExternalVariant int64 `json:"id_external_variant"`
+					Quantity          int32 `json:"quantity"`
+				}, index int) *entity.LivestreamExtVariant {
+					return &entity.LivestreamExtVariant{
+						FkLivestreamProduct: livestreamProduct.IDLivestreamProduct,
+						FkExtVariant:        externalVariant.IDExternalVariant,
+						Quantity:            externalVariant.Quantity,
+					}
+				})
+				newExternalLivestreamVariantData = append(newExternalLivestreamVariantData, livestreamExternalVariants...)
+			}
+
+			_, err = s.LivestreamExternalVariantRepository.CreateManyOnConflict(
+				db,
+				postgres.ColumnList{
+					table.LivestreamExtVariant.FkLivestreamProduct,
+					table.LivestreamExtVariant.FkExtVariant,
+					table.LivestreamExtVariant.Quantity,
+				},
+				newExternalLivestreamVariantData,
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, nil
+	}
+
+	_, err := s.LivestreamExternalVariantRepository.ExecWithinTransaction(execWithinTransaction)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *LivestreamService) StartLivestream(livestreamId int64) error {
+	if _, err := s.LivestreamRepository.UpdateById(
+		s.LivestreamRepository.GetDatabase().Db,
+		postgres.ColumnList{
+			table.Livestream.Status,
+		},
+		entity.Livestream{
+			IDLivestream: livestreamId,
+			Status:       constants.LIVESTREAM_STARTED,
+		},
+	); err != nil {
+		return err
+	}
+
 	return nil
 }
 

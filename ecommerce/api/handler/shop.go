@@ -3,11 +3,13 @@ package handler
 import (
 	"ecommerce/api/model"
 	"ecommerce/internal/service"
+
 	"github.com/gin-gonic/gin"
 )
 
 type IShopHandler interface {
 	CreateShopForNewAccount(ctx *gin.Context)
+	GetShopInfo(ctx *gin.Context)
 }
 
 type ShopHandler struct {
@@ -42,4 +44,18 @@ func (h *ShopHandler) CreateShopForNewAccount(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessCreate(ctx)
+}
+
+func (h *ShopHandler) GetShopInfo(ctx *gin.Context) {
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+	}
+
+	shop, err := h.Service.GetShopInfo(shopId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessGet(ctx, shop)
 }

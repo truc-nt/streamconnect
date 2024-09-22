@@ -9,6 +9,7 @@ import (
 
 type Handlers struct {
 	UserHandler              IUserHandler
+	ShopHandler              IShopHandler
 	ProductHandler           IProductHandler
 	VariantHandler           IVariantHandler
 	ShopifyHandler           IShopifyHandler
@@ -18,11 +19,12 @@ type Handlers struct {
 	LivestreamProductHandler ILivestreamProductHandler
 	CartHandler              ICartHandler
 	OrderHandler             IOrderHandler
-	ShopHandler              IShopHandler
+	VoucherHandler           IVoucherHandler
 }
 
 func ProvideHandlers(
 	userHandler IUserHandler,
+	shopHandler IShopHandler,
 	productHandler IProductHandler,
 	variantHandler IVariantHandler,
 	shopifyHandler IShopifyHandler,
@@ -32,10 +34,11 @@ func ProvideHandlers(
 	livestreamProductHandler ILivestreamProductHandler,
 	cartHandler ICartHandler,
 	orderHandler IOrderHandler,
-	shopHandler IShopHandler,
+	voucherHandler IVoucherHandler,
 ) *Handlers {
 	return &Handlers{
 		UserHandler:              userHandler,
+		ShopHandler:              shopHandler,
 		ProductHandler:           productHandler,
 		VariantHandler:           variantHandler,
 		ShopifyHandler:           shopifyHandler,
@@ -45,13 +48,14 @@ func ProvideHandlers(
 		LivestreamProductHandler: livestreamProductHandler,
 		CartHandler:              cartHandler,
 		OrderHandler:             orderHandler,
-		ShopHandler:              shopHandler,
+		VoucherHandler:           voucherHandler,
 	}
 }
 
 type IBaseHandler interface {
 	handleSuccessGet(ctx *gin.Context, data interface{})
 	handleSuccessCreate(ctx *gin.Context)
+	handleSuccessCreateWithData(ctx *gin.Context)
 	handleSuccessUpdate(ctx *gin.Context)
 	handleFailed(ctx *gin.Context, err error)
 	parseId(c *gin.Context, id string) int64
@@ -65,6 +69,10 @@ func (h *BaseHandler) handleSuccessGet(ctx *gin.Context, data interface{}) {
 
 func (h *BaseHandler) handleSuccessCreate(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
+}
+
+func (h *BaseHandler) handleSuccessCreateWithData(ctx *gin.Context, data interface{}) {
+	ctx.JSON(http.StatusCreated, data)
 }
 
 func (h *BaseHandler) handleSuccessUpdate(ctx *gin.Context) {

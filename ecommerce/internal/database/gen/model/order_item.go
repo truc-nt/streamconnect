@@ -8,8 +8,10 @@
 package model
 
 type OrderItem struct {
-	IDOrderItem       int64 `sql:"primary_key" json:"id_order_item" xml:"id_order_item"`
-	FkOrder           int64 `json:"fk_order" xml:"fk_order"`
-	FkExternalVariant int64 `json:"fk_external_variant" xml:"fk_external_variant"`
-	Quantity          int32 `json:"quantity" xml:"quantity"`
+	IDOrderItem  int64   `sql:"primary_key" json:"id_order_item" xml:"id_order_item"`
+	FkOrder      int64   `json:"fk_order" xml:"fk_order"`
+	FkExtVariant int64   `json:"fk_external_variant" xml:"fk_ext_variant"`
+	Quantity     int32   `json:"quantity" xml:"quantity"`
+	UnitPrice    float64 `json:"unit_price" xml:"unit_price"`
+	PaidPrice    float64 `json:"paid_price" xml:"paid_price"`
 }

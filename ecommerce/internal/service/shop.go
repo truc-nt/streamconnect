@@ -2,16 +2,18 @@ package service
 
 import (
 	"ecommerce/api/model"
-	internalModel "ecommerce/internal/database/gen/model"
+	entity "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
+	"strconv"
+
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
-	"strconv"
 )
 
 type IShopService interface {
 	CreateShopForNewAccount(request *model.CreateShopForNewUserRequest) error
+	GetShopInfo(shopId int64) (*entity.Shop, error)
 }
 
 type ShopService struct {
@@ -40,7 +42,7 @@ func (s *ShopService) CreateShopForNewAccount(request *model.CreateShopForNewUse
 				table.Shop.FkUser,
 				table.Shop.Name,
 			},
-			internalModel.Shop{
+			entity.Shop{
 				FkUser: ownerId,
 				Name:   shopName,
 			},
@@ -53,7 +55,7 @@ func (s *ShopService) CreateShopForNewAccount(request *model.CreateShopForNewUse
 			postgres.ColumnList{
 				table.Cart.FkUser,
 			},
-			internalModel.Cart{
+			entity.Cart{
 				FkUser: ownerId,
 			},
 		)
@@ -65,4 +67,8 @@ func (s *ShopService) CreateShopForNewAccount(request *model.CreateShopForNewUse
 		return err
 	}
 	return nil
+}
+
+func (s *ShopService) GetShopInfo(shopId int64) (*entity.Shop, error) {
+	return s.ShopRepository.GetById(s.ShopRepository.GetDatabase().Db, shopId)
 }

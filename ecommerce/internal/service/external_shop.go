@@ -7,7 +7,7 @@ import (
 )
 
 type IExternalShopService interface {
-	GetExternalShopById(externalShopId int64) (*model.ExternalShop, error)
+	GetExternalShopById(externalShopId int64) (*model.ExtShop, error)
 	GetExternalShopsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
 	SyncExternalVariantsByExternalShopId(externalShopId int64) error
 }
@@ -25,7 +25,7 @@ func NewExternalShopService(repo repository.IExternalShopRepository, ecommerceSe
 	}
 }
 
-func (s *ExternalShopService) GetExternalShopById(externalShopId int64) (*model.ExternalShop, error) {
+func (s *ExternalShopService) GetExternalShopById(externalShopId int64) (*model.ExtShop, error) {
 	externalShop, err := s.Repository.GetById(s.Repository.GetDatabase().Db, externalShopId)
 	if err != nil {
 		return nil, err

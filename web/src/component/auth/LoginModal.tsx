@@ -2,33 +2,35 @@ import { Button, Form, Input, message, Modal, ModalProps } from "antd";
 import { Dispatch, SetStateAction } from "react";
 import { login } from "@/api/auth";
 import useLoading from "@/hook/loading";
-export interface AuthModalProps {
-  openModal: boolean;
-  setOpenModal: Dispatch<SetStateAction<boolean>>;
-}
-export default function LoginModal({
-  openModal,
-  setOpenModal,
-}: AuthModalProps) {
+import { useAppDispatch } from "@/store/store";
+import { setLogin } from "@/store/auth";
+import { decodeJwt } from "@/util/auth";
+import { useAppSelector } from "@/store/store";
+import { toggleLoginModal } from "@/store/auth";
+
+export default function LoginModal() {
+  const dispatch = useAppDispatch();
   const handleLogin = useLoading(
     login,
     "Đăng nhập thành công",
     "Đăng nhập thất bại",
   );
+  const { isShowLoginModal } = useAppSelector((state) => state.authReducer);
 
   const onSubmit = async (values: any) => {
     try {
-      await handleLogin(values.username, values.password);
-      setOpenModal(false);
+      const res = await handleLogin(values.username, values.password);
+      localStorage.setItem("token", res.token);
+      dispatch(toggleLoginModal());
+      const userInfo = decodeJwt(res.token);
+      dispatch(setLogin(userInfo));
     } catch (err) {}
   };
-  const onCancel = () => {
-    setOpenModal(false);
-  };
+
   return (
     <Modal
-      open={openModal}
-      onCancel={onCancel}
+      open={isShowLoginModal}
+      onCancel={() => dispatch(toggleLoginModal())}
       title={<div className="text-center">Đăng nhập</div>}
       footer={null}
       width={400}

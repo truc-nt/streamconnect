@@ -9,8 +9,8 @@ import (
 func LoadCartRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 	cart := apiRouter.Group("/carts")
 	{
-		cart.GET("/:cart_id", h.CartHandler.Get)
-		cart.POST("/:cart_id", h.CartHandler.AddToCart)
+		cart.GET("/", h.CartHandler.Get)
+		cart.POST("/", h.CartHandler.AddToCart)
 	}
 
 	cartItem := apiRouter.Group("/cart_items")

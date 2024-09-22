@@ -2,6 +2,7 @@ package service
 
 import (
 	"ecommerce/api/model"
+	"ecommerce/internal/constants"
 	internalModel "ecommerce/internal/database/gen/model"
 	"ecommerce/internal/database/gen/table"
 	"ecommerce/internal/repository"
@@ -60,10 +61,12 @@ func (s *CartService) AddToCart(cartId int64, addToCartRequest []*model.AddToCar
 					db,
 					postgres.ColumnList{
 						table.CartItem.Quantity,
+						table.CartItem.Status,
 					},
 					internalModel.CartItem{
 						IDCartItem: findCartItem.FkCartItem,
 						Quantity:   cartItem.Quantity,
+						Status:     constants.ACTIVE,
 					},
 				)
 				if err != nil {
@@ -81,13 +84,13 @@ func (s *CartService) AddToCart(cartId int64, addToCartRequest []*model.AddToCar
 				db,
 				postgres.ColumnList{
 					table.CartItem.FkCart,
-					table.CartItem.FkExternalVariant,
+					table.CartItem.FkExtVariant,
 					table.CartItem.Quantity,
 				},
 				internalModel.CartItem{
-					FkCart:            cartId,
-					FkExternalVariant: livestreamExternalVariant.FkExternalVariant,
-					Quantity:          cartItem.Quantity,
+					FkCart:       cartId,
+					FkExtVariant: livestreamExternalVariant.FkExtVariant,
+					Quantity:     cartItem.Quantity,
 				},
 			)
 			if err != nil {
@@ -97,12 +100,12 @@ func (s *CartService) AddToCart(cartId int64, addToCartRequest []*model.AddToCar
 			_, err = s.CartItemLivestreamExternalVariant.CreateOne(
 				db,
 				postgres.ColumnList{
-					table.CartItemLivestreamExternalVariant.FkCartItem,
-					table.CartItemLivestreamExternalVariant.Fk,
+					table.CartItemLivestreamExtVariant.FkCartItem,
+					table.CartItemLivestreamExtVariant.FkLivestreamExtVariant,
 				},
-				internalModel.CartItemLivestreamExternalVariant{
-					FkCartItem: newCartItem.IDCartItem,
-					Fk:         cartItem.IDLivestreamExternalVariant,
+				internalModel.CartItemLivestreamExtVariant{
+					FkCartItem:             newCartItem.IDCartItem,
+					FkLivestreamExtVariant: cartItem.IDLivestreamExternalVariant,
 				},
 			)
 

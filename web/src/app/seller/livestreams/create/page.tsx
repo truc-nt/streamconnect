@@ -1,20 +1,11 @@
 "use client";
-import React, { useState } from "react";
-import { Button, message, Steps, Flex, Card } from "antd";
-import LivestreamInformation from "./component/LivestreamInformation";
-import ChosenLivestreamVariant from "@/component/livestream_variant/ChosenLivestreamVariant";
+import LivestreamCreate from "./component/LivestreamCreate";
+import { useAppSelector } from "@/store/store";
 
 const Page = () => {
-  return (
-    <Flex vertical gap="large">
-      <Card title="Thông tin">
-        <LivestreamInformation />
-      </Card>
-      <Card title="Chọn sản phẩm">
-        <ChosenLivestreamVariant shopId={1} />
-      </Card>
-    </Flex>
-  );
+  const { userId } = useAppSelector((state) => state.authReducer);
+  if (!userId) return null;
+  return <LivestreamCreate shopId={userId} />;
 };
 
 export default Page;

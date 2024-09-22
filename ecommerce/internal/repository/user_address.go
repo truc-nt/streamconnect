@@ -53,7 +53,7 @@ func (r *UserAddressRepository) GetById(db qrm.Queryable, id int64) (*model.User
 
 func (r *UserAddressRepository) GetByUserId(db qrm.Queryable, userId int64) ([]*model.UserAddress, error) {
 	stmt := table.UserAddress.SELECT(table.UserAddress.AllColumns).WHERE(table.UserAddress.FkUser.EQ(postgres.Int(userId)))
-	var data []*model.UserAddress
+	data := make([]*model.UserAddress, 0)
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err

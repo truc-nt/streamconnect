@@ -1,7 +1,8 @@
 package constants
 
 const (
-	LIVESTREAM_CREATED   = "created"
-	LIVESTREAM_STREAMING = "streaming"
-	LIVESTREAM_ENDED     = "ended"
+	LIVESTREAM_CREATED = "created"
+	LIVESTREAM_STARTED = "started"
+	LIVESTREAM_PLAYED  = "played"
+	LIVESTREAM_ENDED   = "ended"
 )

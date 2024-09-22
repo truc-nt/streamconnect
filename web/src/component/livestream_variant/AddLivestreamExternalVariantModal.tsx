@@ -1,6 +1,6 @@
 import { useGetProductsByShopId } from "@/hook/product";
 import { getVariantsByProductId } from "@/api/product";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductInformation, {
   IProductInformation,
   IExternalVariant,
@@ -47,8 +47,10 @@ const AddLivestreamVariantModal = ({
   ...props
 }: IAddLivestreamExternalVariantProps) => {
   const { data: products } = useGetProductsByShopId(shopId);
+
   const [selectedProduct, setSelectedProduct] =
-    useState<IProductInformation | null>(null);
+    useState<IProductInformation | null>();
+
   const [chosenOption, setChosenOption] = useState<{ [key: string]: string }>(
     {},
   );
@@ -72,6 +74,61 @@ const AddLivestreamVariantModal = ({
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleChangeQuantity = (
+    externalVariantId: number,
+    ecommerceId: number,
+    quantity: number,
+    price: number,
+  ) => {
+    setChosenLivestreamVariants((prev) => {
+      const index = prev.findIndex((variant) =>
+        variant.externalVariants.some(
+          (externalVariant) =>
+            externalVariant.externalVariantId === externalVariantId,
+        ),
+      );
+      if (index === -1) {
+        return [
+          ...prev,
+          {
+            productId: selectedProduct?.productId!,
+            variantId: chosenVariant?.id_variant,
+            name: selectedProduct?.name,
+            imageUrl: selectedProduct?.image_url,
+            option: chosenOption,
+            externalVariants: [
+              {
+                externalVariantId,
+                ecommerceId,
+                quantity,
+                price,
+              },
+            ],
+          } as IChosenLivestreamVariant,
+        ];
+      }
+      return prev.map((variant, i) => {
+        if (i === index) {
+          return {
+            ...variant,
+            externalVariants: variant.externalVariants.map(
+              (externalVariant) => {
+                if (externalVariant.externalVariantId === externalVariantId) {
+                  return {
+                    ...externalVariant,
+                    quantity,
+                  };
+                }
+                return externalVariant;
+              },
+            ),
+          };
+        }
+        return variant;
+      });
+    });
   };
 
   const columns: TableColumnType<IExternalVariant>[] = [
@@ -115,7 +172,14 @@ const AddLivestreamVariantModal = ({
             min={0}
             max={stock}
             defaultValue={quantity ?? 0}
-            onChange={(value) => {}}
+            onChange={(value) =>
+              handleChangeQuantity(
+                id_external_variant,
+                id_ecommerce,
+                value!,
+                price,
+              )
+            }
           />
         );
       },
@@ -157,7 +221,9 @@ const AddLivestreamVariantModal = ({
             </Flex>
           )}
         />
-        {!selectedProduct && <div className="text-center mt-4 border-1 border-dashed border-gray-300 bg-gray-200 rounded-lg h-[300px]"/>}
+        {!selectedProduct && (
+          <div className="text-center mt-4 border-2 border-dashed border-gray-300 bg-gray-200 rounded-lg h-[300px]" />
+        )}
 
         {Object.keys(selectedProduct ?? {}).length > 0 && (
           <ProductInformation

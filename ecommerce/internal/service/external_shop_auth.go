@@ -6,7 +6,7 @@ import (
 )
 
 type IExternalShopAuthService interface {
-	GetShopifyAuthByExternalShopId(externalShopId int64) (*model.ExternalShopShopifyAuth, error)
+	GetShopifyAuthByExternalShopId(externalShopId int64) (*model.ExtShopShopifyAuth, error)
 }
 
 type ExternalShopAuthService struct {
@@ -19,7 +19,7 @@ func NewExternalShopAuthService(repo repository.IExternalShopShopifyAuthReposito
 	}
 }
 
-func (s *ExternalShopAuthService) GetShopifyAuthByExternalShopId(externalShopId int64) (*model.ExternalShopShopifyAuth, error) {
+func (s *ExternalShopAuthService) GetShopifyAuthByExternalShopId(externalShopId int64) (*model.ExtShopShopifyAuth, error) {
 	auth, err := s.ExternalShopShopifyAuthRepository.GetByExternalShopId(s.ExternalShopShopifyAuthRepository.GetDatabase().Db, externalShopId)
 	if err != nil {
 		return nil, err
