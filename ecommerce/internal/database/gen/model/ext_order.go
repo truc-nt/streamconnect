@@ -18,8 +18,8 @@ type ExtOrder struct {
 	ExtOrderIDMapping   string    `json:"external_order_id_mapping" xml:"ext_order_id_mapping"`
 	ShippingFee         float64   `json:"shipping_fee" xml:"shipping_fee"`
 	ShippingFeeDiscount float64   `json:"shipping_fee_discount" xml:"shipping_fee_discount"`
-	InternalDiscount    *float64  `json:"internal_discount" xml:"internal_discount"`
-	ExternalDiscount    *float64  `json:"externalernal_discount" xml:"external_discount"`
+	InternalDiscount    float64   `json:"internal_discount" xml:"internal_discount"`
+	ExternalDiscount    float64   `json:"externalernal_discount" xml:"external_discount"`
 	CreatedAt           time.Time `json:"created_at" xml:"created_at"`
 	UpdatedAt           time.Time `json:"updated_at" xml:"updated_at"`
 }

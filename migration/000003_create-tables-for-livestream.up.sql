@@ -3,14 +3,13 @@ CREATE TABLE IF NOT EXISTS livestream (
     fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL,
     title VARCHAR NOT NULL,
     description VARCHAR,
-    status VARCHAR NOT NULL,
+    status VARCHAR NOT NULL CHECK (status in ('created', 'started', 'played', 'ended')),
     meeting_id VARCHAR NOT NULL,
     hls_url VARCHAR,
     start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_time TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_status check (status in ('created', 'started', 'played', 'ended'))
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS livestream_schedule (
@@ -24,7 +23,8 @@ CREATE TABLE IF NOT EXISTS livestream_product (
     id_livestream_product BIGSERIAL PRIMARY KEY,
     fk_livestream BIGSERIAL REFERENCES livestream(id_livestream) NOT NULL,
     fk_product BIGSERIAL REFERENCES product(id_product) NOT NULL,
-    priority INTEGER NOT NULL
+    priority INTEGER NOT NULL,
+    is_livestreamed BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS livestream_ext_variant (

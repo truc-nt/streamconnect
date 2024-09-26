@@ -37,6 +37,11 @@ func (h *ShopifyHandler) Connect(ctx *gin.Context) {
 }
 
 func (h *ShopifyHandler) Redirect(ctx *gin.Context) {
+	/*shopId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}*/
 	shopId := int64(1)
 	var queryParams *model.ShopifyRedirectParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {

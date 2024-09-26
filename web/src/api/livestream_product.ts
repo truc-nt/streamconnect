@@ -1,4 +1,5 @@
 import axios from "./axios";
+import { IBaseLivestreamProduct } from "@/model/livestream";
 
 export interface ILivestreamExternalVariant {
   id_livestream_external_variant: number;
@@ -15,11 +16,11 @@ interface ILivestreamVariant {
   livestream_external_variants: ILivestreamExternalVariant[];
 }
 
-export interface ILivestreamProduct {
-  id_product: number;
+export interface ILivestreamProduct extends IBaseLivestreamProduct {
+  /*id_product: number;
   name: string;
   description: string;
-  image_url: string;
+  image_url: string;*/
   livestream_variants: ILivestreamVariant[];
 }
 
@@ -50,12 +51,39 @@ export interface IPinLivestreamProduct {
   priority: number;
 }
 
-export const pinLivestreamProduct = async (
+export const updateLivestreamProductPriority = async (
   pinLivestreamProduct: IPinLivestreamProduct[],
 ) => {
   const res = await axios.post<IPinLivestreamProduct[]>(
-    `livestream_products/pin`,
+    `livestream_products/priority`,
     pinLivestreamProduct,
+  );
+  return res.data;
+};
+
+export interface IUpdateLivestreamProductRequest {
+  id_livestream_product: number;
+  priority?: number;
+  is_livestreamed?: boolean;
+}
+export const updateLivestreamProduct = async (
+  livestreamId: number,
+  updateLivestreamProduct: IUpdateLivestreamProductRequest[],
+) => {
+  const res = await axios.patch(
+    `livestreams/${livestreamId}/update_livestream_products`,
+    updateLivestreamProduct,
+  );
+  return res.data;
+};
+
+export const registerLivestreamProductFollower = async (
+  livestreamId: number,
+  livestreamProductIds: number[],
+) => {
+  const res = await axios.post(
+    `livestreams/${livestreamId}/livestream_products/follow`,
+    livestreamProductIds,
   );
   return res.data;
 };

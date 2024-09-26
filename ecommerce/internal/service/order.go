@@ -192,7 +192,7 @@ func (s *OrderService) CreateOrderWithCartItems(userId int64, createOrderWithCar
 					FkOrder:           newOrder.IDOrder,
 					FkExtShop:         externalOrder.IDExternalShop,
 					ExtOrderIDMapping: externalOrderIdMapping,
-					InternalDiscount:  &externalOrder.InternalDiscount,
+					InternalDiscount:  externalOrder.InternalDiscount,
 				},
 			); err != nil {
 				return nil, err

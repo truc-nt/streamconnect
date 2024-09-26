@@ -1,17 +1,16 @@
 "use client";
 import React from "react";
-import { Checkbox, Card as AntdCard, Typography, Flex, Space } from "antd";
+import { Card as AntdCard, Typography, Flex, Space } from "antd";
 import Image from "next/image";
 import { theme } from "antd";
-import { ILivestreamProductInformation } from "@/api/livestream";
+import { IBaseLivestreamProduct } from "@/model/livestream";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 
-interface IProductItem extends ILivestreamProductInformation {
-  checked?: boolean;
+interface IProductItem extends IBaseLivestreamProduct {
   onClick: () => void;
-  onClickCheckbox?: (e: CheckboxChangeEvent) => void;
-  button?: React.ReactNode;
   className?: string;
+  Button?: React.ReactNode;
+  Checkbox?: React.ReactNode;
 }
 
 const ProductItem = ({
@@ -19,31 +18,48 @@ const ProductItem = ({
   min_price,
   max_price,
   image_url,
-  checked,
   onClick,
-  onClickCheckbox,
-  button,
   className,
+  Button,
+  Checkbox,
 }: IProductItem) => {
   const { token } = theme.useToken();
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Check if the click event is from a checkbox
+    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
+      return; // Prevent triggering the card's onClick
+    }
+    onClick(); // Trigger the card's onClick
+  };
+
   return (
     <Flex gap="small" align="center" justify="center">
-      {onClickCheckbox && (
-        <Checkbox checked={checked} onChange={onClickCheckbox} />
-      )}
       <AntdCard
-        onClick={onClick}
+        onClick={handleClick}
         hoverable
         className={`w-full h-[120px] p-2 flex items-center ${className}`}
         cover={
-          <div style={{ height: "100px", width: "100px" }} className="relative">
-            <Image
-              src={image_url}
-              alt={name}
-              layout="fill"
-              objectFit="contain"
-            />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              gap: "5px",
+            }}
+          >
+            {Checkbox}
+            <div
+              style={{ height: "100px", width: "100px" }}
+              className="relative"
+            >
+              <Image
+                src={image_url}
+                alt={name}
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
           </div>
         }
         styles={{
@@ -76,7 +92,7 @@ const ProductItem = ({
             </Typography.Text>
           </div>
         </Flex>
-        {button}
+        {Button}
       </AntdCard>
     </Flex>
   );

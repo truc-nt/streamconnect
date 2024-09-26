@@ -15,7 +15,7 @@ import (
 type ILivestreamProductService interface {
 	GetLivestreamProductsByLivestreamId(livestreamId int64) (interface{}, error)
 	GetLivestreamProductInfoByLivestreamProductId(livestreamProductId int64) (interface{}, error)
-	PinLivestreamProduct(pinLivestreamProductRequest *model.PinLivestreamProductRequest) error
+	UpdateLivestreamProductPriority(pinLivestreamProductRequest *model.UpdateLivestreamProductPriorityRequest) error
 }
 
 type LivestreamProductService struct {
@@ -108,9 +108,9 @@ func (s *LivestreamProductService) GetLivestreamProductInfoByLivestreamProductId
 	return livestreamExternalVariants, nil
 }
 
-func (s *LivestreamProductService) PinLivestreamProduct(pinLivestreamProductRequest *model.PinLivestreamProductRequest) error {
+func (s *LivestreamProductService) UpdateLivestreamProductPriority(updateLivestreamProductPriorityRequest *model.UpdateLivestreamProductPriorityRequest) error {
 	var execWithinTransaction = func(db qrm.Queryable) (interface{}, error) {
-		for _, request := range *pinLivestreamProductRequest {
+		for _, request := range *updateLivestreamProductPriorityRequest {
 			if _, err := s.LivestreamProductRepository.UpdateById(
 				db,
 				postgres.ColumnList{

@@ -37,7 +37,7 @@ const PriceInfo = ({
       <Flex justify="space-between">
         <Typography.Text style={{ fontWeight: "bold" }}>Tổng</Typography.Text>
         <Typography.Text style={{ fontWeight: "bold" }}>
-          {subTotal - internalDiscount - externalDiscount} đ
+          {Math.max(subTotal - internalDiscount - externalDiscount, 0)} đ
         </Typography.Text>
       </Flex>
     </>

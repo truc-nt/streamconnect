@@ -85,6 +85,7 @@ type GetByLivestreamId struct {
 	ImageURL            string  `json:"image_url"`
 	MinPrice            float64 `json:"min_price"`
 	MaxPrice            float64 `json:"max_price"`
+	IsLivestreamed      bool    `alias:"livestream_product.is_livestreamed" json:"is_livestreamed"`
 }
 
 func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*GetByLivestreamId, error) {
@@ -99,6 +100,7 @@ func (r *LivestreamProductRepository) GetByLivestreamId(db qrm.Queryable, livest
 	stmt := table.LivestreamProduct.SELECT(
 		table.LivestreamProduct.IDLivestreamProduct,
 		table.LivestreamProduct.Priority,
+		table.LivestreamProduct.IsLivestreamed,
 		table.Product.Name,
 		imageUrlSubQuery.AS("GetByLivestreamId.ImageURL"),
 		postgres.MIN(table.ExtVariant.Price).AS("GetByLivestreamId.MinPrice"),

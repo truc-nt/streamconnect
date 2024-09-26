@@ -21,6 +21,7 @@ type livestreamProductTable struct {
 	FkLivestream        postgres.ColumnInteger
 	FkProduct           postgres.ColumnInteger
 	Priority            postgres.ColumnInteger
+	IsLivestreamed      postgres.ColumnBool
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -65,8 +66,9 @@ func newLivestreamProductTableImpl(schemaName, tableName, alias string) livestre
 		FkLivestreamColumn        = postgres.IntegerColumn("fk_livestream")
 		FkProductColumn           = postgres.IntegerColumn("fk_product")
 		PriorityColumn            = postgres.IntegerColumn("priority")
-		allColumns                = postgres.ColumnList{IDLivestreamProductColumn, FkLivestreamColumn, FkProductColumn, PriorityColumn}
-		mutableColumns            = postgres.ColumnList{FkLivestreamColumn, FkProductColumn, PriorityColumn}
+		IsLivestreamedColumn      = postgres.BoolColumn("is_livestreamed")
+		allColumns                = postgres.ColumnList{IDLivestreamProductColumn, FkLivestreamColumn, FkProductColumn, PriorityColumn, IsLivestreamedColumn}
+		mutableColumns            = postgres.ColumnList{FkLivestreamColumn, FkProductColumn, PriorityColumn, IsLivestreamedColumn}
 	)
 
 	return livestreamProductTable{
@@ -77,6 +79,7 @@ func newLivestreamProductTableImpl(schemaName, tableName, alias string) livestre
 		FkLivestream:        FkLivestreamColumn,
 		FkProduct:           FkProductColumn,
 		Priority:            PriorityColumn,
+		IsLivestreamed:      IsLivestreamedColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

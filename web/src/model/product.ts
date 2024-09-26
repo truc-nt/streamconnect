@@ -1,8 +1,13 @@
-interface IBaseProduct {
+export interface IBaseProduct {
+  id_product: number;
   name: string;
   description: string;
   status: string;
+  image_url: string;
+  min_price: number;
+  max_price: number;
 }
+
 export interface IBaseVariant extends IBaseProduct {
   id_variant: number;
   status: string;

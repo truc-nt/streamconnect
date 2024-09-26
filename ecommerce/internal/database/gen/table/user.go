@@ -24,6 +24,8 @@ type userTable struct {
 	Status         postgres.ColumnString
 	CreatedAt      postgres.ColumnTimestamp
 	UpdatedAt      postgres.ColumnTimestamp
+	Gender         postgres.ColumnString
+	Birthdate      postgres.ColumnDate
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -71,8 +73,10 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		StatusColumn         = postgres.StringColumn("status")
 		CreatedAtColumn      = postgres.TimestampColumn("created_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDUserColumn, UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn}
+		GenderColumn         = postgres.StringColumn("gender")
+		BirthdateColumn      = postgres.DateColumn("birthdate")
+		allColumns           = postgres.ColumnList{IDUserColumn, UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn, GenderColumn, BirthdateColumn}
+		mutableColumns       = postgres.ColumnList{UsernameColumn, HashedPasswordColumn, EmailColumn, StatusColumn, CreatedAtColumn, UpdatedAtColumn, GenderColumn, BirthdateColumn}
 	)
 
 	return userTable{
@@ -86,6 +90,8 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		Status:         StatusColumn,
 		CreatedAt:      CreatedAtColumn,
 		UpdatedAt:      UpdatedAtColumn,
+		Gender:         GenderColumn,
+		Birthdate:      BirthdateColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

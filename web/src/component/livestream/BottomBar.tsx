@@ -1,3 +1,6 @@
+"use client";
+import { useParams } from "next/navigation";
+
 import {
   Constants,
   createCameraVideoTrack,
@@ -21,18 +24,23 @@ import {
 } from "@ant-design/icons";
 import { useIsHls } from "@/hook/hls";
 import { useIsRecording } from "@/hook/recording";
-import { saveHls } from "@/api/livestream";
-import { useParams } from "next/navigation";
+import useLoading from "@/hook/loading";
+import { saveHls, updateLivestream } from "@/api/livestream";
+import { LivestreamStatus } from "@/constant/livestream";
 
-const EndButton = () => {
+const EndButton = ({ livestreamId }: { livestreamId: number }) => {
   const { end } = useMeeting();
+  const executeUpdateLivestream = useLoading(updateLivestream);
 
   return (
     <Button
       size="large"
       type="primary"
-      onClick={() => {
+      onClick={async () => {
         end();
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.ENDED,
+        });
       }}
     >
       END
@@ -47,6 +55,8 @@ const HlsButton = ({ livestreamId }: { livestreamId: number }) => {
 
   const isHlsRef = useRef(isHls);
 
+  const executeUpdateLivestream = useLoading(updateLivestream);
+
   useEffect(() => {
     isHlsRef.current = isHls;
   }, [isHls]);
@@ -57,6 +67,15 @@ const HlsButton = ({ livestreamId }: { livestreamId: number }) => {
         try {
           await saveHls(livestreamId, hlsUrls.playbackHlsUrl);
         } catch (e) {}
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.PLAYED,
+          hls_url: hlsUrls.playbackHlsUrl,
+        });
+      } else {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.STARTED,
+          hls_url: hlsUrls.playbackHlsUrl,
+        });
       }
     };
     startHls();
@@ -314,7 +333,7 @@ const BottomBar = ({
         <Flex gap="small" justify="center" align="center">
           <MicButton />
           <WebCamButton />
-          <EndButton />
+          <EndButton livestreamId={Number(livestreamId)} />
         </Flex>
       )}
       <Flex gap="small" justify="center" align="center">

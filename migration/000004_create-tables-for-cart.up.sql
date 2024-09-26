@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS cart_item (
     fk_cart BIGSERIAL REFERENCES cart(id_cart) NOT NULL,
     fk_ext_variant BIGSERIAL REFERENCES ext_variant(id_ext_variant) NOT NULL,
     quantity INT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'active',
-    CONSTRAINT check_status check (status in ('active', 'inactive'))
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive'))
 );
 
 CREATE TABLE IF NOT EXISTS cart_item_livestream_ext_variant (
