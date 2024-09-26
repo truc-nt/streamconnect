@@ -109,7 +109,7 @@ const VoucherForm = (props: FormProps) => {
             <InputNumber className="w-full" />
           </Form.Item>
         </Col>
-        <Col span={12}>
+        {/*<Col span={12}>
           <Form.Item label="Thời gian bắt đầu" name="start_time">
             <DatePicker
               showTime
@@ -128,7 +128,7 @@ const VoucherForm = (props: FormProps) => {
               className="w-full"
             />
           </Form.Item>
-        </Col>
+        </Col>*/}
       </Row>
     </Form>
   );

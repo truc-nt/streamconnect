@@ -10,28 +10,28 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 
 const ViewerView = () => {
   const { hlsUrls, hlsState } = useMeeting();
-  const [playbackUrl, setPlaybackUrl] = useState("");
+  const [playbackHlsUrl, setplaybackHlsUrl] = useState("");
   const { publish, messages } = usePubSub("CHAT");
 
   const playerRef = useRef(null);
 
   useEffect(() => {
-    setPlaybackUrl(hlsUrls.livestreamUrl);
-  }, [hlsUrls.livestreamUrl]);
+    setplaybackHlsUrl(hlsUrls.playbackHlsUrl);
+  }, [hlsUrls.playbackHlsUrl]);
 
   return (
     <>
-      {playbackUrl ? (
+      {playbackHlsUrl ? (
         <ReactHlsPlayer
           playsInline
           autoPlay
           controls={true}
-          src={playbackUrl}
+          src={playbackHlsUrl}
           height="100%"
           width="100%"
           playerRef={playerRef}
           hlsConfig={{
-            maxLoadingDelay: 4,
+            maxLoadingDelay: 5,
             //minAutoBitrate: 0,
             //lowLatencyMode: true,
           }}

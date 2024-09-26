@@ -15,7 +15,7 @@ const AddressCard = () => {
       console.log("hello", data);
       dispatch(setAddressId(data.id_user_address));
     }
-  }, []);
+  }, [data]);
 
   return (
     <Card

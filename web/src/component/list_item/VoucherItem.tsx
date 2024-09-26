@@ -80,10 +80,10 @@ const VoucherItem = ({
           <Typography.Text style={{ fontSize: "10px" }}>
             {`Đơn tối thiểu ${min_purchase}đ`}
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "0.5rem" }}>
+          {/*<Typography.Text style={{ fontSize: "0.5rem" }}>
             Thời gian: {new Date(start_time).toLocaleString()} -{" "}
             {new Date(end_time).toLocaleString()}
-          </Typography.Text>
+          </Typography.Text>*/}
         </Flex>
         {button}
       </AntdCard>
