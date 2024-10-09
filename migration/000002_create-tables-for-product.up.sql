@@ -11,31 +11,28 @@ CREATE TABLE IF NOT EXISTS product (
   fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-  CONSTRAINT check_status check (status in ('active', 'inactive'))
 );
 
 CREATE TABLE IF NOT EXISTS variant (
   id_variant BIGSERIAL PRIMARY KEY,
   fk_product BIGSERIAL REFERENCES product(id_product) NOT NULL,
   sku TEXT,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
   option JSON DEFAULT '{}',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_status check (status in ('active', 'inactive'))
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS image_variant (
   id_image_variant BIGSERIAL PRIMARY KEY,
   fk_variant BIGSERIAL REFERENCES variant(id_variant) NOT NULL,
   url TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_status check (status in ('active', 'inactive'))
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS ext_variant (
@@ -46,12 +43,11 @@ CREATE TABLE IF NOT EXISTS ext_variant (
   ext_id_mapping VARCHAR(255) NOT NULL,
   sku TEXT,
   name TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
   option JSON,
   price DECIMAL(10, 2) NOT NULL,
   image_url TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT unique_ext_product_variant UNIQUE (ext_product_id_mapping, ext_id_mapping),
-  CONSTRAINT check_status check (status in ('active', 'inactive'))
+  CONSTRAINT unique_ext_product_variant UNIQUE (ext_product_id_mapping, ext_id_mapping)
 );

@@ -42,7 +42,6 @@ const MappingExternalProduct = ({
   externalProductIdMapping: string | null;
   setExternalProductIdMapping: (value: string | null) => void;
 }) => {
-  const { mutate } = useSWRConfig();
   const { token } = theme.useToken();
   const { userId } = useAppSelector((state) => state.authReducer);
   const { data: externalVariants } = useGetExternalVariants(
@@ -206,7 +205,7 @@ const MappingExternalProduct = ({
                 setSelectedProductId(value);
                 const variants = await getVariantsByProductId(value);
                 setSelectedVariants(
-                  variants?.data.map((variant) => ({
+                  variants?.map((variant) => ({
                     ...variant,
                     externalVariantId: 0,
                   })) ?? [],
@@ -233,7 +232,8 @@ const MappingExternalProduct = ({
                     external_product_id_mapping: externalProductIdMapping ?? "",
                   },
                 ]);
-                mutate(`/api/shops/1/products`);
+                //mutate(`/api/shops/1/products`);
+                setExternalProductIdMapping(null);
               }}
             >
               Tạo mới

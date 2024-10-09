@@ -3,7 +3,6 @@ package handler
 import (
 	"ecommerce/api/model"
 	"ecommerce/internal/service"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,11 +14,16 @@ type ILivestreamHandler interface {
 	SetLivestreamHls(ctx *gin.Context)
 	UpdateLivestreamExternalVariantQuantity(ctx *gin.Context)
 	AddLivestreamProduct(ctx *gin.Context)
-	StartLivestream(ctx *gin.Context)
+	UpdateLivestream(ctx *gin.Context)
 
-	GetLivestreamInfo(ctx *gin.Context)
 	RegisterLivestreamProductFollower(ctx *gin.Context)
+	GetFollowLivestreamProductsInLivestream(ctx *gin.Context)
+	DeleteLivestreamProductFollower(ctx *gin.Context)
+
 	FetchLivestreamProductFollowers(ctx *gin.Context)
+	UpdateLivestreamProducts(ctx *gin.Context)
+
+	GetLivestreamStatistics(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -57,7 +61,11 @@ func (h *LivestreamHandler) CreateLivestream(ctx *gin.Context) {
 
 func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
 	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
-	//userId := ctx.Param("user_id")
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
@@ -68,7 +76,17 @@ func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
 		h.handleFailed(ctx, err)
 		return
 	}
-	h.handleSuccessGet(ctx, livestream)
+	h.handleSuccessGet(ctx, &model.GetLivestreamResponse{
+		IDLivestream: livestream.IDLivestream,
+		IDShop:       livestream.FkShop,
+		Title:        livestream.Title,
+		Description:  livestream.Description,
+		Status:       livestream.Status,
+		MeetingID:    livestream.MeetingID,
+		HlsURL:       livestream.HlsURL,
+		IsHost:       userId == livestream.FkShop,
+		ShopName:     livestream.ShopName,
+	})
 }
 
 func (h *LivestreamHandler) GetLivestreams(ctx *gin.Context) {
@@ -85,6 +103,26 @@ func (h *LivestreamHandler) GetLivestreams(ctx *gin.Context) {
 	}
 
 	h.handleSuccessGet(ctx, livestreams)
+}
+
+func (h *LivestreamHandler) UpdateLivestream(ctx *gin.Context) {
+	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	var request *model.UpdateLivestreamRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.UpdateLivestream(id, request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
 }
 
 func (h *LivestreamHandler) SetLivestreamHls(ctx *gin.Context) {
@@ -105,29 +143,6 @@ func (h *LivestreamHandler) SetLivestreamHls(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessUpdate(ctx)
-}
-
-func (h *LivestreamHandler) GetLivestreamInfo(ctx *gin.Context) {
-	userId := ctx.GetHeader("user_id")
-
-	id, err := h.parseId(ctx, ctx.Param("livestream_id"))
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}
-
-	livestream, err := h.Service.GetLivestreamInfo(id)
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}
-
-	h.handleSuccessGet(ctx, &model.GetLivestreamInfoResponse{
-		MeetingId: livestream.MeetingID,
-		IDShop:    livestream.FkShop,
-		IsHost:    userId == fmt.Sprintf("%d", livestream.FkShop),
-		ShopName:  livestream.ShopName,
-	})
 }
 
 func (h *LivestreamHandler) UpdateLivestreamExternalVariantQuantity(ctx *gin.Context) {
@@ -165,37 +180,25 @@ func (h *LivestreamHandler) AddLivestreamProduct(ctx *gin.Context) {
 	h.handleSuccessCreate(ctx)
 }
 
-func (h *LivestreamHandler) StartLivestream(ctx *gin.Context) {
+func (h *LivestreamHandler) RegisterLivestreamProductFollower(ctx *gin.Context) {
 	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-
-	if err := h.Service.StartLivestream(livestreamId); err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}
-
-	h.handleSuccessUpdate(ctx)
-}
-
-func (h *LivestreamHandler) RegisterLivestreamProductFollower(ctx *gin.Context) {
-	idLivestream, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-	var request *model.RegisterLivestreamProductFollowerRequest
-	if err := ctx.ShouldBindJSON(&request); err != nil {
+
+	var livestreamProductIds []int64
+
+	if err := ctx.ShouldBindJSON(&livestreamProductIds); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-	if request.IDLivestream != idLivestream {
-		h.handleFailed(ctx, errors.New("livestream id not match"))
-		return
-	}
-	if err := h.Service.RegisterLivestreamProductFollower(request); err != nil {
+	if err := h.Service.RegisterLivestreamProductFollower(livestreamId, userId, livestreamProductIds); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
@@ -214,4 +217,75 @@ func (h *LivestreamHandler) FetchLivestreamProductFollowers(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessGet(ctx, responseDTO)
+}
+
+func (h *LivestreamHandler) UpdateLivestreamProducts(ctx *gin.Context) {
+	var request *model.UpdateLivestreamProductsRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.UpdateLivestreamProducts(request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) GetLivestreamStatistics(ctx *gin.Context) {
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	response, err := h.Service.GetLivestreamStatistics(livestreamId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, response)
+}
+
+func (h *LivestreamHandler) GetFollowLivestreamProductsInLivestream(ctx *gin.Context) {
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	response, err := h.Service.GetFollowLivestreamProductsInLivestream(userId, livestreamId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, response)
+}
+
+func (h *LivestreamHandler) DeleteLivestreamProductFollower(ctx *gin.Context) {
+	livestreamProductId, err := h.parseId(ctx, ctx.Param("livestream_product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.DeleteLivestreamProductFollower(livestreamProductId, userId); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessCreate(ctx)
 }

@@ -8,8 +8,10 @@ import (
 )
 
 type IProductHandler interface {
+	GetProductById(ctx *gin.Context)
 	GetProductsByShopId(ctx *gin.Context)
 	CreateProductsWithVariants(ctx *gin.Context)
+	UpdateProduct(ctx *gin.Context)
 }
 
 type ProductHandler struct {
@@ -21,6 +23,22 @@ func NewProductHandler(s service.IProductService) IProductHandler {
 	return &ProductHandler{
 		Service: s,
 	}
+}
+
+func (h *ProductHandler) GetProductById(ctx *gin.Context) {
+	productId, err := h.parseId(ctx, ctx.Param("product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	product, err := h.Service.GetProductById(productId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, product)
 }
 
 func (h *ProductHandler) GetProductsByShopId(ctx *gin.Context) {
@@ -58,6 +76,27 @@ func (h *ProductHandler) CreateProductsWithVariants(ctx *gin.Context) {
 	}
 
 	if err := h.Service.CreateProductsWithVariants(shopId, createProductsWithVariantsRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessCreate(ctx)
+}
+
+func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
+	productId, err := h.parseId(ctx, ctx.Param("product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	var updateProductRequest *model.UpdateProductRequest
+	if err := ctx.ShouldBindJSON(&updateProductRequest); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.UpdateProduct(productId, updateProductRequest); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

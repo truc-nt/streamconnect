@@ -11,6 +11,8 @@ type IOrderHandler interface {
 	CreateOrderWithCartItems(ctx *gin.Context)
 	GetBuyOrders(ctx *gin.Context)
 	GetOrder(ctx *gin.Context)
+	GetOrdersByShopId(ctx *gin.Context)
+	CreateOrderWithLivestreamExtVariantId(ctx *gin.Context)
 }
 
 type OrderHandler struct {
@@ -51,6 +53,8 @@ func (h *OrderHandler) GetBuyOrders(ctx *gin.Context) {
 		return
 	}
 
+	userId = 1
+
 	orders, err := h.Service.GetBuyOrders(userId)
 	if err != nil {
 		h.handleFailed(ctx, err)
@@ -72,4 +76,41 @@ func (h *OrderHandler) GetOrder(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessGet(ctx, order)
+}
+
+func (h *OrderHandler) GetOrdersByShopId(ctx *gin.Context) {
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	orders, err := h.Service.GetOrdersByShopId(shopId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, orders)
+}
+
+func (h *OrderHandler) CreateOrderWithLivestreamExtVariantId(ctx *gin.Context) {
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	livestreamExtVariantId, err := h.parseId(ctx, ctx.Param("livestream_ext_variant_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	err = h.Service.CreateOrderWithLivestreamExtVariantId(userId, livestreamExtVariantId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessCreate(ctx)
 }

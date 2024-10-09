@@ -10,9 +10,8 @@ import {
 } from "antd";
 import Image from "next/image";
 import { theme } from "antd";
-import { ILivestreamProductInformation } from "@/api/livestream";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
-import { TruckOutlined, TagOutlined } from "@ant-design/icons";
+import { TruckOutlined, TagOutlined, GiftOutlined } from "@ant-design/icons";
 import { addUserVoucher, IShopVoucherGetResponse } from "@/api/voucher";
 import useLoading from "@/hook/loading";
 import {
@@ -58,7 +57,7 @@ const VoucherItem = ({
             {type === "item" ? (
               <TagOutlined style={{ fontSize: "30px" }} />
             ) : (
-              <TruckOutlined style={{ fontSize: "30px" }} />
+              <GiftOutlined style={{ fontSize: "30px" }} />
             )}
           </div>
         }

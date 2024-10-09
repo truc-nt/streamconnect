@@ -27,7 +27,7 @@ const (
 
 type IShopifyService interface {
 	IEcommerceService
-	GetAuthorizePath(shopDomain string) string
+	GetAuthorizePath(shopId int64, shopDomain string) string
 	ConnectNewExternalShopShopify(shopId int64, shopDomain string, authorizeCode string) error
 }
 
@@ -70,9 +70,9 @@ func (s *ShopifyService) getShopOriginFromShopDomain(shopDomain string) string {
 	return matches[1]
 }
 
-func (s *ShopifyService) GetAuthorizePath(shopDomain string) string {
+func (s *ShopifyService) GetAuthorizePath(shopId int64, shopDomain string) string {
 	shopName := s.getShopOriginFromShopDomain(shopDomain)
-	return s.ShopifyAdapter.GetAuthorizePath(&shopify.ShopifyClientParam{
+	return s.ShopifyAdapter.GetAuthorizePath(shopId, &shopify.ShopifyClientParam{
 		ShopName: shopName,
 	})
 }

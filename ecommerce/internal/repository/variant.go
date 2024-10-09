@@ -15,6 +15,7 @@ type IVariantRepository interface {
 	GetVariantsByProductId(db qrm.Queryable, shopId int64, limit int64, offset int64) ([]*GetVariantsByProductId, error)
 	GetVariantsByExternalProductIdMapping(db qrm.Queryable, externalProductIdMapping string) ([]*GetVariantsByExternalProductIdMapping, error)
 	GetVariantInfoById(db qrm.Queryable, id int64) (*GetVariantInfoById, error)
+	GetExternalVariantsByVariantId(db qrm.Queryable, variantId int64) (*GetExternalVariantsByVariantId, error)
 }
 
 type VariantRepository struct {
@@ -145,6 +146,35 @@ func (r *VariantRepository) GetVariantInfoById(db qrm.Queryable, id int64) (*Get
 	)
 
 	var data GetVariantInfoById
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+type GetExternalVariantsByVariantId struct {
+	*model.Variant
+	ExternalVariants []*struct {
+		*model.ExtVariant
+		IDEcommerce int16  `alias:"ext_shop.fk_ecommerce" json:"id_ecommerce"`
+		ShopName    string `alias:"ext_shop.name" json:"shop_name"`
+	} `json:"external_variants"`
+}
+
+func (r *VariantRepository) GetExternalVariantsByVariantId(db qrm.Queryable, variantId int64) (*GetExternalVariantsByVariantId, error) {
+	stmt := table.Variant.SELECT(
+		table.Variant.AllColumns,
+		table.ExtVariant.AllColumns,
+		table.ExtShop.FkEcommerce,
+		table.ExtShop.Name,
+	).FROM(
+		table.Variant.
+			INNER_JOIN(table.ExtVariant, table.ExtVariant.FkVariant.EQ(table.Variant.IDVariant)).
+			INNER_JOIN(table.ExtShop, table.ExtShop.IDExtShop.EQ(table.ExtVariant.FkExtShop)),
+	).WHERE(table.Variant.IDVariant.EQ(postgres.Int(variantId)))
+
+	var data GetExternalVariantsByVariantId
 	err := stmt.Query(db, &data)
 	if err != nil {
 		return nil, err

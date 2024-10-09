@@ -1,9 +1,9 @@
-import { getUserInfo, getDefaultAddress, getAddresses } from "@/api/user";
+import { getUser, getDefaultAddress, getAddresses } from "@/api/user";
 
 import useSWR from "swr";
 
-export const useGetUserInfo = () => {
-  return useSWR(`/api/users`, () => getUserInfo(), {
+export const useGetUser = () => {
+  return useSWR(`/api/users`, () => getUser(), {
     revalidateOnFocus: false,
   });
 };

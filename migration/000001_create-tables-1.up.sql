@@ -3,30 +3,11 @@ CREATE TABLE IF NOT EXISTS "user" (
   username VARCHAR(100) NOT NULL UNIQUE,
   hashed_password VARCHAR(200) NOT NULL,
   email VARCHAR(100) NOT NULL unique,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
+  gender TEXT CHECK (gender in ('male', 'female', 'other')),
+  birthdate DATE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT check_status check (status in ('active', 'inactive'))
-);
-
-CREATE TABLE IF NOT EXISTS acl_role (
-  id_acl_role SMALLSERIAL PRIMARY KEY,
-  name TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS acl_role_user (
-  id_acl_role_user SMALLSERIAL PRIMARY KEY,
-  fk_acl_role SMALLSERIAL REFERENCES acl_role(id_acl_role) NOT NULL,
-  fk_user BIGSERIAL REFERENCES "user"(id_user) NOT NULL,
-  fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS user_role (
-  id_user_role SERIAL PRIMARY KEY,
-  username varchar(100) NOT NULL,
-  role varchar(20) NOT NULL,
-  UNIQUE (username, role),
-  FOREIGN KEY (username) REFERENCES "user"(username)
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS shop (
@@ -38,20 +19,43 @@ CREATE TABLE IF NOT EXISTS shop (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS user_role (
+  id_user_role SERIAL PRIMARY KEY,
+  username varchar(100) NOT NULL,
+  role varchar(20) NOT NULL,
+  UNIQUE (username, role),
+  FOREIGN KEY (username) REFERENCES "user"(username)
+);
+
+CREATE TABLE IF NOT EXISTS acl_role (
+  id_acl_role SMALLSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  UNIQUE (name)
+);
+
+INSERT INTO acl_role (name) VALUES ('Follower');
+
+CREATE TABLE IF NOT EXISTS acl_role_user (
+  id_acl_role_user SMALLSERIAL PRIMARY KEY,
+  fk_acl_role SMALLSERIAL REFERENCES acl_role(id_acl_role) NOT NULL,
+  fk_user BIGSERIAL REFERENCES "user"(id_user) NOT NULL,
+  fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS ecommerce (
   id_ecommerce SMALLSERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
+INSERT INTO ecommerce (name) VALUES ('Shopify');
 
 CREATE TABLE IF NOT EXISTS ext_shop (
   id_ext_shop BIGSERIAL PRIMARY KEY,
   fk_shop BIGSERIAL REFERENCES shop(id_shop) NOT NULL,
   fk_ecommerce SMALLSERIAL REFERENCES ecommerce(id_ecommerce) NOT NULL,
   name TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status in ('active', 'inactive')),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  constraint check_status check (status in ('active', 'inactive'))
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS ext_shop_shopify_auth (

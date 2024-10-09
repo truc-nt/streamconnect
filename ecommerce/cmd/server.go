@@ -53,6 +53,8 @@ var RepositoriesSet = wire.NewSet(
 	repository.NewUserRepository,
 	repository.NewUserAddressRepository,
 	repository.NewShopRepository,
+	repository.NewAclRoleRepository,
+	repository.NewAclRoleUserRepository,
 
 	repository.NewProductRepository,
 	repository.NewVariantRepository,

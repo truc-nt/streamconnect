@@ -1,9 +1,9 @@
-import {Client} from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 export const socketClient = new Client({
-  brokerURL: 'ws://localhost:8080/ws',
-  onWebSocketError: evt => {
-    console.log(evt)
-  }
+  brokerURL: "ws://localhost:8080/ws",
+  onWebSocketError: (evt) => {
+    console.log(evt);
+  },
 });
 export function connectSocket(onNotificationReceive: any) {
   const token = localStorage.getItem("token");
@@ -11,8 +11,8 @@ export function connectSocket(onNotificationReceive: any) {
     return;
   }
   socketClient.onConnect = () => {
-    socketClient.subscribe('/user/topic/notification', message => {
-      console.log('receive message', message);
+    socketClient.subscribe("/user/topic/notification", (message) => {
+      console.log("receive message", message);
       const notification: Notification = JSON.parse(message.body);
       onNotificationReceive(notification);
     });

@@ -23,7 +23,7 @@ const mainNavigator: MenuItem[] = [
     label: <Link href="/">Khám phá</Link>,
     icon: <CompassFilled />,
   },
-  {
+  /*{
     key: "/trending",
     label: <Link href="/trending">Xu hướng</Link>,
     icon: <FireFilled />,
@@ -32,13 +32,13 @@ const mainNavigator: MenuItem[] = [
     key: "/following",
     label: <Link href="/following">Đang theo dõi</Link>,
     icon: <TeamOutlined />,
-  },
+  },*/
 ];
 
 const userNavigator: MenuItem[] = [
   {
     key: "/user",
-    label: <Link href="/user/profile">Thông tin tài khoản</Link>,
+    label: <Link href="/user/">Thông tin tài khoản</Link>,
     icon: <ContactsOutlined />,
   },
   {
@@ -55,9 +55,14 @@ const userNavigator: MenuItem[] = [
 
 const sellerNavigator: MenuItem[] = [
   {
-    key: "/seller",
+    key: "/seller/dashboard",
     label: <Link href="/seller/dashboard">Kênh bán hàng</Link>,
     icon: <SignalFilled />,
+  },
+  {
+    key: "/seller",
+    label: <Link href="/seller">Thông tin</Link>,
+    icon: <ContactsOutlined />,
   },
   {
     key: "/seller/orders",

@@ -1,7 +1,7 @@
 package com.hcmut.shared_lib.model.constant;
 
 public enum NotificationType implements KeyEnum<NotificationType> {
-    MESSAGE("MESSAGE"), ORDER("ORDER");
+    MESSAGE("message"), ORDER("order"), PRODUCT("product");
     private final String key;
 
     private NotificationType(String key) {

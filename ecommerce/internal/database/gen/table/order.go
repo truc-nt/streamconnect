@@ -17,11 +17,13 @@ type orderTable struct {
 	postgres.Table
 
 	// Columns
-	IDOrder   postgres.ColumnInteger
-	FkUser    postgres.ColumnInteger
-	FkShop    postgres.ColumnInteger
-	CreatedAt postgres.ColumnTimestamp
-	UpdatedAt postgres.ColumnTimestamp
+	IDOrder          postgres.ColumnInteger
+	FkUser           postgres.ColumnInteger
+	FkShop           postgres.ColumnInteger
+	FkShippingMethod postgres.ColumnInteger
+	FkPaymentMethod  postgres.ColumnInteger
+	CreatedAt        postgres.ColumnTimestamp
+	UpdatedAt        postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -62,24 +64,28 @@ func newOrderTable(schemaName, tableName, alias string) *OrderTable {
 
 func newOrderTableImpl(schemaName, tableName, alias string) orderTable {
 	var (
-		IDOrderColumn   = postgres.IntegerColumn("id_order")
-		FkUserColumn    = postgres.IntegerColumn("fk_user")
-		FkShopColumn    = postgres.IntegerColumn("fk_shop")
-		CreatedAtColumn = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn = postgres.TimestampColumn("updated_at")
-		allColumns      = postgres.ColumnList{IDOrderColumn, FkUserColumn, FkShopColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = postgres.ColumnList{FkUserColumn, FkShopColumn, CreatedAtColumn, UpdatedAtColumn}
+		IDOrderColumn          = postgres.IntegerColumn("id_order")
+		FkUserColumn           = postgres.IntegerColumn("fk_user")
+		FkShopColumn           = postgres.IntegerColumn("fk_shop")
+		FkShippingMethodColumn = postgres.IntegerColumn("fk_shipping_method")
+		FkPaymentMethodColumn  = postgres.IntegerColumn("fk_payment_method")
+		CreatedAtColumn        = postgres.TimestampColumn("created_at")
+		UpdatedAtColumn        = postgres.TimestampColumn("updated_at")
+		allColumns             = postgres.ColumnList{IDOrderColumn, FkUserColumn, FkShopColumn, FkShippingMethodColumn, FkPaymentMethodColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns         = postgres.ColumnList{FkUserColumn, FkShopColumn, FkShippingMethodColumn, FkPaymentMethodColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return orderTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		IDOrder:   IDOrderColumn,
-		FkUser:    FkUserColumn,
-		FkShop:    FkShopColumn,
-		CreatedAt: CreatedAtColumn,
-		UpdatedAt: UpdatedAtColumn,
+		IDOrder:          IDOrderColumn,
+		FkUser:           FkUserColumn,
+		FkShop:           FkShopColumn,
+		FkShippingMethod: FkShippingMethodColumn,
+		FkPaymentMethod:  FkPaymentMethodColumn,
+		CreatedAt:        CreatedAtColumn,
+		UpdatedAt:        UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

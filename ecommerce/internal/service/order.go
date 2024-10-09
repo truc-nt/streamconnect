@@ -16,6 +16,8 @@ type IOrderService interface {
 	CreateOrderWithCartItems(userId int64, createOrderWithCartItemsRequest *model.CreateOrderWithCartItemsRequest) error
 	GetBuyOrders(userId int64) (interface{}, error)
 	GetOrder(orderId int64) (interface{}, error)
+	GetOrdersByShopId(shopId int64) (interface{}, error)
+	CreateOrderWithLivestreamExtVariantId(userId int64, livestreamExtVariantId int64) error
 }
 
 type OrderService struct {
@@ -27,6 +29,7 @@ type OrderService struct {
 	ExternalOrderRepository                      repository.IExternalOrderRepository
 	UserRepository                               repository.IUserRepository
 	UserAddressRepository                        repository.IUserAddressRepository
+	LivestreamExternalVariantRepository          repository.ILivestreamExternalVariantRepository
 
 	EcommerceService map[int16]IEcommerceService
 }
@@ -40,6 +43,7 @@ func NewOrderService(
 	externalOrderRepository repository.IExternalOrderRepository,
 	userRepository repository.IUserRepository,
 	userAddressRepository repository.IUserAddressRepository,
+	livestreamExternalVariantRepository repository.ILivestreamExternalVariantRepository,
 	ecommerceService map[int16]IEcommerceService,
 ) IOrderService {
 	return &OrderService{
@@ -51,6 +55,7 @@ func NewOrderService(
 		ExternalOrderRepository:                      externalOrderRepository,
 		UserRepository:                               userRepository,
 		UserAddressRepository:                        userAddressRepository,
+		LivestreamExternalVariantRepository:          livestreamExternalVariantRepository,
 
 		EcommerceService: ecommerceService,
 	}
@@ -59,14 +64,18 @@ func NewOrderService(
 func (s *OrderService) CreateOrderWithCartItems(userId int64, createOrderWithCartItemsRequest *model.CreateOrderWithCartItemsRequest) error {
 	var execWinthinTransaction = func(db qrm.Queryable) (interface{}, error) {
 		newOrderData := entity.Order{
-			FkUser: userId,
-			FkShop: createOrderWithCartItemsRequest.IDShop,
+			FkUser:           userId,
+			FkShop:           createOrderWithCartItemsRequest.IDShop,
+			FkPaymentMethod:  1,
+			FkShippingMethod: 1,
 		}
 		newOrder, err := s.OrderRepository.CreateOne(
 			db,
 			postgres.ColumnList{
 				table.Order.FkUser,
 				table.Order.FkShop,
+				table.Order.FkPaymentMethod,
+				table.Order.FkShippingMethod,
 			},
 			newOrderData,
 		)
@@ -192,7 +201,7 @@ func (s *OrderService) CreateOrderWithCartItems(userId int64, createOrderWithCar
 					FkOrder:           newOrder.IDOrder,
 					FkExtShop:         externalOrder.IDExternalShop,
 					ExtOrderIDMapping: externalOrderIdMapping,
-					InternalDiscount:  &externalOrder.InternalDiscount,
+					InternalDiscount:  externalOrder.InternalDiscount,
 				},
 			); err != nil {
 				return nil, err
@@ -214,4 +223,124 @@ func (s *OrderService) GetBuyOrders(userId int64) (interface{}, error) {
 
 func (s *OrderService) GetOrder(orderId int64) (interface{}, error) {
 	return s.ExternalOrderRepository.GetExternalOrdersByOrderId(s.OrderRepository.GetDatabase().Db, orderId)
+}
+
+func (s *OrderService) GetOrdersByShopId(shopId int64) (interface{}, error) {
+	//return s.OrderRepository.GetByShopId(s.OrderRepository.GetDatabase().Db, shopId)
+	return nil, nil
+}
+
+func (s *OrderService) CreateOrderWithLivestreamExtVariantId(userId int64, livestreamExtVariantId int64) error {
+	var execWinthinTransaction = func(db qrm.Queryable) (interface{}, error) {
+
+		variant, err := s.LivestreamExternalVariantRepository.GetVariantById(s.LivestreamExternalVariantRepository.GetDatabase().Db, livestreamExtVariantId)
+		if err != nil {
+			return nil, err
+		}
+
+		newOrderData := entity.Order{
+			FkUser:           userId,
+			FkShop:           variant.IDShop,
+			FkPaymentMethod:  1,
+			FkShippingMethod: 1,
+		}
+		newOrder, err := s.OrderRepository.CreateOne(
+			db,
+			postgres.ColumnList{
+				table.Order.FkUser,
+				table.Order.FkShop,
+				table.Order.FkPaymentMethod,
+				table.Order.FkShippingMethod,
+			},
+			newOrderData,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		newOrderItemData := entity.OrderItem{
+			FkOrder:      newOrder.IDOrder,
+			FkExtVariant: variant.IDExtVariant,
+			Quantity:     1,
+			UnitPrice:    variant.Price,
+			PaidPrice:    variant.Price,
+		}
+
+		newOrderItem, err := s.OrderItemRepository.CreateOne(
+			db,
+			postgres.ColumnList{
+				table.OrderItem.FkOrder,
+				table.OrderItem.FkExtVariant,
+				table.OrderItem.Quantity,
+				table.OrderItem.UnitPrice,
+				table.OrderItem.PaidPrice,
+			},
+			newOrderItemData,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if _, err := s.OrderItemLivestreamExternalVariantRepository.CreateOne(
+			db,
+			postgres.ColumnList{
+				table.OrderItemLivestreamExtVariant.FkOrderItem,
+				table.OrderItemLivestreamExtVariant.FkLivestreamExtVariant,
+			},
+			entity.OrderItemLivestreamExtVariant{
+				FkOrderItem:            newOrderItem.IDOrderItem,
+				FkLivestreamExtVariant: livestreamExtVariantId,
+			},
+		); err != nil {
+			return nil, err
+		}
+
+		user, err := s.UserRepository.GetById(db, userId)
+		if err != nil {
+			return nil, err
+		}
+
+		address, err := s.UserAddressRepository.GetDefaultAddressByUserId(s.UserAddressRepository.GetDatabase().Db, userId)
+		if err != nil {
+			return nil, err
+		}
+
+		externalOrderIdMapping, err := s.EcommerceService[variant.FkEcommerce].CreateOrder(user, address, variant.IDExtShop, []*internalModel.ExternalOrderItem{
+			{
+				ExternalIdMapping: variant.ExtIDMapping,
+				Quantity:          1,
+			},
+		}, 0)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := s.ExternalOrderRepository.CreateOne(
+			db,
+			postgres.ColumnList{
+				table.ExtOrder.FkOrder,
+				table.ExtOrder.FkExtShop,
+				table.ExtOrder.ExtOrderIDMapping,
+				table.ExtOrder.ShippingFee,
+				table.ExtOrder.ShippingFeeDiscount,
+				table.ExtOrder.InternalDiscount,
+				table.ExtOrder.ExternalDiscount,
+			},
+			entity.ExtOrder{
+				FkOrder:           newOrder.IDOrder,
+				FkExtShop:         variant.IDExtShop,
+				ExtOrderIDMapping: externalOrderIdMapping,
+				InternalDiscount:  0,
+			},
+		); err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
+	if _, err := s.OrderRepository.ExecWithinTransaction(execWinthinTransaction); err != nil {
+		return err
+	}
+	return nil
+
 }

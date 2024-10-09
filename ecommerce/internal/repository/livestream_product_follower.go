@@ -13,6 +13,8 @@ import (
 type ILivestreamProductFollowerRepository interface {
 	IBaseRepository[model.LivestreamProductFollower]
 	FindByProductId(db qrm.Queryable, productId int64) ([]model.LivestreamProductFollower, error)
+	GetFollowLivestreamProductsInLivestream(db qrm.Queryable, userId, livestreamId int64) ([]*model.LivestreamProductFollower, error)
+	DeleteByLivestreamIdAndUserId(db qrm.Queryable, livestreamProductId, userId int64) error
 }
 
 type LivestreamProductFollowerRepository struct {
@@ -52,4 +54,34 @@ func (r *LivestreamProductFollowerRepository) FindByProductId(db qrm.Queryable, 
 		return nil, err
 	}
 	return data, nil
+}
+
+func (r *LivestreamProductFollowerRepository) GetFollowLivestreamProductsInLivestream(db qrm.Queryable, userId, livestreamId int64) ([]*model.LivestreamProductFollower, error) {
+	stmt := table.LivestreamProductFollower.SELECT(table.LivestreamProductFollower.AllColumns).
+		FROM(
+			table.LivestreamProductFollower.
+				INNER_JOIN(table.LivestreamProduct, table.LivestreamProductFollower.FkLivestreamProduct.EQ(table.LivestreamProduct.IDLivestreamProduct)),
+		).WHERE(table.LivestreamProductFollower.FkUser.EQ(postgres.Int(userId))).
+		WHERE(table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)))
+
+	var data []*model.LivestreamProductFollower
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (r *LivestreamProductFollowerRepository) DeleteByLivestreamIdAndUserId(db qrm.Queryable, livestreamProductId, userId int64) error {
+	stmt := table.LivestreamProductFollower.DELETE().
+		WHERE(table.LivestreamProductFollower.FkUser.EQ(postgres.Int(userId))).
+		WHERE(table.LivestreamProductFollower.FkLivestreamProduct.EQ(postgres.Int(livestreamProductId))).
+		RETURNING(table.LivestreamProductFollower.AllColumns)
+
+	var data model.LivestreamProductFollower
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

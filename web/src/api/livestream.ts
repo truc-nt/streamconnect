@@ -1,7 +1,7 @@
 import axios from "./axios";
 import qs from "qs";
 
-import { IBaseLivestream } from "@/model/livestream";
+import { IBaseLivestream, IBaseLivestreamProduct } from "@/model/livestream";
 
 export const getLivestreams = async (queryParam: { [key: string]: any }) => {
   const res = await axios.get<IBaseLivestream[]>(
@@ -45,34 +45,39 @@ export const createLivestream = async (
   return axios.post(`shops/${shopId}/livestreams/create`, data);
 };
 
-export interface ILivestreamProductInformation {
-  id_livestream_product: number;
-  id_product: number;
-  name: string;
-  min_price: number;
-  max_price: number;
-  image_url: string;
-  priority: number;
-}
-
 export const getLivestreamProducts = async (livestreamId: number) => {
-  const res = await axios.get<ILivestreamProductInformation[]>(
+  const res = await axios.get<IBaseLivestreamProduct[]>(
     `livestreams/${livestreamId}/livestream_products`,
   );
   return res.data;
 };
 
-interface IGetMeetingIdResponse {
-  meeting_id: string;
+interface IGetLivestreamResponse extends IBaseLivestream {
   is_host: boolean;
-  id_shop: number;
   shop_name: string;
 }
 
-export const getLivestreamInfo = async (livestreamId: number) => {
-  const res = await axios.get<IGetMeetingIdResponse>(
-    `livestreams/${livestreamId}/info`,
+export const getLivestream = async (livestreamId: number) => {
+  const res = await axios.get<IGetLivestreamResponse>(
+    `livestreams/${livestreamId}`,
   );
+  return res.data;
+};
+
+interface IUpdateLivestreamRequest {
+  title: string;
+  description: string;
+  status: string;
+  meeting_id: string;
+  hls_url: string;
+  start_time: string;
+  end_time: string;
+}
+export const updateLivestream = async (
+  livestreamId: number,
+  request: IUpdateLivestreamRequest,
+) => {
+  const res = await axios.patch(`livestreams/${livestreamId}`, request);
   return res.data;
 };
 
@@ -91,10 +96,5 @@ export const addLivestreamProduct = async (
     `livestreams/${livestreamId}/add_livestream_product`,
     data,
   );
-  return res.data;
-};
-
-export const startLivestream = async (livestreamId: number) => {
-  const res = await axios.put(`livestreams/${livestreamId}/start`);
   return res.data;
 };

@@ -31,15 +31,31 @@ type CreateLivestreamRequest struct {
 	LivestreamProducts []*LivestreamProductCreateRequest `json:"livestream_products"`
 }
 
+type UpdateLivestreamRequest struct {
+	Title       *string    `json:"title"`
+	Description *string    `json:"description"`
+	Status      *string    `json:"status"`
+	MeetingID   *string    `json:"meeting_id"`
+	HlsURL      *string    `json:"hls_url"`
+	StartTime   *time.Time `json:"start_time"`
+	EndTime     *string    `json:"end_time"`
+}
+
 type SetLivestreamHlsRequest struct {
 	HlsUrl string `json:"hls_url"`
 }
 
-type GetLivestreamInfoResponse struct {
-	MeetingId string `json:"meeting_id"`
-	IDShop    int64  `json:"id_shop"`
-	IsHost    bool   `json:"is_host"`
-	ShopName  string `json:"shop_name"`
+type GetLivestreamResponse struct {
+	IDLivestream int64   `json:"id_livestream" xml:"id_livestream"`
+	IDShop       int64   `json:"id_shop" xml:"fk_shop"`
+	Title        string  `json:"title" xml:"title"`
+	Description  *string `json:"description" xml:"description"`
+	Status       string  `json:"status" xml:"status"`
+	MeetingID    string  `json:"meeting_id" xml:"meeting_id"`
+	HlsURL       *string `json:"hls_url" xml:"hls_url"`
+	IsHost       bool    `json:"is_host"`
+	ShopName     string  `json:"shop_name"`
+	IsFollowed   bool    `json:"is_followed"`
 }
 
 type UpdateLivestreamExternalVariantQuantityRequest []*struct {
@@ -47,14 +63,19 @@ type UpdateLivestreamExternalVariantQuantityRequest []*struct {
 	Quantity                    int32 `json:"quantity"`
 }
 
-type PinLivestreamProductRequest []struct {
+type UpdateLivestreamProductPriorityRequest []*struct {
 	LivestreamProductId int64 `json:"id_livestream_product"`
 	Priority            int32 `json:"priority"`
 }
 
+type UpdateLivestreamProductsRequest []*struct {
+	IDLivestreamProduct int64  `json:"id_livestream_product"`
+	Priority            *int32 `json:"priority"`
+	IsLivestreamed      *bool  `json:"is_livestreamed"`
+}
+
 type RegisterLivestreamProductFollowerRequest struct {
 	IDLivestreamProducts []int64 `json:"id_livestream_products"`
-	IDLivestream         int64   `json:"id_livestream"`
 	IDUser               int64   `json:"id_user"`
 }
 

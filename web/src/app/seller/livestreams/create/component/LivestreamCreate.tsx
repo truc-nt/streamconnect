@@ -102,6 +102,7 @@ const LivestreamCreate = ({ shopId }: { shopId: number }) => {
 
       const res = await handleCreateLivestream(shopId, livestreamCreateData);
       if (values.startTimeOption === 1) router.push(`/livestreams/${res.data}`);
+      else router.push(`/seller/livestreams`);
     } catch (error) {}
   };
 
@@ -112,7 +113,7 @@ const LivestreamCreate = ({ shopId }: { shopId: number }) => {
       </Card>
       <Card title="Chọn sản phẩm">
         <ChosenLivestreamVariant
-          shopId={1}
+          shopId={shopId}
           onChange={handleChangeChosenLivestreamVariants}
         />
       </Card>

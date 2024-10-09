@@ -20,8 +20,8 @@ export interface IExternalProduct {
   external_variants: IExternalVariant[];
 }
 
-export const getExternalProducts = async () => {
-  return axios.get<IExternalProduct[]>(`/external_products/`);
+export const getExternalProducts = async (shopId: number) => {
+  return axios.get<IExternalProduct[]>(`/shops/${shopId}/external_products`);
 };
 
 export const getExternalVariants = async (externalProductIdMapping: string) => {

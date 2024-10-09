@@ -1,4 +1,4 @@
-import UserInfoForm from "./component/UserInfoForm";
+import UserInfoForm from "@/component/form/UserInfoForm";
 import { Flex, Card } from "antd";
 
 const Page = () => {

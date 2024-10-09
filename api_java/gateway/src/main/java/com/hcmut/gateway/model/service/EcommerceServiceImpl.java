@@ -86,7 +86,7 @@ public class EcommerceServiceImpl implements EcommerceService {
         notification.setMessage(String.format("Sản phẩm %s đang được bán trực tiếp trên livestream %s",
                 livestreamProductFollower.getLivestreamProduct().getName(),
                 livestreamProductFollower.getLivestream().getTitle()));
-        notification.setType(NotificationType.ORDER.getKey());
+        notification.setType(NotificationType.PRODUCT.getKey());
         return notification;
     }
 }

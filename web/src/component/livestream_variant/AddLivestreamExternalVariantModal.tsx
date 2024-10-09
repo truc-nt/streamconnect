@@ -1,10 +1,11 @@
 import { useGetProductsByShopId } from "@/hook/product";
 import { getVariantsByProductId } from "@/api/product";
 import { useState, useEffect } from "react";
-import ProductInformation, {
+import {
   IProductInformation,
   IExternalVariant,
 } from "@/app/seller/livestreams/create/component/ProductInformation";
+import ProductInfo from "@/component/info/ProductInfo";
 import { ECOMMERCE_PLATFORMS } from "@/constant/ecommerce";
 import {
   TableColumnType,
@@ -54,6 +55,7 @@ const AddLivestreamVariantModal = ({
   const [chosenOption, setChosenOption] = useState<{ [key: string]: string }>(
     {},
   );
+
   const chosenVariant = selectedProduct?.variants?.find((variant) =>
     Object.entries(variant.option).every(
       ([key, value]) => chosenOption[key] === value,
@@ -69,7 +71,7 @@ const AddLivestreamVariantModal = ({
         productId: product.id_product,
         name: product.name,
         image_url: product.image_url,
-        variants: res.data,
+        variants: res,
       });
     } catch (error) {
       console.error(error);
@@ -224,10 +226,18 @@ const AddLivestreamVariantModal = ({
         {!selectedProduct && (
           <div className="text-center mt-4 border-2 border-dashed border-gray-300 bg-gray-200 rounded-lg h-[300px]" />
         )}
-
         {Object.keys(selectedProduct ?? {}).length > 0 && (
-          <ProductInformation
-            product={selectedProduct!}
+          <ProductInfo
+            product={{
+              productId: selectedProduct?.productId!,
+              name: selectedProduct?.name!,
+              image_url: selectedProduct?.image_url!,
+              variants:
+                selectedProduct?.variants?.map((variant) => ({
+                  id_variant: variant.id_variant,
+                  option: variant.option,
+                })) ?? [],
+            }}
             handleChangeOption={(option) => setChosenOption(option)}
           />
         )}

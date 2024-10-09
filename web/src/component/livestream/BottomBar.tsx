@@ -1,3 +1,6 @@
+"use client";
+import { useParams } from "next/navigation";
+
 import {
   Constants,
   createCameraVideoTrack,
@@ -18,21 +21,30 @@ import {
   BorderOutlined,
   SkinFilled,
   WalletOutlined,
+  DesktopOutlined,
 } from "@ant-design/icons";
 import { useIsHls } from "@/hook/hls";
 import { useIsRecording } from "@/hook/recording";
-import { saveHls } from "@/api/livestream";
-import { useParams } from "next/navigation";
+import useLoading from "@/hook/loading";
+import { saveHls, updateLivestream } from "@/api/livestream";
+import { LivestreamStatus } from "@/constant/livestream";
+import { useRouter } from "next/navigation";
 
-const EndButton = () => {
+const EndButton = ({ livestreamId }: { livestreamId: number }) => {
   const { end } = useMeeting();
+  const executeUpdateLivestream = useLoading(updateLivestream);
+  const router = useRouter();
 
   return (
     <Button
       size="large"
       type="primary"
-      onClick={() => {
+      onClick={async () => {
         end();
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.ENDED,
+        });
+        router.push(`/seller/livestreams`);
       }}
     >
       END
@@ -47,16 +59,27 @@ const HlsButton = ({ livestreamId }: { livestreamId: number }) => {
 
   const isHlsRef = useRef(isHls);
 
+  const executeUpdateLivestream = useLoading(updateLivestream);
+
   useEffect(() => {
     isHlsRef.current = isHls;
   }, [isHls]);
 
   useEffect(() => {
     const startHls = async () => {
-      if (hlsUrls.playbackHlsUrl) {
+      if (hlsUrls.livestreamUrl) {
         try {
           await saveHls(livestreamId, hlsUrls.playbackHlsUrl);
         } catch (e) {}
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.PLAYED,
+          hls_url: hlsUrls.livestreamUrl,
+        });
+      } else {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.STARTED,
+          hls_url: hlsUrls.livestreamUrl,
+        });
       }
     };
     startHls();
@@ -119,6 +142,20 @@ const RecordingButton = () => {
     >
       REC
     </Button>
+  );
+};
+
+const ShareScreenButton = () => {
+  const { localScreenShareOn, toggleScreenShare, presenterId } = useMeeting();
+  return (
+    <Button
+      size="large"
+      icon={<DesktopOutlined />}
+      type={localScreenShareOn ? "primary" : "default"}
+      onClick={() => {
+        toggleScreenShare();
+      }}
+    />
   );
 };
 
@@ -308,13 +345,14 @@ const BottomBar = ({
         <Flex gap="small" justify="center" align="center">
           <RecordingButton />
           <HlsButton livestreamId={Number(livestreamId)} />
+          <ShareScreenButton />
         </Flex>
       )}
       {localParticipant.mode === Constants.modes.CONFERENCE && (
         <Flex gap="small" justify="center" align="center">
           <MicButton />
           <WebCamButton />
-          <EndButton />
+          <EndButton livestreamId={Number(livestreamId)} />
         </Flex>
       )}
       <Flex gap="small" justify="center" align="center">

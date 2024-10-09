@@ -46,14 +46,17 @@ const FirstStep = () => {
       0,
     ) ?? 0;
 
-  const internalDiscountTotal = groupByShop.reduce((total, shop) => {
-    return (
-      total +
-      shop.groupByEcommerce.reduce((ecommerceTotal, ecommerce) => {
-        return ecommerceTotal + ecommerce.internalDiscountTotal;
-      }, 0)
-    );
-  }, 0);
+  const internalDiscountTotal =
+    groupByShop.reduce((total, shop) => {
+      return (
+        total +
+        shop.groupByEcommerce.reduce((ecommerceTotal, ecommerce) => {
+          return ecommerceTotal + (ecommerce.internalDiscountTotal ?? 0);
+        }, 0)
+      );
+    }, 0) ?? 0;
+
+  console.log(subTotal, internalDiscountTotal);
 
   const handleNextStep = () => {
     /*dispatch(

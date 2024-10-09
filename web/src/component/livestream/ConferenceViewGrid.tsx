@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Constants, useMeeting } from "@videosdk.live/react-sdk";
 import ConferenceView from "./ConferenceView";
 import { Flex, Row, Col } from "antd";

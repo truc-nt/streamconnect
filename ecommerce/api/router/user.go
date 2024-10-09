@@ -11,6 +11,7 @@ func LoadUserRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
 	userRouter.Use(AuthorizationMiddleware())
 	{
 		userRouter.GET("/", h.UserHandler.GetUser)
+		userRouter.PATCH("/", h.UserHandler.UpdateUser)
 
 	}
 

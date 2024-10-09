@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"ecommerce/internal/client/shopify/model"
 	"ecommerce/internal/constants"
@@ -16,7 +17,7 @@ import (
 
 //go:generate mockgen -package=shopify -source=shopify_client.go -destination=shopify_client_mock.go
 type IShopifyClient interface {
-	GetAuthorizePath(oauth2Config *oauth2.Config) string
+	GetAuthorizePath(shopId int64, oauth2Config *oauth2.Config) string
 	GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error)
 
 	GetProducts() (*model.GetProductsResponse, error)
@@ -64,12 +65,12 @@ func (c *ShopifyClient) getResponse(req *http.Request) ([]byte, error) {
 	return resData, nil
 }
 
-func (c *ShopifyClient) GetAuthorizePath(oauth2Config *oauth2.Config) string {
+func (c *ShopifyClient) GetAuthorizePath(shopId int64, oauth2Config *oauth2.Config) string {
 	oauth2Config.Endpoint = oauth2.Endpoint{
 		AuthURL:  fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAuthorizePath,
 		TokenURL: fmt.Sprintf(constants.ShopifyBaseURL, c.Param.ShopName) + constants.ShopifyAccessTokenPath,
 	}
-	return oauth2Config.AuthCodeURL("state")
+	return oauth2Config.AuthCodeURL(strconv.FormatInt(shopId, 10))
 }
 
 func (c *ShopifyClient) GetAccessToken(oauth2Config *oauth2.Config, code string) (*oauth2.Token, error) {

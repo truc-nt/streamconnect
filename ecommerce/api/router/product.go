@@ -7,8 +7,15 @@ import (
 )
 
 func LoadProductRouter(apiRouter *gin.RouterGroup, h *handler.Handlers) {
-	externalShopRouter := apiRouter.Group("/products")
+	productRouter := apiRouter.Group("/products")
 	{
-		externalShopRouter.GET("/:product_id/variants", h.VariantHandler.GetVariantsByProductId)
+		productRouter.GET("/:product_id", h.ProductHandler.GetProductById)
+		productRouter.GET("/:product_id/variants", h.VariantHandler.GetVariantsByProductId)
+		productRouter.PATCH("/:product_id", h.ProductHandler.UpdateProduct)
+	}
+
+	variantRouter := apiRouter.Group("/variants")
+	{
+		variantRouter.GET("/:variant_id/external_variants", h.VariantHandler.GetExternalVariantsByVariantId)
 	}
 }

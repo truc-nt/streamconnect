@@ -12,11 +12,13 @@ import (
 )
 
 type User struct {
-	IDUser         int64     `sql:"primary_key" json:"id_user" xml:"id_user"`
-	Username       string    `json:"username" xml:"username"`
-	HashedPassword string    `json:"hashed_password" xml:"hashed_password"`
-	Email          string    `json:"email" xml:"email"`
-	Status         string    `json:"status" xml:"status"`
-	CreatedAt      time.Time `json:"created_at" xml:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" xml:"updated_at"`
+	IDUser         int64      `sql:"primary_key" json:"id_user" xml:"id_user"`
+	Username       string     `json:"username" xml:"username"`
+	HashedPassword string     `json:"hashed_password" xml:"hashed_password"`
+	Email          string     `json:"email" xml:"email"`
+	Status         string     `json:"status" xml:"status"`
+	CreatedAt      time.Time  `json:"created_at" xml:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at" xml:"updated_at"`
+	Gender         *string    `json:"gender" xml:"gender"`
+	Birthdate      *time.Time `json:"birthdate" xml:"birthdate"`
 }

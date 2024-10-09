@@ -7,8 +7,14 @@ import React, {
   createContext,
   useContext,
 } from "react";
-import { useGetLivstreamInfo } from "@/hook/livestream";
+import { Flex, Typography } from "antd";
+
+import { Constants } from "@videosdk.live/react-sdk";
+import { useGetLivestream } from "@/hook/livestream";
 import { useAppDispatch, useAppSelector } from "@/store/store";
+import { LivestreamStatus } from "@/constant/livestream";
+import { updateLivestream } from "@/api/livestream";
+import useLoading from "@/hook/loading";
 
 const VideoSdkMeetingProvider = dynamic(
   () => import("@videosdk.live/react-sdk").then((mod) => mod.MeetingProvider),
@@ -26,24 +32,47 @@ export const MeetingAppContext = createContext({
   livestreamId: 0,
   shopId: 0,
   shopName: "",
+  livestreamStatus: "",
 });
 
 export const useMeetingAppContext = () => useContext(MeetingAppContext);
 
 const MeetingProvider = ({ livestreamId }: { livestreamId: number }) => {
-  const { data: getLivestreamInfoResponse } = useGetLivstreamInfo(
-    Number(livestreamId),
-  );
+  const { data: livestream } = useGetLivestream(Number(livestreamId));
   const { username } = useAppSelector((state) => state.authReducer);
+  const executeUpdateLivestream = useLoading(updateLivestream);
 
-  return getLivestreamInfoResponse ? (
+  useEffect(() => {
+    const updateLivestreamStatus = async () => {
+      if (livestream?.is_host) {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.STARTED,
+        });
+      }
+    };
+
+    updateLivestreamStatus();
+
+    return () => {
+      const cleanup = async () => {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.CREATED,
+        });
+      };
+
+      cleanup();
+    };
+  }, []);
+
+  return livestream?.meeting_id &&
+    livestream?.status !== LivestreamStatus.ENDED ? (
     <VideoSdkMeetingProvider
       config={{
-        meetingId: getLivestreamInfoResponse.meeting_id,
-        micEnabled: getLivestreamInfoResponse?.is_host ? true : false,
-        webcamEnabled: getLivestreamInfoResponse?.is_host ? true : false,
+        meetingId: livestream?.meeting_id,
+        micEnabled: livestream?.is_host ? true : false,
+        webcamEnabled: livestream?.is_host ? true : false,
         name: username ?? "",
-        mode: getLivestreamInfoResponse?.is_host ? "CONFERENCE" : "VIEWER",
+        mode: livestream?.is_host ? "CONFERENCE" : "VIEWER",
         multiStream: false,
         debugMode: true,
       }}
@@ -54,13 +83,25 @@ const MeetingProvider = ({ livestreamId }: { livestreamId: number }) => {
       <MeetingAppContext.Provider
         value={{
           livestreamId,
-          shopId: getLivestreamInfoResponse?.id_shop,
-          shopName: getLivestreamInfoResponse?.shop_name,
+          shopId: livestream?.id_shop,
+          shopName: livestream?.shop_name,
+          livestreamStatus: livestream?.status,
         }}
       >
         <MeetingContainer />
       </MeetingAppContext.Provider>
     </VideoSdkMeetingProvider>
+  ) : livestream?.status === LivestreamStatus.ENDED ? (
+    <Flex
+      vertical
+      justify="center"
+      align="center"
+      className="h-full bg-gray-800 rounded-lg"
+    >
+      <Typography.Title level={3} style={{ color: "white" }}>
+        Người bán đã kết thúc buổi livestream
+      </Typography.Title>
+    </Flex>
   ) : (
     <h1>Loading...</h1>
   );

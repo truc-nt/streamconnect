@@ -20,3 +20,9 @@ type GetProductsByShopIdData struct {
 	CreatedAt    time.Time              `json:"created_at" xml:"created_at"`
 	UpdatedAt    time.Time              `json:"updated_at" xml:"updated_at"`
 }
+
+type UpdateProductRequest struct {
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+	Status      *string `json:"status"`
+}

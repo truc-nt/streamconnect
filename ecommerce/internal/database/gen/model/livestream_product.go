@@ -12,4 +12,5 @@ type LivestreamProduct struct {
 	FkLivestream        int64 `json:"fk_livestream" xml:"fk_livestream"`
 	FkProduct           int64 `json:"fk_product" xml:"fk_product"`
 	Priority            int32 `json:"priority" xml:"priority"`
+	IsLivestreamed      *bool `json:"is_livestreamed" xml:"is_livestreamed"`
 }

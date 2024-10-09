@@ -12,6 +12,7 @@ type IUserHandler interface {
 	GetUser(ctx *gin.Context)
 	GetAddressesByUserId(ctx *gin.Context)
 	CreateAddress(ctx *gin.Context)
+	UpdateUser(ctx *gin.Context)
 }
 
 type UserHandler struct {
@@ -41,6 +42,25 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessGet(ctx, user)
+}
+
+func (h *UserHandler) UpdateUser(ctx *gin.Context) {
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	var user *model.UpdateUserRequest
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.UserService.UpdateUser(userId, user); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
 }
 
 func (h *UserHandler) GetDefaultAddress(ctx *gin.Context) {
@@ -83,7 +103,7 @@ func (h *UserHandler) CreateAddress(ctx *gin.Context) {
 		return
 	}
 
-	var address *model.AddressCreateRequest
+	var address *model.CreateAddressRequest
 	if err := ctx.ShouldBindJSON(&address); err != nil {
 		h.handleFailed(ctx, err)
 		return

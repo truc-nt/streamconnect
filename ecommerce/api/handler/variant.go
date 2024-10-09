@@ -10,6 +10,7 @@ import (
 type IVariantHandler interface {
 	GetVariantsByProductId(ctx *gin.Context)
 	GetVariantsByExternalProductIdMapping(ctx *gin.Context)
+	GetExternalVariantsByVariantId(ctx *gin.Context)
 }
 
 type VariantHandler struct {
@@ -54,4 +55,18 @@ func (h *VariantHandler) GetVariantsByExternalProductIdMapping(ctx *gin.Context)
 		return
 	}
 	h.handleSuccessGet(ctx, variants)
+}
+
+func (h *VariantHandler) GetExternalVariantsByVariantId(ctx *gin.Context) {
+	variantId, err := h.parseId(ctx, ctx.Param("variant_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	externalVariants, err := h.VariantService.GetExternalVariantsByVariantId(variantId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessGet(ctx, externalVariants)
 }

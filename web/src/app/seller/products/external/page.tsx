@@ -6,9 +6,12 @@ import { IExternalProduct } from "@/api/external_product";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import MappingExternalProduct from "./component/MappingExternalProduct";
+import { useAppSelector } from "@/store/store";
 
 const Page = () => {
-  const { data: externalProducts } = useGetExternalProducts();
+  const { userId } = useAppSelector((state) => state.authReducer);
+  const { data: externalProducts, mutate: mutateExternalProducts } =
+    useGetExternalProducts(userId!);
   const [externalProductIdMapping, setExternalProductIdMapping] = useState<
     string | null
   >(null);
@@ -81,12 +84,15 @@ const Page = () => {
                 setExternalProductIdMapping(external_product_id_mapping)
               }
             />
-            <DeleteOutlined />
           </Flex>
         );
       },
     },
   ];
+
+  useEffect(() => {
+    mutateExternalProducts();
+  }, [externalProductIdMapping]);
 
   return (
     <>
@@ -94,7 +100,6 @@ const Page = () => {
         columns={columns}
         dataSource={externalProducts?.data || []}
         rowKey={(row) => row.external_product_id_mapping}
-        rowSelection={{}}
       />
       {externalProductIdMapping !== null && (
         <MappingExternalProduct

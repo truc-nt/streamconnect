@@ -1,14 +1,13 @@
 import {
   getLivestreamProducts,
   getLivestreams,
-  getLivestreamInfo,
-  saveHls,
+  getLivestream,
 } from "@/api/livestream";
 import useSWR from "swr";
 
 export const useGetAllLivestreams = (shopId: number) => {
   return useSWR(
-    "/api/livestreams",
+    `/api/livestreams?shop_id=${shopId}`,
     () =>
       getLivestreams({
         shop_id: shopId,
@@ -44,10 +43,10 @@ export const useGetLivestreamProducts = (livestreamId: number) => {
   );
 };
 
-export const useGetLivstreamInfo = (livestreamId: number) => {
+export const useGetLivestream = (livestreamId: number) => {
   return useSWR(
-    `/api/livestreams/${livestreamId}/info`,
-    () => getLivestreamInfo(livestreamId),
+    `/api/livestreams/${livestreamId}`,
+    () => getLivestream(livestreamId),
     {
       //shouldRetryOnError: false,
       revalidateOnFocus: false,

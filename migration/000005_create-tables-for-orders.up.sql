@@ -8,6 +8,18 @@ CREATE TABLE IF NOT EXISTS user_address (
     is_default BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS shipping_method (
+    id_shipping_method SMALLSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    CONSTRAINT unique_shipping_method UNIQUE(name)
+);
+
+CREATE TABLE IF NOT EXISTS payment_method (
+    id_payment_method SMALLSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    CONSTRAINT unique_payment_method UNIQUE(name)
+);
+
 CREATE TABLE IF NOT EXISTS "order" (
     id_order BIGSERIAL PRIMARY KEY,
     fk_user BIGSERIAL REFERENCES "user"(id_user) NOT NULL,
@@ -31,12 +43,6 @@ CREATE TABLE IF NOT EXISTS ext_order (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS ext_order_voucher (
-    id_order_voucher BIGSERIAL PRIMARY KEY,
-    fk_ext_order BIGSERIAL REFERENCES ext_order(id_ext_order) NOT NULL,
-    fk_voucher BIGSERIAL REFERENCES voucher(id_voucher) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS order_item (
     id_order_item BIGSERIAL PRIMARY KEY,
     fk_order BIGSERIAL REFERENCES "order"(id_order) NOT NULL,
@@ -58,16 +64,13 @@ CREATE TABLE IF NOT EXISTS voucher (
     code TEXT UNIQUE NOT NULL,
     discount DECIMAL(10, 2) NOT NULL,
     max_discount DECIMAL(10, 2),
-    method TEXT NOT NULL,
-    type TEXT NOT NULL,
-    target TEXT NOT NULL,
+    method TEXT NOT NULL CHECK (method in ('each', 'across')),
+    type TEXT NOT NULL CHECK (type in ('percentage', 'fixed')),
+    target TEXT NOT NULL CHECK (target in ('item', 'shipping')),
     quantity INT NOT NULL,
     min_purchase DECIMAL(10, 2) DEFAULT 0.00 NOT NULL,
     start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    end_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_method check (method in ('each', 'across')),
-    CONSTRAINT check_type check (type in ('percentage', 'fixed')),
-    CONSTRAINT check_target check (target in ('item', 'shipping'))
+    end_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS voucher_user (
@@ -77,17 +80,12 @@ CREATE TABLE IF NOT EXISTS voucher_user (
     CONSTRAINT unique_voucher_user UNIQUE(fk_voucher, fk_user)
 );
 
-CREATE TABLE IF NOT EXISTS shipping_method (
-    id_shipping_method SMALLSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    CONSTRAINT unique_shipping_method UNIQUE(name)
-)
+CREATE TABLE IF NOT EXISTS ext_order_voucher (
+    id_order_voucher BIGSERIAL PRIMARY KEY,
+    fk_ext_order BIGSERIAL REFERENCES ext_order(id_ext_order) NOT NULL,
+    fk_voucher BIGSERIAL REFERENCES voucher(id_voucher) NOT NULL
+);
 
-CREATE TABLE IF NOT EXISTS payment_method (
-    id_payment_method SMALLSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    CONSTRAINT unique_payment_method UNIQUE(name)
-)
 
 CREATE TABLE IF NOT EXISTS order_address (
     id_order_address BIGSERIAL PRIMARY KEY,
@@ -96,8 +94,8 @@ CREATE TABLE IF NOT EXISTS order_address (
     phone TEXT NOT NULL,
     address TEXT NOT NULL,
     city TEXT NOT NULL
-)
+);
 
-INSERT INTO shipping_method (name) VALUES ('standard')
-INSERT INTO payment_method (name) VALUES ('cash on delivery')
+INSERT INTO shipping_method (name) VALUES ('standard');
+INSERT INTO payment_method (name) VALUES ('cash on delivery');
 

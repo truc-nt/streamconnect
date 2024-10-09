@@ -17,6 +17,7 @@ type ILivestreamExternalVariantRepository interface {
 	GetByLivestreamProductId(db qrm.Queryable, livestreamProductId int64) (*GetByLivestreamProductId, error)
 	GetByIds(db qrm.Queryable, livestreamExternalVariantIds []int64) ([]*model.LivestreamExtVariant, error)
 	CreateManyOnConflict(db qrm.Queryable, columnList postgres.ColumnList, data []*model.LivestreamExtVariant) ([]*model.LivestreamExtVariant, error)
+	GetVariantById(db qrm.Queryable, id int64) (*GetVariantById, error)
 }
 
 type LivestreamExternalVariantRepository struct {
@@ -148,4 +149,36 @@ func (r *LivestreamExternalVariantRepository) CreateManyOnConflict(db qrm.Querya
 			),
 		)
 	return r.insertMany(db, stmt)
+}
+
+type GetVariantById struct {
+	*model.LivestreamExtVariant
+	*model.ExtVariant
+	*model.ExtShop
+	*model.Variant
+	*model.Product
+	IDShop int64 `alias:"product.fk_shop" json:"id_shop"`
+}
+
+func (r *LivestreamExternalVariantRepository) GetVariantById(db qrm.Queryable, id int64) (*GetVariantById, error) {
+	stmt := table.LivestreamExtVariant.SELECT(
+		table.LivestreamExtVariant.AllColumns,
+		table.ExtVariant.AllColumns,
+		table.Variant.AllColumns,
+		table.Product.AllColumns,
+		table.ExtShop.AllColumns,
+	).FROM(
+		table.LivestreamExtVariant.
+			LEFT_JOIN(table.ExtVariant, table.ExtVariant.IDExtVariant.EQ(table.LivestreamExtVariant.FkExtVariant)).
+			LEFT_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExtVariant.FkVariant)).
+			LEFT_JOIN(table.Product, table.Product.IDProduct.EQ(table.Variant.FkProduct)).
+			LEFT_JOIN(table.ExtShop, table.ExtShop.IDExtShop.EQ(table.ExtVariant.FkExtShop)),
+	).WHERE(table.LivestreamExtVariant.IDLivestreamExtVariant.EQ(postgres.Int(int64(id))))
+
+	var data GetVariantById
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
