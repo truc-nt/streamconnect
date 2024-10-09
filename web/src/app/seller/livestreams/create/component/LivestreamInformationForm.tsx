@@ -1,3 +1,6 @@
+"use client";
+import { useState } from "react";
+
 import {
   Form,
   Input,
@@ -9,11 +12,10 @@ import {
   Radio,
   Space,
 } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useAppSelector, useAppDispatch } from "@/store/store";
-import { setLivestreamInformation, reset } from "@/store/livestream_create";
+import dayjs from "dayjs";
 
 const LivestreamInformationForm = (props: FormProps) => {
+  const [isStartTimeRequired, setIsStartTimeRequired] = useState(false);
   return (
     <Form
       name="login"
@@ -36,16 +38,39 @@ const LivestreamInformationForm = (props: FormProps) => {
         name="startTimeOption"
         rules={[{ required: true, message: "Hãy chọn thời gian bắt đầu" }]}
       >
-        <Radio.Group>
+        <Radio.Group
+          onChange={(e) => setIsStartTimeRequired(e.target.value === 2)}
+        >
           <Space direction="vertical">
             <Radio value={1}>Bắt đầu ngay bây giờ</Radio>
             <Flex align="center">
               <Radio value={2}>Lên lịch</Radio>
-              <Form.Item name="startTimeValue" className="m-0">
+              <Form.Item
+                name="startTimeValue"
+                className="m-0"
+                required={isStartTimeRequired}
+                rules={[{ required: isStartTimeRequired }]}
+              >
                 <DatePicker
                   showTime
                   placeholder="Chọn thời gian bắt đầu"
                   format="YYYY-MM-DD HH:mm:ss"
+                  disabledDate={(current) =>
+                    current && current < dayjs().startOf("day")
+                  }
+                  disabledTime={(current) => ({
+                    disabledHours: () => [],
+                    disabledMinutes: (selectedHour) => {
+                      if (selectedHour === dayjs().hour()) {
+                        return Array.from(
+                          { length: dayjs().minute() },
+                          (_, i) => i,
+                        );
+                      }
+                      return [];
+                    },
+                    disabledSeconds: () => [],
+                  })}
                 />
               </Form.Item>
             </Flex>

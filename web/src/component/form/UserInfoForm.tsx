@@ -3,10 +3,17 @@ import { Form, Input, Button, Select, Row, Col, DatePicker } from "antd";
 import { useGetUser } from "@/hook/user";
 import { useEffect } from "react";
 import { updateUser } from "@/api/user";
+import useLoading from "@/hook/loading";
+import dayjs from "dayjs";
 
 const UserInfoForm = () => {
   const [form] = Form.useForm();
   const { data: user } = useGetUser();
+  const executeUpdateUser = useLoading(
+    updateUser,
+    "Cập nhật thông tin người dùng thành công",
+    "Cập nhật thông tin người dùng thất bại",
+  );
 
   const handleSubmit = async () => {
     try {
@@ -18,7 +25,7 @@ const UserInfoForm = () => {
 
       console.log(request);
 
-      await updateUser(request);
+      await executeUpdateUser(request);
     } catch (e) {}
   };
 
@@ -28,7 +35,7 @@ const UserInfoForm = () => {
         username: user.username,
         email: user.email,
         gender: user.gender,
-        birthdate: user.birthdate,
+        birthdate: user.birthdate ? dayjs(user.birthdate) : null,
       });
     }
   }, [user, form]);

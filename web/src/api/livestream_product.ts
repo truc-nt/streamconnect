@@ -87,3 +87,24 @@ export const registerLivestreamProductFollower = async (
   );
   return res.data;
 };
+
+export const getFollowLivestreamProductsInLivestream = async (
+  livestreamId: number,
+) => {
+  const res = await axios.get<
+    {
+      fk_user: number;
+      fk_livestream_product: number;
+    }[]
+  >(`livestreams/${livestreamId}/livestream_products/follow`);
+  return res.data;
+};
+
+export const deleteFollowLivestreamProduct = async (
+  livestreamProductId: number,
+) => {
+  const res = await axios.delete(
+    `livestream_products/${livestreamProductId}/follow`,
+  );
+  return res.data;
+};

@@ -23,7 +23,7 @@ type IShopifyAdapter interface {
 	createOauth2Config() *oauth2.Config
 	getShopifyClient(param *shopify.ShopifyClientParam) shopify.IShopifyClient
 
-	GetAuthorizePath(param *shopify.ShopifyClientParam) string
+	GetAuthorizePath(shopId int64, param *shopify.ShopifyClientParam) string
 	GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error)
 	GetProducts(param *shopify.ShopifyClientParam) ([]*model.ExternalVariant, error)
 	GetExternalVariantStockByproductIds(param *shopify.ShopifyClientParam, productIds []string) ([]*model.ExternalVariantStock, error)
@@ -64,9 +64,9 @@ func (a *ShopifyAdapter) createOauth2Config() *oauth2.Config {
 	}
 }
 
-func (a *ShopifyAdapter) GetAuthorizePath(param *shopify.ShopifyClientParam) string {
+func (a *ShopifyAdapter) GetAuthorizePath(shopId int64, param *shopify.ShopifyClientParam) string {
 	oauth2Config := a.createOauth2Config()
-	return a.getShopifyClient(param).GetAuthorizePath(oauth2Config)
+	return a.getShopifyClient(param).GetAuthorizePath(shopId, oauth2Config)
 }
 
 func (a *ShopifyAdapter) GetAccessToken(param *shopify.ShopifyClientParam, code string) (string, error) {

@@ -1,7 +1,16 @@
 "use client";
 import { useState } from "react";
 
-import { Checkbox, List, Modal, Button, Space, Flex, Typography } from "antd";
+import {
+  Checkbox,
+  List,
+  Modal,
+  Button,
+  Space,
+  Flex,
+  Typography,
+  theme,
+} from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Constants } from "@videosdk.live/react-sdk";
 import {
@@ -9,10 +18,11 @@ import {
   PlusCircleOutlined,
   PushpinOutlined,
   ArrowRightOutlined,
+  HeartFilled,
 } from "@ant-design/icons";
 
-import LivestreamProductSellingModal from "@/app/livestreams/[id]/component/LivestreamProductSellingModal";
-import EditLivestreamProductModal from "@/app/livestreams/[id]/component/EditLivestreamProductModal";
+import LivestreamProductSellingModal from "@/component/modal/LivestreamProductSellingModal";
+import EditLivestreamProductModal from "@/component/modal/EditLivestreamProductModal";
 import ProductItem from "@/component/list_item/ProductItem";
 import ChosenLivestreamVariant from "@/component/livestream_variant/ChosenLivestreamVariant";
 import useLoading from "@/hook/loading";
@@ -26,9 +36,11 @@ import { addLivestreamProduct, ILivestreamProduct } from "@/api/livestream";
 import {
   registerLivestreamProductFollower,
   updateLivestreamProduct,
+  deleteFollowLivestreamProduct,
 } from "@/api/livestream_product";
 import { IChosenLivestreamVariant } from "@/app/seller/livestreams/create/component/LivestreamCreate";
 import { LivestreamStatus } from "@/constant/livestream";
+import { useGetFollowLivestreamProductsInLivestream } from "@/hook/livestream_product";
 
 const LivestreamProductList = ({
   shopId,
@@ -38,19 +50,33 @@ const LivestreamProductList = ({
 }: {
   shopId: number;
   livestreamId: number;
-  mode: "CONFERENCE" | "VIEWER";
-  status: LivestreamStatus;
+  mode: string;
+  status: string;
 }) => {
+  const { token } = theme.useToken();
   const { data: livestreamProducts, mutate: getLivestreamProducts } =
     useGetLivestreamProducts(Number(livestreamId)) ?? [];
-  const livestreamProductList = [
-    livestreamProducts?.filter(
-      (livestreamProduct) => !livestreamProduct.is_livestreamed,
-    ) ?? [],
-    livestreamProducts?.filter(
-      (livestreamProduct) => livestreamProduct.is_livestreamed,
-    ) ?? [],
-  ];
+
+  const {
+    data: followLivestreamProducts,
+    mutate: mutateFollowLivestreamProducts,
+  } = useGetFollowLivestreamProductsInLivestream(Number(livestreamId));
+
+  let livestreamProductList = [livestreamProducts ?? []];
+
+  if (
+    status === LivestreamStatus.PLAYED ||
+    status === LivestreamStatus.STARTED
+  ) {
+    livestreamProductList = [
+      livestreamProducts?.filter(
+        (livestreamProduct) => !livestreamProduct.is_livestreamed,
+      ) ?? [],
+      livestreamProducts?.filter(
+        (livestreamProduct) => livestreamProduct.is_livestreamed,
+      ) ?? [],
+    ];
+  }
 
   const [pinnedLivestreamProductIds, setPinnedLivestreamProductIds] = useState<
     number[]
@@ -60,11 +86,6 @@ const LivestreamProductList = ({
   );
   const [openAddModal, setOpenAddModal] = useState(false);
 
-  const executeUpdateLivestreamProductPriority = useLoading(
-    updateLivestreamProductPriority,
-    "Đã ghim sản phẩm thành công",
-    "Ghim sản phẩm thất bại",
-  );
   const executeAddLivestreamProduct = useLoading(
     addLivestreamProduct,
     "Thêm sản phẩm thành công",
@@ -74,6 +95,11 @@ const LivestreamProductList = ({
     registerLivestreamProductFollower,
     "Đăng ký sản phẩm thành công",
     "Đăng ký sản phẩm thất bại",
+  );
+  const executeDeleteFollowLivestreamProduct = useLoading(
+    deleteFollowLivestreamProduct,
+    "Hủy đăng ký sản phẩm thành công",
+    "Hủy đăng ký sản phẩm thất bại",
   );
 
   const executeNotifyLivestreamProductFollowers = useLoading(
@@ -174,9 +200,15 @@ const LivestreamProductList = ({
         ...unpinLivestreamProduct,
       ]);
       await getLivestreamProducts();
-      await executeNotifyLivestreamProductFollowers(
-        livestreamProducts?.[0]?.id_livestream_product,
-      );
+
+      if (
+        status === LivestreamStatus.PLAYED ||
+        status === LivestreamStatus.STARTED
+      ) {
+        await executeNotifyLivestreamProductFollowers(
+          livestreamProducts?.[0]?.id_livestream_product,
+        );
+      }
       setPinnedLivestreamProductIds([]);
     } catch (e) {}
   };
@@ -221,7 +253,8 @@ const LivestreamProductList = ({
                       onClick={() => {
                         setLivestreamProductId(item.id_livestream_product);
                       }}
-                      {...(mode === Constants.modes.CONFERENCE
+                      {...(mode === Constants.modes.CONFERENCE &&
+                      status !== LivestreamStatus.ENDED
                         ? {
                             Checkbox: (
                               <Checkbox
@@ -240,7 +273,24 @@ const LivestreamProductList = ({
                           }
                         : {})}
                       Button={
-                        mode === Constants.modes.VIEWER && (
+                        mode === Constants.modes.VIEWER &&
+                        status !== LivestreamStatus.ENDED &&
+                        (followLivestreamProducts?.find(
+                          (followLivestreamProduct) =>
+                            followLivestreamProduct.fk_livestream_product ===
+                            item.id_livestream_product,
+                        ) ? (
+                          <HeartFilled
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              await executeDeleteFollowLivestreamProduct(
+                                item.id_livestream_product,
+                              );
+                              mutateFollowLivestreamProducts();
+                            }}
+                            style={{ color: token.colorPrimary }}
+                          />
+                        ) : (
                           <HeartOutlined
                             onClick={async (e) => {
                               e.stopPropagation();
@@ -248,11 +298,17 @@ const LivestreamProductList = ({
                                 livestreamId,
                                 [item.id_livestream_product],
                               );
+                              mutateFollowLivestreamProducts();
                             }}
                           />
-                        )
+                        ))
                       }
-                      className={item.is_livestreamed ? "opacity-50" : ""}
+                      className={
+                        item.is_livestreamed &&
+                        status !== LivestreamStatus.ENDED
+                          ? "opacity-50"
+                          : ""
+                      }
                     />
                   </List.Item>
                 )}
@@ -262,8 +318,7 @@ const LivestreamProductList = ({
         />
       </div>
       {mode === Constants.modes.CONFERENCE &&
-        (status == LivestreamStatus.CREATED ||
-          status == LivestreamStatus.PLAYED) && (
+        status !== LivestreamStatus.ENDED && (
           <Space.Compact className="m-auto">
             {true && (
               <Button
@@ -276,13 +331,16 @@ const LivestreamProductList = ({
               icon={<PlusCircleOutlined />}
               onClick={() => setOpenAddModal(true)}
             />
-            <Button
-              icon={<ArrowRightOutlined />}
-              onClick={async () =>
-                //await executeNotifyLivestreamProductFollowers(1)
-                handleNextLivestreamProduct()
-              }
-            />
+            {(status === LivestreamStatus.PLAYED ||
+              status === LivestreamStatus.STARTED) && (
+              <Button
+                icon={<ArrowRightOutlined />}
+                onClick={async () =>
+                  //await executeNotifyLivestreamProductFollowers(1)
+                  handleNextLivestreamProduct()
+                }
+              />
+            )}
           </Space.Compact>
         )}
       {livestreamProductId !== null &&
@@ -299,8 +357,7 @@ const LivestreamProductList = ({
           />
         ))}
       {mode === Constants.modes.CONFERENCE &&
-        (status == LivestreamStatus.CREATED ||
-          status == LivestreamStatus.PLAYED) && (
+        status !== LivestreamStatus.ENDED && (
           <Modal
             open={openAddModal}
             footer={null}

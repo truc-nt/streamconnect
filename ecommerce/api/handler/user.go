@@ -103,7 +103,7 @@ func (h *UserHandler) CreateAddress(ctx *gin.Context) {
 		return
 	}
 
-	var address *model.AddressCreateRequest
+	var address *model.CreateAddressRequest
 	if err := ctx.ShouldBindJSON(&address); err != nil {
 		h.handleFailed(ctx, err)
 		return

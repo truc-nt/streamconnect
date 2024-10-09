@@ -25,4 +25,5 @@ export interface IBaseExternalVariant extends IBaseVariant {
   option: { [key: string]: string };
   price: number;
   id_ecommerce: number;
+  stock: number;
 }

@@ -27,18 +27,18 @@ const mainNavigator: MenuItem[] = [
     key: "/trending",
     label: <Link href="/trending">Xu hướng</Link>,
     icon: <FireFilled />,
-  },*/
+  },
   {
     key: "/following",
     label: <Link href="/following">Đang theo dõi</Link>,
     icon: <TeamOutlined />,
-  },
+  },*/
 ];
 
 const userNavigator: MenuItem[] = [
   {
     key: "/user",
-    label: <Link href="/user/profile">Thông tin tài khoản</Link>,
+    label: <Link href="/user/">Thông tin tài khoản</Link>,
     icon: <ContactsOutlined />,
   },
   {

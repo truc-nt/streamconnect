@@ -26,11 +26,11 @@ func NewExternalVariantHandler(s service.IExternalVariantService) IExternalVaria
 }
 
 func (h *ExternalVariantHandler) GetExternalVariantsGroupByProduct(ctx *gin.Context) {
-	/*externalShopId, err := h.parseId(ctx, ctx.Param("external_shop_id"))
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
-	}*/
+	}
 
 	var queryParams *model.GetExternalVariantsGroupByProduct
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
@@ -38,7 +38,7 @@ func (h *ExternalVariantHandler) GetExternalVariantsGroupByProduct(ctx *gin.Cont
 		return
 	}
 
-	products, err := h.Service.GetExternalVariantsGroupByProduct(queryParams.Limit, queryParams.Offset)
+	products, err := h.Service.GetExternalVariantsGroupByProduct(shopId, queryParams.Limit, queryParams.Offset)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return

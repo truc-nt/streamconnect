@@ -5,10 +5,7 @@ import {
   IUpdateLivestreamExternalVariantQuantity,
 } from "@/api/livestream_product";
 import { useState, useEffect } from "react";
-import ProductInformation, {
-  IProductInformation,
-  IExternalVariant,
-} from "@/app/seller/livestreams/create/component/ProductInformation";
+import ProductInfo from "@/component/info/ProductInfo";
 import { ECOMMERCE_PLATFORMS } from "@/constant/ecommerce";
 import {
   TableColumnType,
@@ -128,7 +125,7 @@ const EditLivestreamProductModal = ({
       {...props}
     >
       <Flex vertical gap="middle">
-        <ProductInformation
+        <ProductInfo
           product={{
             productId: livestreamProduct?.id_product!,
             name: livestreamProduct?.name!,

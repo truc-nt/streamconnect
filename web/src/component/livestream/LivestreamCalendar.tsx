@@ -14,42 +14,29 @@ import {
   Modal,
   Checkbox,
 } from "antd";
-import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import {
-  HeartOutlined,
-  PushpinOutlined,
-  PlusCircleOutlined,
-} from "@ant-design/icons";
 import type { CalendarProps } from "antd";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { Constants } from "@videosdk.live/react-sdk";
 
 import { useGetAllLivestreams } from "@/hook/livestream";
-import { useGetLivestreamProducts } from "@/hook/livestream";
-import { notifyLivestreamProductFollowers } from "@/api/notification";
-import useLoading from "@/hook/loading";
-import {
-  updateLivestreamProductPriority,
-  IPinLivestreamProduct,
-} from "@/api/livestream_product";
-import { addLivestreamProduct, ILivestreamProduct } from "@/api/livestream";
-import { registerLivestreamProductFollower } from "@/api/livestream_product";
-import { IChosenLivestreamVariant } from "@/app/seller/livestreams/create/component/LivestreamCreate";
-import ChosenLivestreamVariant from "@/component/livestream_variant/ChosenLivestreamVariant";
 import LivestreamProductList from "@/component/list/LivestreamProductList";
 
 const LivestreamCalendar = ({
   shopId,
   mode,
+  selectedLivestreamId,
+  setSelectedLivestreamId,
 }: {
   shopId: number;
   mode: string;
+  selectedLivestreamId?: number | null;
+  setSelectedLivestreamId?: (id: number | null) => void;
 }) => {
   const { data: livestreams } = useGetAllLivestreams(shopId);
-  const [selectedLivestreamId, setSelectedLivestreamId] = useState<
+  /*const [selectedLivestreamId, setSelectedLivestreamId] = useState<
     number | null
-  >(null);
+  >(null);*/
 
   const getListData = (value: Dayjs) => {
     const dateString = value.format("YYYY-MM-DD");
@@ -72,7 +59,7 @@ const LivestreamCalendar = ({
           <Tag
             key={index}
             color="blue"
-            onClick={() => setSelectedLivestreamId(livestream.livestreamId)}
+            onClick={() => setSelectedLivestreamId?.(livestream.livestreamId)}
           >
             {livestream.title}
           </Tag>
@@ -108,6 +95,12 @@ const LivestreamCalendar = ({
               shopId={shopId}
               livestreamId={selectedLivestreamId}
               mode={mode}
+              status={
+                livestreams?.find(
+                  (livestream) =>
+                    livestream.id_livestream === selectedLivestreamId,
+                )?.status!
+              }
             />
           </div>
         </Card>

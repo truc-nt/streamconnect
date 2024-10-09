@@ -16,8 +16,8 @@ const ViewerView = () => {
   const playerRef = useRef(null);
 
   useEffect(() => {
-    setPlaybackUrl(hlsUrls.playbackHlsUrl);
-  }, [hlsUrls.playbackHlsUrl]);
+    setPlaybackUrl(hlsUrls.livestreamUrl);
+  }, [hlsUrls.livestreamUrl]);
 
   return (
     <>

@@ -7,10 +7,11 @@ type ShopifyConnectParams struct {
 }
 
 type ShopifyRedirectParams struct {
-	Code string `form:"code"`
-	Hmac string `form:"hmac"`
-	Host string `form:"host"`
-	Shop string `form:"shop"`
+	Code  string `form:"code"`
+	Hmac  string `form:"hmac"`
+	Host  string `form:"host"`
+	Shop  string `form:"shop"`
+	State int64  `form:"state"`
 }
 
 type ShopifySyncProductsParams struct {

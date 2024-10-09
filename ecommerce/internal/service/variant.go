@@ -10,6 +10,7 @@ type IVariantService interface {
 	GetVariantsByProductId(productId int64, limit int64, offset int64) ([]*repository.GetVariantsByProductId, error)
 
 	GetVariantsByExternalProductIdMapping(externalProductIdMapping string) (interface{}, error)
+	GetExternalVariantsByVariantId(variantId int64) (interface{}, error)
 }
 
 type VariantService struct {
@@ -76,4 +77,8 @@ func (s *VariantService) GetVariantsByProductId(shopId int64, limit int64, offse
 
 func (s *VariantService) GetVariantsByExternalProductIdMapping(externalProductIdMapping string) (interface{}, error) {
 	return s.VariantRepository.GetVariantsByExternalProductIdMapping(s.VariantRepository.GetDatabase().Db, externalProductIdMapping)
+}
+
+func (s *VariantService) GetExternalVariantsByVariantId(variantId int64) (interface{}, error) {
+	return s.VariantRepository.GetExternalVariantsByVariantId(s.VariantRepository.GetDatabase().Db, variantId)
 }

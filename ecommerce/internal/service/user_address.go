@@ -11,7 +11,7 @@ import (
 
 type IUserAddressService interface {
 	GetAddressByUserId(userId int64) ([]*entity.UserAddress, error)
-	CreateAddress(userId int64, request *apiModel.AddressCreateRequest) (*entity.UserAddress, error)
+	CreateAddress(userId int64, request *apiModel.CreateAddressRequest) (*entity.UserAddress, error)
 }
 
 type UserAddressService struct {
@@ -30,7 +30,7 @@ func (s *UserAddressService) GetAddressByUserId(userId int64) ([]*entity.UserAdd
 	return s.UserAddressRepository.GetByUserId(s.UserAddressRepository.GetDatabase().Db, userId)
 }
 
-func (s *UserAddressService) CreateAddress(userId int64, request *apiModel.AddressCreateRequest) (*entity.UserAddress, error) {
+func (s *UserAddressService) CreateAddress(userId int64, request *apiModel.CreateAddressRequest) (*entity.UserAddress, error) {
 	addresses, err := s.UserAddressRepository.GetByUserId(s.UserAddressRepository.GetDatabase().Db, userId)
 	if err != nil {
 		return nil, err
@@ -46,6 +46,7 @@ func (s *UserAddressService) CreateAddress(userId int64, request *apiModel.Addre
 		Name:      request.Name,
 		Phone:     request.Phone,
 		Address:   request.Address,
+		City:      request.City,
 		IsDefault: isDefault,
 	}
 
@@ -56,6 +57,7 @@ func (s *UserAddressService) CreateAddress(userId int64, request *apiModel.Addre
 			table.UserAddress.Name,
 			table.UserAddress.Phone,
 			table.UserAddress.Address,
+			table.UserAddress.City,
 			table.UserAddress.IsDefault,
 		},
 		*address,

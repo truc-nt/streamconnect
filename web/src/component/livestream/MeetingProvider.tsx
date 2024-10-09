@@ -13,6 +13,8 @@ import { Constants } from "@videosdk.live/react-sdk";
 import { useGetLivestream } from "@/hook/livestream";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { LivestreamStatus } from "@/constant/livestream";
+import { updateLivestream } from "@/api/livestream";
+import useLoading from "@/hook/loading";
 
 const VideoSdkMeetingProvider = dynamic(
   () => import("@videosdk.live/react-sdk").then((mod) => mod.MeetingProvider),
@@ -38,7 +40,29 @@ export const useMeetingAppContext = () => useContext(MeetingAppContext);
 const MeetingProvider = ({ livestreamId }: { livestreamId: number }) => {
   const { data: livestream } = useGetLivestream(Number(livestreamId));
   const { username } = useAppSelector((state) => state.authReducer);
-  console.log(livestream, livestream?.meeting_id);
+  const executeUpdateLivestream = useLoading(updateLivestream);
+
+  useEffect(() => {
+    const updateLivestreamStatus = async () => {
+      if (livestream?.is_host) {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.STARTED,
+        });
+      }
+    };
+
+    updateLivestreamStatus();
+
+    return () => {
+      const cleanup = async () => {
+        await executeUpdateLivestream(livestreamId, {
+          status: LivestreamStatus.CREATED,
+        });
+      };
+
+      cleanup();
+    };
+  }, []);
 
   return livestream?.meeting_id &&
     livestream?.status !== LivestreamStatus.ENDED ? (

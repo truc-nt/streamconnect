@@ -18,7 +18,7 @@ type IExternalVariantRepository interface {
 	GetByVariantIds(db qrm.Queryable, variantIds []int64) ([]*model.ExtVariant, error)
 	UpdateExternalVariant(db qrm.Queryable, variantId int64, shopifyVariantId string) error
 
-	GetExternalVariantsGroupByProduct(db qrm.Queryable, limit int64, offset int64) (interface{}, error)
+	GetExternalVariantsGroupByProduct(db qrm.Queryable, shopId int64, limit int64, offset int64) (interface{}, error)
 	GetExternalVariantsByExternalProductIdMapping(db qrm.Queryable, externalProductIdMapping string) ([]*model.ExtVariant, error)
 	GetExternalVariantInfoById(db qrm.Queryable, id int64) (*GetExternalVariantInfoById, error)
 }
@@ -125,7 +125,7 @@ type GetExternalVariantsGroupByProduct struct {
 	} `json:"external_variants"`
 }
 
-func (r *ExternalVariantRepository) GetExternalVariantsGroupByProduct(db qrm.Queryable, limit int64, offset int64) (interface{}, error) {
+func (r *ExternalVariantRepository) GetExternalVariantsGroupByProduct(db qrm.Queryable, shopId int64, limit int64, offset int64) (interface{}, error) {
 	stmt := table.ExtVariant.SELECT(
 		table.ExtVariant.AllColumns,
 		table.Product.IDProduct,
@@ -136,7 +136,8 @@ func (r *ExternalVariantRepository) GetExternalVariantsGroupByProduct(db qrm.Que
 			LEFT_JOIN(table.ExtShop, table.ExtShop.IDExtShop.EQ(table.ExtVariant.FkExtShop)).
 			LEFT_JOIN(table.Variant, table.Variant.IDVariant.EQ(table.ExtVariant.FkVariant)).
 			LEFT_JOIN(table.Product, table.Product.IDProduct.EQ(table.Variant.FkProduct)),
-	).LIMIT(limit).OFFSET(offset).ORDER_BY(table.ExtVariant.ExtProductIDMapping)
+	).WHERE(table.ExtShop.FkShop.EQ(postgres.Int(shopId))).
+		LIMIT(limit).OFFSET(offset).ORDER_BY(table.ExtVariant.ExtProductIDMapping)
 
 	data := make([]*GetExternalVariantsGroupByProduct, 0)
 	err := stmt.Query(r.GetDatabase().Db, &data)

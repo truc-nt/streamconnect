@@ -7,7 +7,7 @@ import useSWR from "swr";
 
 export const useGetAllLivestreams = (shopId: number) => {
   return useSWR(
-    "/api/livestreams",
+    `/api/livestreams?shop_id=${shopId}`,
     () =>
       getLivestreams({
         shop_id: shopId,

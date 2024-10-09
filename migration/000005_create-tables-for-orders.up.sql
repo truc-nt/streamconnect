@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS voucher (
     max_discount DECIMAL(10, 2),
     method TEXT NOT NULL CHECK (method in ('each', 'across')),
     type TEXT NOT NULL CHECK (type in ('percentage', 'fixed')),
-    target TEXT NOT NULL CHECK (target in ('item', 'shipping'))
+    target TEXT NOT NULL CHECK (target in ('item', 'shipping')),
     quantity INT NOT NULL,
     min_purchase DECIMAL(10, 2) DEFAULT 0.00 NOT NULL,
     start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

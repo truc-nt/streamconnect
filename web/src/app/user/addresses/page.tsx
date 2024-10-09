@@ -1,14 +1,16 @@
 "use client";
 import { useState } from "react";
-import { theme } from "antd";
-import AddButton from "./component/AddButton";
-import AddressInfoList from "./component/AddressInfoList";
-import { Flex } from "antd";
+import { theme, List } from "antd";
+import { Flex, Card } from "antd";
 
 import AddressModal from "@/component/modal/AddressModal";
+import AddressInfo from "@/component/info/AddressInfo";
+import { useGetAddresses } from "@/hook/user";
+
 const Page = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const { token } = theme.useToken();
+  const { data: addresses, mutate: mutateAddresses } = useGetAddresses();
   return (
     <>
       <Flex gap="middle" vertical>
@@ -28,11 +30,21 @@ const Page = () => {
         >
           Thêm địa chỉ
         </div>
-        <AddressInfoList />
+        <List
+          dataSource={addresses}
+          renderItem={(item, index) => (
+            <List.Item style={{ border: 0 }}>
+              <Card className="w-full">
+                <AddressInfo {...item} />
+              </Card>
+            </List.Item>
+          )}
+        />
       </Flex>
       <AddressModal
         open={openAddModal}
         onCancel={() => setOpenAddModal(false)}
+        successfullySubmitPostAction={() => mutateAddresses()}
       />
     </>
   );

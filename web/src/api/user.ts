@@ -38,6 +38,6 @@ interface ICreateAddressRequest {
   is_default: boolean;
 }
 export const createAddress = async (request: ICreateAddressRequest) => {
-  const response = await axios.patch(`addresses/`, request);
+  const response = await axios.post(`addresses/`, request);
   return response.data;
-}
+};

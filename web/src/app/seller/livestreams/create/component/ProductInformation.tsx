@@ -38,7 +38,7 @@ const ProductInformation = ({
   );
 
   const option = getProductOptionFromVariantOptions(
-    product.variants.map((variant) => variant.option),
+    product?.variants?.map((variant) => variant.option),
   );
 
   useEffect(() => {

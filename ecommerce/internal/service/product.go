@@ -11,12 +11,14 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/samber/lo"
 )
 
 type IProductService interface {
-	GetProductById(productId int64) (*internalModel.Product, error)
+	GetProductById(productId int64) (interface{}, error)
 	GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error)
 	CreateProductsWithVariants(shopId int64, createProductsWithVariantsRequest *model.CreateProductWithVariants) error
+	UpdateProduct(productId int64, updateProductRequest *model.UpdateProductRequest) error
 }
 
 type ProductService struct {
@@ -43,8 +45,51 @@ func NewProductService(
 	}
 }
 
-func (s *ProductService) GetProductById(productId int64) (*internalModel.Product, error) {
-	return s.ProductRepository.GetById(s.ProductRepository.GetDatabase().Db, productId)
+func (s *ProductService) GetProductById(productId int64) (interface{}, error) {
+	product, err := s.ProductRepository.GetProductInfoById(s.ProductRepository.GetDatabase().Db, productId)
+	if err != nil {
+		return nil, err
+	}
+
+	externalShopsByEcommerceId := make(map[int16]map[int64][]string, 0)
+	for _, variant := range product.Variants {
+		for _, externalVariant := range variant.ExternalVariants {
+			if _, ok := externalShopsByEcommerceId[externalVariant.IDEcommerce]; !ok {
+				externalShopsByEcommerceId[externalVariant.IDEcommerce] = make(map[int64][]string, 0)
+			}
+
+			if _, ok := externalShopsByEcommerceId[externalVariant.IDEcommerce][externalVariant.IDExternalShop]; !ok {
+				externalShopsByEcommerceId[externalVariant.IDEcommerce][externalVariant.IDExternalShop] = make([]string, 0)
+			}
+
+			if lo.Contains(externalShopsByEcommerceId[externalVariant.IDEcommerce][externalVariant.IDExternalShop], externalVariant.ExternalProductIdMapping) {
+				continue
+			}
+
+			externalShopsByEcommerceId[externalVariant.IDEcommerce][externalVariant.IDExternalShop] = append(externalShopsByEcommerceId[externalVariant.IDEcommerce][externalVariant.IDExternalShop], externalVariant.ExternalProductIdMapping)
+		}
+	}
+
+	for ecommerceId, productsByExternalShop := range externalShopsByEcommerceId {
+		for externalShopId, externalProductIdMappings := range productsByExternalShop {
+			externalVariantStocks, err := s.EcommerceService[ecommerceId].GetStockByExternalProductExternalId(externalShopId, externalProductIdMappings)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, externalVariantStock := range externalVariantStocks {
+				for _, variant := range product.Variants {
+					for _, externalVariant := range variant.ExternalVariants {
+						if externalVariant.ExternalIdMapping == externalVariantStock.ExternalIdMapping {
+							externalVariant.Stock += externalVariantStock.Stock
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return product, nil
 }
 
 func (s *ProductService) GetProductsByShopId(shopId int64, limit int64, offset int64) (interface{}, error) {
@@ -146,6 +191,47 @@ func (s *ProductService) CreateProductsWithVariants(shopId int64, createProducts
 	}
 
 	if _, err := s.ProductRepository.ExecWithinTransaction(execWithinTransaction); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ProductService) UpdateProduct(productId int64, updateProductRequest *model.UpdateProductRequest) error {
+	updatedColumnList := postgres.ColumnList{}
+	product := internalModel.Product{
+		IDProduct: productId,
+	}
+
+	if updateProductRequest.Name != nil {
+		updatedColumnList = append(
+			updatedColumnList,
+			table.Product.Name,
+		)
+		product.Name = *updateProductRequest.Name
+	}
+
+	if updateProductRequest.Description != nil {
+		updatedColumnList = append(
+			updatedColumnList,
+			table.Product.Description,
+		)
+		product.Description = updateProductRequest.Description
+	}
+
+	if updateProductRequest.Status != nil {
+		updatedColumnList = append(
+			updatedColumnList,
+			table.Product.Status,
+		)
+		product.Status = *updateProductRequest.Status
+	}
+
+	if _, err := s.ProductRepository.UpdateById(
+		s.ProductRepository.GetDatabase().Db,
+		updatedColumnList,
+		product,
+	); err != nil {
 		return err
 	}
 

@@ -1,7 +1,7 @@
 import { Button, Modal, Form, ModalProps } from "antd";
 import AddressForm from "@/component/form/AddressForm";
 
-import { createVoucher } from "@/api/voucher";
+import { createAddress } from "@/api/user";
 import useLoading from "@/hook/loading";
 
 interface IAddressModalProps extends ModalProps {
@@ -9,11 +9,12 @@ interface IAddressModalProps extends ModalProps {
 }
 const AddressModal = (props: IAddressModalProps) => {
   const [form] = Form.useForm();
-  const handleCreateVoucher = useLoading(
-    createVoucher,
-    "Tạo voucher thành công",
-    "Tạo voucher thất bại",
+  const handleCreateAddress = useLoading(
+    createAddress,
+    "Tạo địa chỉ thành công",
+    "Tạo địa chỉ thất bại",
   );
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -23,7 +24,7 @@ const AddressModal = (props: IAddressModalProps) => {
       };
 
       console.log(request);
-      //await handleCreateVoucher(request);
+      await handleCreateAddress(request);
       props.successfullySubmitPostAction?.();
     } catch (e) {}
   };

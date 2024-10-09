@@ -21,16 +21,19 @@ import {
   BorderOutlined,
   SkinFilled,
   WalletOutlined,
+  DesktopOutlined,
 } from "@ant-design/icons";
 import { useIsHls } from "@/hook/hls";
 import { useIsRecording } from "@/hook/recording";
 import useLoading from "@/hook/loading";
 import { saveHls, updateLivestream } from "@/api/livestream";
 import { LivestreamStatus } from "@/constant/livestream";
+import { useRouter } from "next/navigation";
 
 const EndButton = ({ livestreamId }: { livestreamId: number }) => {
   const { end } = useMeeting();
   const executeUpdateLivestream = useLoading(updateLivestream);
+  const router = useRouter();
 
   return (
     <Button
@@ -41,6 +44,7 @@ const EndButton = ({ livestreamId }: { livestreamId: number }) => {
         await executeUpdateLivestream(livestreamId, {
           status: LivestreamStatus.ENDED,
         });
+        router.push(`/seller/livestreams`);
       }}
     >
       END
@@ -63,18 +67,18 @@ const HlsButton = ({ livestreamId }: { livestreamId: number }) => {
 
   useEffect(() => {
     const startHls = async () => {
-      if (hlsUrls.playbackHlsUrl) {
+      if (hlsUrls.livestreamUrl) {
         try {
           await saveHls(livestreamId, hlsUrls.playbackHlsUrl);
         } catch (e) {}
         await executeUpdateLivestream(livestreamId, {
           status: LivestreamStatus.PLAYED,
-          hls_url: hlsUrls.playbackHlsUrl,
+          hls_url: hlsUrls.livestreamUrl,
         });
       } else {
         await executeUpdateLivestream(livestreamId, {
           status: LivestreamStatus.STARTED,
-          hls_url: hlsUrls.playbackHlsUrl,
+          hls_url: hlsUrls.livestreamUrl,
         });
       }
     };
@@ -138,6 +142,20 @@ const RecordingButton = () => {
     >
       REC
     </Button>
+  );
+};
+
+const ShareScreenButton = () => {
+  const { localScreenShareOn, toggleScreenShare, presenterId } = useMeeting();
+  return (
+    <Button
+      size="large"
+      icon={<DesktopOutlined />}
+      type={localScreenShareOn ? "primary" : "default"}
+      onClick={() => {
+        toggleScreenShare();
+      }}
+    />
   );
 };
 
@@ -327,6 +345,7 @@ const BottomBar = ({
         <Flex gap="small" justify="center" align="center">
           <RecordingButton />
           <HlsButton livestreamId={Number(livestreamId)} />
+          <ShareScreenButton />
         </Flex>
       )}
       {localParticipant.mode === Constants.modes.CONFERENCE && (

@@ -2,6 +2,7 @@ import { useAppDispatch } from "@/store/store";
 import { setOpen, setClose } from "@/store/loading";
 import { useCallback } from "react";
 import { App } from "antd";
+import { AxiosError } from "axios";
 
 const useLoading = (
   loadingFetch: (...params: any[]) => Promise<any>,
@@ -20,8 +21,9 @@ const useLoading = (
       if (successMessage) message.success(successMessage);
       onSuccess?.(res);
       return res;
-    } catch (error) {
-      if (errorMessage) message.error(errorMessage);
+    } catch (error: AxiosError | any) {
+      const errMsg = errorMessage || error?.message || "An error occurred";
+      message.error(errMsg);
       onError?.(error);
     } finally {
       dispatch(setClose());

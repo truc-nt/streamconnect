@@ -31,7 +31,7 @@ const AddressForm = (props: FormProps) => {
         <Col span={24}>
           <Form.Item
             label="Địa chỉ"
-            name="discount"
+            name="address"
             rules={[{ required: true }]}
             required={false}
           >
@@ -50,10 +50,21 @@ const AddressForm = (props: FormProps) => {
         </Col>
         <Col span={24}>
           <Form.Item
-            label="Địa chỉ mặc định"
-            name="default"
+            label="Số điện thoại"
+            name="phone"
             rules={[{ required: true }]}
             required={false}
+          >
+            <Input />
+          </Form.Item>
+        </Col>
+        <Col span={24}>
+          <Form.Item
+            label="Địa chỉ mặc định"
+            name="is_default"
+            rules={[{ required: true }]}
+            required={false}
+            initialValue={false}
           >
             <Switch />
           </Form.Item>

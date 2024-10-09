@@ -98,8 +98,3 @@ export const addLivestreamProduct = async (
   );
   return res.data;
 };
-
-export const startLivestream = async (livestreamId: number) => {
-  const res = await axios.put(`livestreams/${livestreamId}/start`);
-  return res.data;
-};

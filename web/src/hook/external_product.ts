@@ -6,13 +6,13 @@ import {
 
 import useSWR from "swr";
 
-export const useGetExternalProducts = () => {
+export const useGetExternalProducts = (shopId: number) => {
   return useSWR(
-    `/api/external_products/`,
-    async () => await getExternalProducts(),
+    `/api/${shopId}/external_products/`,
+    async () => await getExternalProducts(shopId),
     {
       //shouldRetryOnError: false,
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
     },
   );
 };

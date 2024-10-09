@@ -16,7 +16,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   return (
     <Flex vertical gap="middle">
-      <ShopInfo {...shop!} />
+      {shop && <ShopInfo {...shop!} />}
       <Tabs
         className="w-full"
         defaultActiveKey="1"

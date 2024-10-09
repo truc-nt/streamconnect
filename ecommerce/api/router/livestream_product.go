@@ -11,6 +11,8 @@ func LoadLivestreamProductRouter(apiRouter *gin.RouterGroup, h *handler.Handlers
 	{
 		livestreamProduct.GET("/:livestream_product_id", h.LivestreamProductHandler.GetLivestreamProductInfoByLivestreamProductId)
 		livestreamProduct.POST("/priority", h.LivestreamProductHandler.UpdateLivestreamProductPriority)
+
+		livestreamProduct.DELETE("/:livestream_product_id/follow", h.LivestreamHandler.DeleteLivestreamProductFollower)
 	}
 
 	livestreamExternalVariant := apiRouter.Group("/livestream_external_variants")

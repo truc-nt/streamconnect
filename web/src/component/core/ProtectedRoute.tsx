@@ -7,7 +7,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { userId } = useAppSelector((state) => state.authReducer);
   const token = localStorage.getItem("token");
-  console.log(userId);
 
   useEffect(() => {
     if (!token) {

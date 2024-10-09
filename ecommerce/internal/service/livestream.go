@@ -27,10 +27,12 @@ type ILivestreamService interface {
 	UpdateLivestream(livestreamId int64, request *model.UpdateLivestreamRequest) error
 	UpdateLivestreamExternalVariantQuantity(updateLivestreamExternalVariantQuantityRequest *model.UpdateLivestreamExternalVariantQuantityRequest) error
 	AddLivestreamProduct(livestreamId int64, livestreamProductCreateRequest []*model.LivestreamProductCreateRequest) error
-	StartLivestream(livestreamId int64) error
 	RegisterLivestreamProductFollower(livestreamId int64, userId int64, livestreamProductIds []int64) error
+	DeleteLivestreamProductFollower(livestreamId int64, userId int64) error
 	FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error)
 	UpdateLivestreamProducts(updateLivestreamProductsRequest *model.UpdateLivestreamProductsRequest) error
+	GetLivestreamStatistics(livestreamId int64) (interface{}, error)
+	GetFollowLivestreamProductsInLivestream(userId, livestreamId int64) (interface{}, error)
 }
 
 type LivestreamService struct {
@@ -413,23 +415,6 @@ func (s *LivestreamService) AddLivestreamProduct(livestreamId int64, livestreamP
 	return nil
 }
 
-func (s *LivestreamService) StartLivestream(livestreamId int64) error {
-	if _, err := s.LivestreamRepository.UpdateById(
-		s.LivestreamRepository.GetDatabase().Db,
-		postgres.ColumnList{
-			table.Livestream.Status,
-		},
-		entity.Livestream{
-			IDLivestream: livestreamId,
-			Status:       constants.LIVESTREAM_STARTED,
-		},
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *LivestreamService) FetchLivestreamProductFollowers(productId int64) (*model.LivestreamProductFollowerDTO, error) {
 	followers, err := s.LivestreamProductFollowerRepository.FindByProductId(
 		s.LivestreamProductFollowerRepository.GetDatabase().Db,
@@ -507,5 +492,25 @@ func (s *LivestreamService) UpdateLivestreamProducts(updateLivestreamProductsReq
 		return err
 	}
 
+	return nil
+}
+
+func (s *LivestreamService) GetLivestreamStatistics(livestreamId int64) (interface{}, error) {
+	return s.LivestreamRepository.GetOrdersByLivestreamId(s.LivestreamRepository.GetDatabase().Db, livestreamId)
+}
+
+func (s *LivestreamService) GetFollowLivestreamProductsInLivestream(userId, livestreamId int64) (interface{}, error) {
+	return s.LivestreamProductFollowerRepository.GetFollowLivestreamProductsInLivestream(
+		s.LivestreamProductFollowerRepository.GetDatabase().Db,
+		userId,
+		livestreamId,
+	)
+}
+
+func (s *LivestreamService) DeleteLivestreamProductFollower(livestreamProductId int64, userId int64) error {
+	err := s.LivestreamProductFollowerRepository.DeleteByLivestreamIdAndUserId(s.LivestreamProductFollowerRepository.GetDatabase().Db, livestreamProductId, userId)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -8,8 +8,10 @@ type UpdateUserRequest struct {
 	Birthdate *time.Time `json:"birthdate"`
 }
 
-type AddressCreateRequest struct {
-	Name    string `json:"name" binding:"required"`
-	Phone   string `json:"phone" binding:"required"`
-	Address string `json:"address" binding:"required"`
+type CreateAddressRequest struct {
+	Name      string `json:"name" binding:"required"`
+	Phone     string `json:"phone" binding:"required"`
+	Address   string `json:"address" binding:"required"`
+	City      string `json:"city" binding:"required"`
+	IsDefault bool   `json:"is_default"`
 }

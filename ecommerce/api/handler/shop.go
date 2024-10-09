@@ -9,7 +9,9 @@ import (
 
 type IShopHandler interface {
 	CreateShopForNewAccount(ctx *gin.Context)
-	GetShopInfo(ctx *gin.Context)
+	GetShop(ctx *gin.Context)
+	UpdateShop(ctx *gin.Context)
+	FollowShop(ctx *gin.Context)
 }
 
 type ShopHandler struct {
@@ -46,16 +48,80 @@ func (h *ShopHandler) CreateShopForNewAccount(ctx *gin.Context) {
 	h.handleSuccessCreate(ctx)
 }
 
-func (h *ShopHandler) GetShopInfo(ctx *gin.Context) {
+func (h *ShopHandler) GetShop(ctx *gin.Context) {
 	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
 	if err != nil {
 		h.handleFailed(ctx, err)
 	}
 
-	shop, err := h.Service.GetShopInfo(shopId)
+	isFollowing := false
+
+	if ctx.GetHeader("user_id") != "" {
+		userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+		if err != nil {
+			h.handleFailed(ctx, err)
+			return
+		}
+
+		isFollowing, err = h.Service.IsFollowed(shopId, userId)
+		if err != nil {
+			h.handleFailed(ctx, err)
+			return
+		}
+	}
+
+	shop, err := h.Service.GetShop(shopId)
 	if err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
-	h.handleSuccessGet(ctx, shop)
+	h.handleSuccessGet(ctx, model.GetShopResponse{
+		IDShop:      shop.IDShop,
+		FkUser:      shop.FkUser,
+		Name:        shop.Name,
+		Description: shop.Description,
+		CreatedAt:   shop.CreatedAt,
+		UpdatedAt:   shop.UpdatedAt,
+		IsFollowing: isFollowing,
+	})
+}
+
+func (h *ShopHandler) UpdateShop(ctx *gin.Context) {
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	var request *model.UpdateShopRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.UpdateShop(shopId, request); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
+}
+
+func (h *ShopHandler) FollowShop(ctx *gin.Context) {
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	shopId, err := h.parseId(ctx, ctx.Param("shop_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.AddFollower(shopId, userId); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessUpdate(ctx)
 }

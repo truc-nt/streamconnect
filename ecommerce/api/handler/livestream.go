@@ -17,8 +17,13 @@ type ILivestreamHandler interface {
 	UpdateLivestream(ctx *gin.Context)
 
 	RegisterLivestreamProductFollower(ctx *gin.Context)
+	GetFollowLivestreamProductsInLivestream(ctx *gin.Context)
+	DeleteLivestreamProductFollower(ctx *gin.Context)
+
 	FetchLivestreamProductFollowers(ctx *gin.Context)
 	UpdateLivestreamProducts(ctx *gin.Context)
+
+	GetLivestreamStatistics(ctx *gin.Context)
 }
 
 type LivestreamHandler struct {
@@ -80,6 +85,7 @@ func (h *LivestreamHandler) GetLivestream(ctx *gin.Context) {
 		MeetingID:    livestream.MeetingID,
 		HlsURL:       livestream.HlsURL,
 		IsHost:       userId == livestream.FkShop,
+		ShopName:     livestream.ShopName,
 	})
 }
 
@@ -225,4 +231,61 @@ func (h *LivestreamHandler) UpdateLivestreamProducts(ctx *gin.Context) {
 		return
 	}
 	h.handleSuccessUpdate(ctx)
+}
+
+func (h *LivestreamHandler) GetLivestreamStatistics(ctx *gin.Context) {
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	response, err := h.Service.GetLivestreamStatistics(livestreamId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, response)
+}
+
+func (h *LivestreamHandler) GetFollowLivestreamProductsInLivestream(ctx *gin.Context) {
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	livestreamId, err := h.parseId(ctx, ctx.Param("livestream_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	response, err := h.Service.GetFollowLivestreamProductsInLivestream(userId, livestreamId)
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	h.handleSuccessGet(ctx, response)
+}
+
+func (h *LivestreamHandler) DeleteLivestreamProductFollower(ctx *gin.Context) {
+	livestreamProductId, err := h.parseId(ctx, ctx.Param("livestream_product_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	userId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
+	if err := h.Service.DeleteLivestreamProductFollower(livestreamProductId, userId); err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+	h.handleSuccessCreate(ctx)
 }

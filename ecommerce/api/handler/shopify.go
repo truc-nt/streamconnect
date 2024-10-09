@@ -25,31 +25,33 @@ func NewShopifyHandler(s service.IShopifyService) IShopifyHandler {
 }
 
 func (h *ShopifyHandler) Connect(ctx *gin.Context) {
+	shopId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
+	if err != nil {
+		h.handleFailed(ctx, err)
+		return
+	}
+
 	var queryParams *model.ShopifyConnectParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	authorizePath := h.Service.GetAuthorizePath(queryParams.Shop)
+	authorizePath := h.Service.GetAuthorizePath(shopId, queryParams.Shop)
 
-	ctx.Redirect(http.StatusMovedPermanently, authorizePath)
+	//ctx.Redirect(http.StatusMovedPermanently, authorizePath)
+	h.handleSuccessGet(ctx, authorizePath)
 }
 
 func (h *ShopifyHandler) Redirect(ctx *gin.Context) {
-	/*shopId, err := h.parseId(ctx, ctx.GetHeader("user_id"))
-	if err != nil {
-		h.handleFailed(ctx, err)
-		return
-	}*/
-	shopId := int64(1)
+
 	var queryParams *model.ShopifyRedirectParams
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}
 
-	if err := h.Service.ConnectNewExternalShopShopify(shopId, queryParams.Shop, queryParams.Code); err != nil {
+	if err := h.Service.ConnectNewExternalShopShopify(queryParams.State, queryParams.Shop, queryParams.Code); err != nil {
 		h.handleFailed(ctx, err)
 		return
 	}

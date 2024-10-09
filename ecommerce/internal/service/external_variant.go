@@ -12,7 +12,7 @@ import (
 )
 
 type IExternalVariantService interface {
-	GetExternalVariantsGroupByProduct(limit int64, offset int64) (interface{}, error)
+	GetExternalVariantsGroupByProduct(shopId int64, limit int64, offset int64) (interface{}, error)
 	GetExternalVariantsByExternalProductIdMapping(externalProductIdMapping string) ([]*entity.ExtVariant, error)
 	ConnectVariants(connectVariantsRequest *model.ConnectVariantsRequest) error
 }
@@ -29,8 +29,8 @@ func NewExternalVariantService(externalVariantRepository repository.IExternalVar
 	}
 }
 
-func (s *ExternalVariantService) GetExternalVariantsGroupByProduct(limit int64, offset int64) (interface{}, error) {
-	externalProducts, err := s.ExternalVariantRepository.GetExternalVariantsGroupByProduct(s.ExternalVariantRepository.GetDatabase().Db, limit, offset)
+func (s *ExternalVariantService) GetExternalVariantsGroupByProduct(shopId int64, limit int64, offset int64) (interface{}, error) {
+	externalProducts, err := s.ExternalVariantRepository.GetExternalVariantsGroupByProduct(s.ExternalVariantRepository.GetDatabase().Db, shopId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

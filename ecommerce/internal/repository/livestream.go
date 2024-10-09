@@ -16,6 +16,7 @@ type ILivestreamRepository interface {
 	GetByParam(db qrm.Queryable, param *apiModel.GetLivestreamsQueryParam) ([]*model.Livestream, error)
 
 	GetInfoById(db qrm.Queryable, id int64) (*GetInfo, error)
+	GetOrdersByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*model.OrderItem, error)
 }
 
 type LivestreamRepository struct {
@@ -98,4 +99,24 @@ func (r *LivestreamRepository) GetInfoById(db qrm.Queryable, id int64) (*GetInfo
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (r *LivestreamRepository) GetOrdersByLivestreamId(db qrm.Queryable, livestreamId int64) ([]*model.OrderItem, error) {
+	stmt := table.ExtOrder.SELECT(
+		table.OrderItem.AllColumns,
+	).FROM(
+		table.OrderItemLivestreamExtVariant.
+			INNER_JOIN(table.LivestreamExtVariant, table.LivestreamExtVariant.IDLivestreamExtVariant.EQ(table.OrderItemLivestreamExtVariant.FkLivestreamExtVariant)).
+			INNER_JOIN(table.LivestreamProduct, table.LivestreamProduct.IDLivestreamProduct.EQ(table.LivestreamExtVariant.FkLivestreamProduct)).
+			INNER_JOIN(table.OrderItem, table.OrderItem.IDOrderItem.EQ(table.OrderItemLivestreamExtVariant.FkOrderItem)).
+			INNER_JOIN(table.Order, table.Order.IDOrder.EQ(table.OrderItem.FkOrder)).
+			INNER_JOIN(table.ExtOrder, table.ExtOrder.FkOrder.EQ(table.ExtOrder.FkOrder)),
+	).WHERE(table.LivestreamProduct.FkLivestream.EQ(postgres.Int(livestreamId)))
+
+	data := make([]*model.OrderItem, 0)
+	err := stmt.Query(db, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

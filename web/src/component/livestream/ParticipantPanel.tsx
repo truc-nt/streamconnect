@@ -1,9 +1,10 @@
+"use client";
+
 import { useMeeting, useParticipant } from "@videosdk.live/react-sdk";
 import { List, Avatar } from "antd";
 
 const ParticipantPanel = () => {
   const { participants } = useMeeting();
-  console.log(participants.keys());
 
   return (
     <div className="flex-1 overflow-y-scroll p-2">

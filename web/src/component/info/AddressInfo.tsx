@@ -1,6 +1,10 @@
 "use client";
 import { Card, Typography, Divider, Flex, theme } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 
 import { IBaseUserAddress } from "@/model/order";
 
@@ -31,6 +35,12 @@ const AddressInfo = ({
         >
           Địa chỉ: {address}
         </Typography.Paragraph>
+      </Flex>
+      <Flex>
+        <Flex gap="small">
+          <EditOutlined />
+          <DeleteOutlined />
+        </Flex>
       </Flex>
     </Flex>
   );

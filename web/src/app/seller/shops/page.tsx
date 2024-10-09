@@ -11,8 +11,8 @@ import { useAppSelector } from "@/store/store";
 
 const Page = () => {
   const { userId } = useAppSelector((state) => state.authReducer);
-  const handleSyncExternalVariants = useLoading(
-    () => syncExternalVariants(userId!),
+  const executeSyncExternalVariants = useLoading(
+    syncExternalVariants,
     "Đồng bộ sản phẩm thành công",
     "Đồng bộ sản phẩm thất bại",
   );
@@ -67,10 +67,11 @@ const Page = () => {
     {
       title: "",
       key: "action",
-      render: () => (
+      render: ({ id_external_shop }) => (
         <Space>
-          <SyncOutlined onClick={handleSyncExternalVariants} />
-          <DeleteOutlined />
+          <SyncOutlined
+            onClick={async () => executeSyncExternalVariants(id_external_shop)}
+          />
         </Space>
       ),
     },

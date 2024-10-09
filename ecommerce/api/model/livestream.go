@@ -55,6 +55,7 @@ type GetLivestreamResponse struct {
 	HlsURL       *string `json:"hls_url" xml:"hls_url"`
 	IsHost       bool    `json:"is_host"`
 	ShopName     string  `json:"shop_name"`
+	IsFollowed   bool    `json:"is_followed"`
 }
 
 type UpdateLivestreamExternalVariantQuantityRequest []*struct {

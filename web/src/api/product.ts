@@ -1,17 +1,27 @@
 import axios from "./axios";
 
-export interface IProduct {
-  id_product: number;
-  name: string;
-  description: string;
-  status: string;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-}
+import {
+  IBaseProduct,
+  IBaseVariant,
+  IBaseExternalVariant,
+} from "@/model/product";
 
 export const getProductsByShopId = async (shopId: number) => {
-  const res = await axios.get<IProduct[]>(`/shops/${shopId}/products`);
+  const res = await axios.get<IBaseProduct[]>(`/shops/${shopId}/products`);
+  return res.data;
+};
+
+export const getProductById = async (productId: number) => {
+  type IGetProductByIdResponse = IBaseProduct & {
+    variants: (IBaseVariant & {
+      external_variants: (IBaseExternalVariant & {
+        shop_name: string;
+      })[];
+    })[];
+  };
+  const res = await axios.get<IGetProductByIdResponse>(
+    `/products/${productId}`,
+  );
   return res.data;
 };
 
@@ -33,7 +43,8 @@ export interface IVariant {
 }
 
 export const getVariantsByProductId = async (productId: number) => {
-  return axios.get<IVariant[]>(`/products/${productId}/variants`);
+  const res = await axios.get<IVariant[]>(`/products/${productId}/variants`);
+  return res.data;
 };
 
 export interface IProductWithVariants {
@@ -45,4 +56,21 @@ export const createProductWithVariants = async (
   createProductWithVariants: IProductWithVariants[],
 ) => {
   return axios.post(`/shops/${shopId}/products/`, createProductWithVariants);
+};
+
+export interface IUpdateProductRequest {
+  name?: string;
+  description?: string;
+}
+
+export const updateProduct = async (
+  productId: number,
+  data: IUpdateProductRequest,
+) => {
+  return axios.patch(`/products/${productId}`, data);
+};
+
+export const getExternalVariantsByVariantId = async (variantId: number) => {
+  const res = await axios.get<IBaseExternalVariant[]>(`/variants/${variantId}`);
+  return res.data;
 };

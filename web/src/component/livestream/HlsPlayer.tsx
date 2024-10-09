@@ -40,7 +40,7 @@ const HlsPlayer = ({
           vertical
           justify="center"
           align="center"
-          className="h-full bg-gray-800 rounded-lg"
+          className="h-full bg-gray-800 rounded-lg p-5"
         >
           <Typography.Title level={3} style={{ color: "white" }}>
             Người bán tạm thời chưa phát sóng
