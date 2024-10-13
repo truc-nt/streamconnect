@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+    spec:
+      containers:
+        - name: ecommerce
+          image: gcr.io/fabled-ray-438118-j4/ecommerce
+          ports:
+            - containerPort: 8082
+          env:
+            - name: POSTGRES_HOST
+              value: 172.21.144.3
+            - name: POSTGRES_USER
+              value: root
+            - name: POSTGRES_PASSWORD
+              value: "1234"
+            - name: POSTGRES_DBNAME
+              value: streamconnect
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: SERVER_PORT
+              value: "8082"
+            - name: SERVER_HOST
+              value: ""

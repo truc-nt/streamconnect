@@ -37,8 +37,10 @@ type Config struct {
 func NewConfig() *Config {
 	var config Config
 
+	//you can add a flag to check for env file if it is experimental environment
+	//deployment cannot use env file
 	if err := godotenv.Load(); err != nil {
-		panic(err)
+		//ignore if can't find env file
 	}
 	if err := env.Parse(&config); err != nil {
 		panic(err)
