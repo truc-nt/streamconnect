@@ -53,6 +53,9 @@ func (r *VoucherRepository) GetById(db qrm.Queryable, id int64) (*model.Voucher,
 }
 
 func (r *VoucherRepository) GetByIds(db qrm.Queryable, voucherIds []int64) ([]*model.Voucher, error) {
+	if len(voucherIds) == 0 {
+		return nil, nil
+	}
 	ids := lo.Map(voucherIds, func(id int64, _ int) postgres.Expression {
 		return postgres.Int(id)
 	})

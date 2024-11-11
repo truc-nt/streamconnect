@@ -134,7 +134,7 @@ const Header = () => {
       setNotifications(notifications);
     };
     fetchNotifications();
-    //setNotifications(notification || []);
+    setNotifications(notification || []);
   }, []);
   useEffect(() => {
     setNewNotificationCount(

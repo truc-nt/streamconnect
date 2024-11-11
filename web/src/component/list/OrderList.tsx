@@ -16,7 +16,7 @@ const OrderList = () => {
       grid={{ gutter: 16, column: 1 }}
       dataSource={buyOrders}
       renderItem={(item) => (
-        <List.Item onClick={() => router.push(`${pathname}/${item.id_order}`)}>
+        <List.Item onClick={() => router.push(`${pathname}/${item.id_order}`)} className="h-[300px]">
           <OrderTable {...item} />
         </List.Item>
       )}
